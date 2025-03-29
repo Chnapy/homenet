@@ -1,6 +1,9 @@
 import { Box } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import ELK from 'elkjs/lib/elk.bundled.js';
 import React from 'react';
+import { useTRPC } from '../../data/trpc';
+import { useNetEntityLinks } from '../network/hooks/use-net-entity-links';
 
 export type DynamicLayoutProps = {
     enabled: boolean;
@@ -12,20 +15,28 @@ export const DynamicLayout: React.FC<React.PropsWithChildren<DynamicLayoutProps>
 }) => {
     const rootRef = React.useRef<HTMLElement>(null);
 
+    const trpc = useTRPC();
+    const devicesFull = useQuery(
+        trpc.getDevicesFull.queryOptions()
+    );
+
+    const netEntityLinks = useNetEntityLinks();
+
     React.useEffect(() => {
         const rootEl = rootRef.current;
-        if (!enabled || !rootEl) {
+        if (!enabled || !rootEl || !devicesFull.data || !netEntityLinks.data) {
             return;
         }
 
-        const cards = Array.from(rootEl.querySelectorAll('& > .MuiBox-root')) as HTMLElement[];
+        const { deviceMap } = devicesFull.data;
 
-        const children = cards.map((card, i) => ({
-            id: i.toString(),
+        const cards = Array.from(rootEl.querySelectorAll<HTMLElement>('[data-device-key]'));
+
+        const children = cards.map((card) => ({
+            id: card.dataset.deviceKey!,
             width: card.clientWidth,
             height: card.clientHeight,
         }));
-        console.log('CHILDREN', children);
 
         const elk = new ELK();
 
@@ -37,18 +48,17 @@ export const DynamicLayout: React.FC<React.PropsWithChildren<DynamicLayoutProps>
                 // 'elk.spacing.nodeNode': '80',
             },
             children,
-            edges: [
-                { id: "e1", sources: [ "0" ], targets: [ "1" ] },
-                { id: "e2", sources: [ "0" ], targets: [ "2" ] },
-                { id: "e3", sources: [ "0" ], targets: [ "3" ] },
-                { id: "e4", sources: [ "2" ], targets: [ "3" ] },
-            ]
+            edges: netEntityLinks.data
+                .filter(link => deviceMap[ link.from.device ] && deviceMap[ link.to.device ])
+                .map(link => ({
+                    id: `${link.from.device}_${link.from.relatedApp}-${link.to.device}_${link.to.relatedApp}`,
+                    sources: [ link.from.device ],
+                    targets: [ link.to.device ],
+                })),
         })
             .then(data => {
-                console.log('LAYOUT', data)
                 data.children?.forEach(child => {
-                    const i = +child.id;
-                    const card = cards[ i ];
+                    const card = cards.find(item => item.dataset.deviceKey === child.id)!;
 
                     card.style.position = 'absolute';
                     if (child.x) {
@@ -60,9 +70,11 @@ export const DynamicLayout: React.FC<React.PropsWithChildren<DynamicLayoutProps>
                 });
 
                 rootEl.style.position = 'relative';
-                rootEl.style.opacity = '1';
             })
             .catch(console.error)
+            .finally(() => {
+                rootEl.style.opacity = '1';
+            })
     }, [ enabled ]);
 
     return <Box

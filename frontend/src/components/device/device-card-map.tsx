@@ -37,6 +37,7 @@ export const DeviceCardMap: React.FC = () => {
                             }}
                         >
                             <Box
+                                data-device-key={deviceKey}
                                 sx={{
                                     width: 'fit-content',
                                     margin: 6
