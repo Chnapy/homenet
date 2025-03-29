@@ -19,6 +19,16 @@ export const getOSMeta = (slug: DeviceOSSlug): {
             return {
                 name: 'Home Assistant',
                 description: 'OS'
+            };
+        case 'android-tv':
+            return {
+                name: 'Android TV',
+                description: 'OS',
+            };
+        case 'windows':
+            return {
+                name: 'Windows',
+                description: 'OS',
             }
     }
 }

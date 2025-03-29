@@ -1,6 +1,6 @@
 import { DeviceContext } from '../device/provider/device-provider';
-import { useDeviceNetAddressList } from '../device/utils/use-device-net-address-list';
 import { InstanceContext } from '../instance/provider/instance-provider';
+import { useNetEntityAccessMap } from '../network/hooks/use-net-entity-access-map';
 import { AppOSLine } from '../ui/app-os-line';
 import { getOSMeta } from './utils/get-os-meta';
 
@@ -10,36 +10,22 @@ export const OSLine: React.FC = () => {
 
     const deviceLike = instance ?? device;
 
-    const { getDirectAccess } = useDeviceNetAddressList();
+    const { data, isLoading } = useNetEntityAccessMap();
+
+    if (isLoading) {
+        return 'loading';
+    }
+
+    if (!data) {
+        return null;
+    }
+
+    const netEntityAccess = data[ deviceLike.id ].os;
 
     const { name, description } = getOSMeta(deviceLike.os);
 
-    const webAccessList = (deviceLike.web ?? [])?.flatMap(({
-        port,
-        ssl
-    }) => getDirectAccess({
-        type: 'web',
-        port,
-        ssl,
-    }));
-
-    const fullAccessList = [
-        ...(deviceLike.web ?? [])?.flatMap(({
-            port,
-            ssl
-        }) => getDirectAccess({
-            type: 'web',
-            port,
-            ssl,
-        })),
-        ...(deviceLike.ssh ? getDirectAccess({
-            type: 'ssh',
-            port: deviceLike.ssh.port,
-        }) : [])
-    ];
-
-    const osMainAccess = fullAccessList[ 0 ];
-    const osOthersAccessList = fullAccessList.filter(access => access !== osMainAccess)
+    const osMainAccess = netEntityAccess[ 0 ];
+    const osOthersAccessList = netEntityAccess.filter(access => access !== osMainAccess)
 
     return <AppOSLine
         slug={deviceLike.os}

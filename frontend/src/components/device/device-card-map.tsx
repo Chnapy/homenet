@@ -5,6 +5,7 @@ import { useTRPC } from '../../data/trpc';
 import { ThemeProvider } from '../theme/theme-provider';
 import { DeviceCard } from './device-card';
 import { DeviceContext } from './provider/device-provider';
+import { DynamicLayout } from '../dynamic-layout/dynamic-layout';
 
 export const DeviceCardMap: React.FC = () => {
     const trpc = useTRPC();
@@ -20,7 +21,9 @@ export const DeviceCardMap: React.FC = () => {
 
     const { deviceMap, deviceUserMetaMap } = data;
 
-    return <>
+    return <DynamicLayout
+        enabled={!!data}
+    >
         {Object.entries(deviceMap)
             .map(([ deviceKey, device ]) => {
                 const deviceUserMeta = deviceUserMetaMap[ deviceKey ];
@@ -46,5 +49,5 @@ export const DeviceCardMap: React.FC = () => {
                 )
             })
         }
-    </>;
+    </DynamicLayout>;
 };

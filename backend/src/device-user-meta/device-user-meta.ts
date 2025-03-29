@@ -2,7 +2,7 @@ export type DeviceUserMeta = {
     deviceId: string;
     name: string;
     type: 'server' | 'router' | 'mediacenter' | 'desktop' | 'cloud';
-    theme: 'default' | 'mauve' | 'blue';
+    theme: 'default' | 'mauve' | 'blue' | 'green';
     // position: [ number, number ];
 };
 
@@ -24,6 +24,20 @@ export const getDeviceUserMetaMap = async (): Promise<DeviceUserMetaMap> => {
             name: 'Homelab',
             type: 'server',
             theme: 'blue',
+        },
+
+        'uuid-media': {
+            deviceId: 'uuid-media',
+            name: 'Media box',
+            type: 'mediacenter',
+            theme: 'green',
+        },
+
+        'uuid-desktop': {
+            deviceId: 'uuid-desktop',
+            name: 'Desktop PC',
+            type: 'desktop',
+            theme: 'default',
         }
     };
 };

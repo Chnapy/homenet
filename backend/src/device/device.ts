@@ -2,7 +2,10 @@ import { AgentDevice } from '../agent/agent';
 
 export type Device = {
     id: string;
-} & AgentDevice;
+    instances?: (NonNullable<AgentDevice[ 'instances' ]>[ number ] & {
+        id: string;
+    })[];
+} & Omit<AgentDevice, 'instances'>;
 
 export type DeviceMap = {
     [ id: string ]: Device;
@@ -32,6 +35,14 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
                 {
                     address: '192.168.8.206',
                     alias: 'homeassistant.lan'
+                },
+                {
+                    address: '192.168.8.248',
+                    alias: 'shield.lan'
+                },
+                {
+                    address: '192.168.8.147',
+                    alias: 'pc.lan'
                 },
             ],
             web: [
@@ -88,7 +99,9 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
                     // /etc/AdGuardHome/config.yaml
                     // http
                     //   address
-                    port: 3000,
+                    web: [ {
+                        port: 3000,
+                    } ],
                 },
             ]
         },
@@ -108,6 +121,7 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
             //   or use ssh
             instances: [
                 {
+                    id: 'uuid-homelab_instance-0',
                     os: 'haos',
                     type: 'proxmox',
                     lan: '192.168.8.206',
@@ -125,14 +139,54 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
                     apps: [
                         {
                             slug: 'node-red',
-                            port: 1880,
+                            web: [ {
+                                port: 1880,
+                            } ]
                         },
                         {
                             slug: 'zigbee2mqtt',
-                            port: 8099,
+                            web: [ {
+                                port: 8099,
+                            } ]
                         }
                     ],
                 }
+            ]
+        },
+
+        'uuid-media': {
+            id: 'uuid-media',
+            lan: '192.168.8.248',
+            os: 'android-tv',
+            apps: [
+                {
+                    slug: 'plex',
+                    web: [ {
+                        port: 32400,
+                    } ],
+                },
+                {
+                    slug: 'moonlight',
+                }
+            ]
+        },
+
+        'uuid-desktop': {
+            id: 'uuid-desktop',
+            lan: '192.168.8.147',
+            os: 'windows',
+            apps: [
+                {
+                    slug: 'wireguard',
+                    mode: 'client',
+                    address: '10.0.0.4',
+                },
+                {
+                    slug: 'sunshine',
+                    web: [ {
+                        port: 47990,
+                    } ],
+                },
             ]
         },
     };

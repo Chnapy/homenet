@@ -3,21 +3,16 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import { Box, CardActionArea, Collapse, Divider, List, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { DeviceAppSlug, DeviceOSSlug } from '../../data/types/get-devices';
-import { AccessLine, AccessType } from './access-line';
+import { NetAccess } from '../network/hooks/use-net-entity-map';
+import { AccessLine } from './access-line';
 import { AppOSIcon } from './app-os-icon/app-icon';
 
 type AppOSLineProps = {
     slug: DeviceAppSlug | DeviceOSSlug;
     name: string;
     description: string;
-    mainAccess?: {
-        type: AccessType;
-        value: string;
-    };
-    accessList?: {
-        type: AccessType;
-        value: string;
-    }[];
+    mainAccess?: NetAccess;
+    accessList?: NetAccess[];
 }
 
 export const AppOSLine: React.FC<AppOSLineProps> = ({
@@ -63,14 +58,14 @@ export const AppOSLine: React.FC<AppOSLineProps> = ({
                 </Box>
             </Box>
 
-            {mainAccess && <Divider variant='fullWidth' />}
+            {mainAccess && <>
+                <Divider variant='fullWidth' />
 
-            {mainAccess &&
                 <AccessLine
-                    type={mainAccess.type}
-                    value={mainAccess.value}
+                    {...mainAccess}
                     disablePadding
-                />}
+                />
+            </>}
 
         </Box>
     )
@@ -79,48 +74,43 @@ export const AppOSLine: React.FC<AppOSLineProps> = ({
         <Paper elevation={mainAccess ? 2 : 1} sx={mainAccess ? undefined : {
             boxShadow: 'none'
         }}>
-            {
-                mainAccess
-                    ? (
-                        <Box sx={{
-                            display: 'flex'
-                        }} >
-                            <CardActionArea>
-                                {content}
-                            </CardActionArea>
+            {mainAccess
+                ? <Box sx={{
+                    display: 'flex'
+                }} >
+                    <CardActionArea>
+                        {content}
+                    </CardActionArea>
 
-                            {accessList.length > 0 && <>
+                    {accessList.length > 0 && <>
 
-                                <Divider orientation='vertical' flexItem />
+                        <Divider orientation='vertical' flexItem />
 
-                                <Box sx={{ display: 'flex' }}>
-                                    <CardActionArea
-                                        onClick={handleExpandClick}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'flex-end',
-                                        }}
-                                    >
-                                        <Box sx={{ px: 1, py: 2 }}>
-                                            {expanded
-                                                ? <ArrowDropUpIcon />
-                                                : <ArrowDropDownIcon />}
-                                        </Box>
-                                    </CardActionArea>
+                        <Box sx={{ display: 'flex' }}>
+                            <CardActionArea
+                                onClick={handleExpandClick}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'flex-end',
+                                }}
+                            >
+                                <Box sx={{ px: 1, py: 2 }}>
+                                    {expanded
+                                        ? <ArrowDropUpIcon />
+                                        : <ArrowDropDownIcon />}
                                 </Box>
-                            </>}
-                        </Box >
-                    )
-                    : content
-            }
+                            </CardActionArea>
+                        </Box>
+                    </>}
+                </Box >
+                : content}
 
             {accessList.length > 0 && <Collapse in={expanded} timeout="auto">
                 <List disablePadding>
-                    {accessList.map(({ type, value }) => (
+                    {accessList.map((access, i) => (
                         <AccessLine
-                            key={value}
-                            type={type}
-                            value={value}
+                            key={i}
+                            {...access}
                             link
                         />
                     ))}

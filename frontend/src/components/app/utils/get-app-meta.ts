@@ -41,6 +41,21 @@ export const getAppMeta = (app: DeviceApp): {
             return {
                 name: 'Docker',
                 description: 'Containers'
-            }
+            };
+        case 'plex':
+            return {
+                name: 'Plex',
+                description: 'Media server',
+            };
+        case 'moonlight':
+            return {
+                name: 'Moonlight',
+                description: 'Game streaming client'
+            };
+        case 'sunshine':
+            return {
+                name: 'Sunshine',
+                description: 'Game streaming host',
+            };
     }
 }

@@ -14,6 +14,8 @@ const iconMap: Record<Exclude<AppOSIconProps[ 'slug' ], 'unknown'>, string> = {
     "openwrt-glinet": getDashboardIcon('svg', 'openwrt'),
     proxmox: getDashboardIcon('svg', 'proxmox'),
     haos: getDashboardIcon('svg', 'home-assistant'),
+    'android-tv': getDashboardIcon('svg', 'android'),
+    windows: getDashboardIcon('svg', 'microsoft-windows'),
 
     // apps
     wireguard: getDashboardIcon('svg', 'wireguard'),
@@ -22,6 +24,9 @@ const iconMap: Record<Exclude<AppOSIconProps[ 'slug' ], 'unknown'>, string> = {
     "node-red": getDashboardIcon('svg', 'node-red'),
     zigbee2mqtt: getDashboardIcon('svg', 'zigbee2mqtt'),
     docker: getDashboardIcon('svg', 'docker'),
+    plex: getDashboardIcon('svg', 'plex'),
+    moonlight: 'TODO',  // TODO
+    sunshine: getDashboardIcon('svg', 'sunshine'),
 };
 
 export const AppOSIcon: React.FC<AppOSIconProps> = ({ slug, ...boxProps }) => {

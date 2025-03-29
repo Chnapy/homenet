@@ -2,33 +2,38 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import LanIcon from '@mui/icons-material/Lan';
 import LinkIcon from '@mui/icons-material/Link';
 import CloudIcon from '@mui/icons-material/Cloud';
-// import TerminalIcon from '@mui/icons-material/Terminal';
+import TerminalIcon from '@mui/icons-material/Terminal';
 import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { NetAccess } from '../network/hooks/use-net-entity-map';
 
-export type AccessType = 'lan' | 'wan' | 'wan-domain' | 'vpn';
-
-type AccessLineProps = {
-    type: AccessType;
-    value: string;
+type AccessLineProps = NetAccess & {
     link?: boolean;
     disablePadding?: boolean;
 }
 
-const iconMap: Record<AccessType, typeof CloudIcon> = {
+const iconMap: Record<NetAccess[ 'scope' ], typeof CloudIcon> = {
     lan: LanIcon,
     wan: CloudIcon,
-    'wan-domain': LinkIcon,
+    'dns-domain': LinkIcon,
     vpn: VpnKeyIcon,
-    // ssh: TerminalIcon,
-}
+};
 
 export const AccessLine: React.FC<AccessLineProps> = ({
     type,
-    value,
+    scope,
+    address,
+    port,
+    ssl,
     link,
     disablePadding,
 }) => {
-    const Icon = iconMap[ type ];
+    const Icon = type === 'ssh'
+        ? TerminalIcon
+        : iconMap[ scope ];
+
+    const value = type === 'ssh'
+        ? `ssh ${address}${port && port !== 22 ? ' -p ' + port : ''}`
+        : `${ssl ? 'https' : 'http'}://${address}${port ? ':' + port : ''}`;
 
     const content = <>
         <ListItemIcon sx={{ minWidth: 0 }}>

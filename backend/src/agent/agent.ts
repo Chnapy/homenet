@@ -1,5 +1,5 @@
 
-export type AgentOS = 'openwrt-glinet' | 'haos' | 'proxmox';
+export type AgentOS = 'openwrt-glinet' | 'haos' | 'proxmox' | 'android-tv' | 'windows';
 
 export type AgentDHCPItem = {
     address: string;
@@ -20,7 +20,7 @@ export type AgentApp =
         clients?: string[];
     }
     | {
-        slug: 'nginx',
+        slug: 'nginx';
         // /etc/nginx
         reverseProxy?: {
             from: {
@@ -35,26 +35,29 @@ export type AgentApp =
         }[];
     }
     | {
-        slug: 'adguard-home',
+        slug:
         // /etc/AdGuardHome/config.yaml
         // http
         //   address
-        port?: number,
-    }
-    | {
-        slug: 'node-red',
+        | 'adguard-home'
         // ha addons info <slug>
         // network
-        port?: number,
-    }
-    | {
-        slug: 'zigbee2mqtt',
+        | 'node-red'
         // ha addons info <slug>
         // network
-        port?: number,
+        | 'zigbee2mqtt'
+        | 'plex'
+        | 'sunshine'
+        web: {
+            port?: number;
+            ssl?: boolean;
+        }[];
     }
     | {
-        slug: 'docker',
+        slug: 'docker';
+    }
+    | {
+        slug: 'moonlight';
     }
 
 export type AgentInstance = Pick<AgentDevice, 'os' | 'lan' | 'web' | 'ssh' | 'apps'> & {

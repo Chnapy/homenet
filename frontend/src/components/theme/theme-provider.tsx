@@ -152,6 +152,21 @@ const themeMap: Record<DeviceUserMetaTheme, Theme> = {
             },
         },
     }),
+
+    green: createTheme({
+        ...themeBase,
+        palette: {
+            ...themeBase.palette,
+            primary: {
+                ...themeBase.palette.primary,
+                main: '#5f4a5f',
+            },
+            background: {
+                default: '#002200',
+                paper: '#223622'
+            },
+        },
+    }),
 }
 
 type ThemeProviderProps = {
