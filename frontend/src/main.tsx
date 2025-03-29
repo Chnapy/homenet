@@ -1,4 +1,5 @@
 import { CssBaseline } from '@mui/material'
+import { ReactFlowProvider } from '@xyflow/react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app.tsx'
@@ -9,8 +10,17 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <DataProvider>
       <ThemeProvider>
-        <CssBaseline enableColorScheme />
-        <App />
+        <ReactFlowProvider>
+          <CssBaseline enableColorScheme />
+
+          <style dangerouslySetInnerHTML={{
+            __html: `#root {
+      height: 100vh;
+    }`,
+          }} />
+
+          <App />
+        </ReactFlowProvider>
       </ThemeProvider>
     </DataProvider>
   </StrictMode>,

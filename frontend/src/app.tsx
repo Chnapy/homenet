@@ -1,14 +1,13 @@
 import React from 'react';
-import { DeviceCardMap } from './components/device/device-card-map';
-import { ModeToggle } from './components/theme/mode-toggle';
+import { DeviceMapDynamicLayout } from './components/dynamic-layout/device-map-dynamic-layout';
 
 export const App: React.FC = () => {
   return (
     <>
 
-      <ModeToggle />
+      {/* <ModeToggle /> */}
 
-      <DeviceCardMap />
+      <DeviceMapDynamicLayout />
 
     </>
   );
