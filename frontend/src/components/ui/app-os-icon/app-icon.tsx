@@ -3,6 +3,7 @@ import { Box, BoxProps } from '@mui/material';
 import React from 'react';
 import { DeviceAppSlug, DeviceOSSlug } from '../../../data/types/get-devices';
 import { getDashboardIcon } from './utils/get-dashboard-icon';
+import moonlightIcon from '../../../assets/icons/moonlight.png';
 
 export type AppOSIconProps = {
     slug: DeviceAppSlug | DeviceOSSlug;
@@ -25,7 +26,7 @@ const iconMap: Record<Exclude<AppOSIconProps[ 'slug' ], 'unknown'>, string> = {
     zigbee2mqtt: getDashboardIcon('svg', 'zigbee2mqtt'),
     docker: getDashboardIcon('svg', 'docker'),
     plex: getDashboardIcon('svg', 'plex'),
-    moonlight: 'TODO',  // TODO
+    moonlight: moonlightIcon,
     sunshine: getDashboardIcon('svg', 'sunshine'),
 };
 
