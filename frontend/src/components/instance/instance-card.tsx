@@ -10,7 +10,8 @@ import { InstanceContext } from './provider/instance-provider';
 export const InstanceCard: React.FC = () => {
     const instance = InstanceContext.useValue();
 
-    return <Box>
+    return <Box data-instanceid={instance.id}>
+
         <Box sx={{
             display: 'flex',
             alignItems: 'flex-end',
@@ -20,7 +21,8 @@ export const InstanceCard: React.FC = () => {
             <Box sx={{
                 display: 'flex',
                 width: 32,
-                marginBottom: '-16px'
+                marginBottom: '-16px',
+                zIndex: 1,
             }}>
                 <InstanceIcon />
             </Box>

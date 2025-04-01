@@ -1,5 +1,5 @@
 import React from 'react';
-import { DeviceMapDynamicLayout } from './components/dynamic-layout/device-map-dynamic-layout';
+import { DynamicLayoutFlow } from './components/dynamic-layout/dynamic-layout-flow';
 
 export const App: React.FC = () => {
   return (
@@ -7,7 +7,7 @@ export const App: React.FC = () => {
 
       {/* <ModeToggle /> */}
 
-      <DeviceMapDynamicLayout />
+      <DynamicLayoutFlow />
 
     </>
   );

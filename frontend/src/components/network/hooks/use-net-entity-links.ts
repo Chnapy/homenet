@@ -5,6 +5,7 @@ import { DeviceAppSlug } from '../../../data/types/get-devices';
 import { useNetEntityMap } from './use-net-entity-map';
 
 type NetDeviceLink = {
+    id: string;
     type: 'network' | 'link';
     from: {
         device: string;
@@ -20,7 +21,13 @@ export type NetEntityLinks = {
     devicesLinks: NetDeviceLink[];
 }
 
-const getIPMask = (ip: string) => ip.split('.').slice(0, -1).join('.') + '.';
+export const getIPMask = (ip: string) => ip.split('.').slice(0, -1).join('.') + '.';
+
+const injectLinkId = ({ type, from, to }: Omit<NetDeviceLink, 'id'>): NetDeviceLink => {
+    const id = `${from.device}_${from.relatedApp}-${to.device}_${to.relatedApp}`;
+
+    return { id, type, from, to };
+};
 
 export const useNetEntityLinks = () => {
     const trpc = useTRPC();
@@ -66,7 +73,7 @@ export const useNetEntityLinks = () => {
                             .filter(entity => entity.lan !== netEntity.lan
                                 && entity.lan.startsWith(lanMask))
                             .map((entity): NetDeviceLink => {
-                                return {
+                                return injectLinkId({
                                     type: 'network',
                                     from: {
                                         device: netEntity.id,
@@ -74,7 +81,7 @@ export const useNetEntityLinks = () => {
                                     to: {
                                         device: entity.id,
                                     },
-                                };
+                                });
                             })
                     );
                 }
@@ -92,7 +99,7 @@ export const useNetEntityLinks = () => {
                                 && entity.vpn !== netEntity.vpn
                                 && entity.vpn.startsWith(vpnMask))
                             .map((entity): NetDeviceLink => {
-                                return {
+                                return injectLinkId({
                                     type: 'network',
                                     from: {
                                         device: netEntity.id,
@@ -102,7 +109,7 @@ export const useNetEntityLinks = () => {
                                         device: entity.id,
                                         relatedApp: 'wireguard',
                                     },
-                                };
+                                });
                             })
                     );
                 }
@@ -119,7 +126,7 @@ export const useNetEntityLinks = () => {
                             );
                         })
                             .filter(Boolean)
-                            .map((entity): NetDeviceLink => ({
+                            .map((entity): NetDeviceLink => injectLinkId({
                                 type: 'link',
                                 from: {
                                     device: netEntity.id,
@@ -137,7 +144,7 @@ export const useNetEntityLinks = () => {
                     links.push(
                         ...entityList
                             .filter(device => device.apps?.some(app => app.slug === 'sunshine'))
-                            .map((device): NetDeviceLink => ({
+                            .map((device): NetDeviceLink => injectLinkId({
                                 type: 'link',
                                 from: {
                                     device: netEntity.id,

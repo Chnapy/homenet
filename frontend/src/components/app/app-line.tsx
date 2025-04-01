@@ -39,4 +39,4 @@ export const AppLine: React.FC = () => {
         mainAccess={appMainAccess}
         accessList={appOthersAccessList}
     />;
-}
+};

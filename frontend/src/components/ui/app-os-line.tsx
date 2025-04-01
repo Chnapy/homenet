@@ -15,12 +15,13 @@ type AppOSLineProps = {
     accessList?: NetAccess[];
 }
 
-export const AppOSLine: React.FC<AppOSLineProps> = ({
+export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
     slug,
     name,
     description,
     mainAccess,
     accessList = [],
+    children,
 }) => {
     const [ expanded, setExpanded ] = React.useState(false);
 
@@ -71,8 +72,11 @@ export const AppOSLine: React.FC<AppOSLineProps> = ({
     )
 
     return (
-        <Paper elevation={mainAccess ? 2 : 1} sx={mainAccess ? undefined : {
-            boxShadow: 'none'
+        <Paper data-slug={slug} elevation={mainAccess ? 2 : 1} sx={{
+            position: 'relative',
+            ...(mainAccess ? {} : {
+                boxShadow: 'none'
+            }),
         }}>
             {mainAccess
                 ? <Box sx={{
@@ -116,6 +120,8 @@ export const AppOSLine: React.FC<AppOSLineProps> = ({
                     ))}
                 </List>
             </Collapse>}
+
+            {children}
         </Paper >
     );
 }
