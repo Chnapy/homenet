@@ -2,8 +2,7 @@ export type DeviceUserMeta = {
     deviceId: string;
     name: string;
     type: 'server' | 'router' | 'mediacenter' | 'desktop' | 'cloud';
-    theme: 'default' | 'mauve' | 'blue' | 'green';
-    // position: [ number, number ];
+    theme: 'default' | 'mauve' | 'blue' | 'green' | 'yellow';
 };
 
 export type DeviceUserMetaMap = {
@@ -38,6 +37,13 @@ export const getDeviceUserMetaMap = async (): Promise<DeviceUserMetaMap> => {
             name: 'Desktop PC',
             type: 'desktop',
             theme: 'default',
-        }
+        },
+
+        'uuid-vps': {
+            deviceId: 'uuid-vps',
+            name: 'OVH VPS',
+            type: 'cloud',
+            theme: 'yellow',
+        },
     };
 };

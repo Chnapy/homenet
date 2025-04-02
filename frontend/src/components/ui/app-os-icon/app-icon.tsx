@@ -19,6 +19,7 @@ export const iconMap: Record<AppOSIconProps[ 'slug' ], string | undefined> = {
     haos: getDashboardIcon('svg', 'home-assistant'),
     'android-tv': getDashboardIcon('svg', 'android'),
     windows: getDashboardIcon('svg', 'microsoft-windows'),
+    debian: getDashboardIcon('svg', 'debian-linux'),
 
     // apps
     wireguard: getDashboardIcon('svg', 'wireguard'),
@@ -30,6 +31,9 @@ export const iconMap: Record<AppOSIconProps[ 'slug' ], string | undefined> = {
     plex: getDashboardIcon('svg', 'plex'),
     moonlight: moonlightIcon,
     sunshine: getDashboardIcon('svg', 'sunshine'),
+    caddy: getDashboardIcon('svg', 'caddy'),
+    'uptime-kuma': getDashboardIcon('svg', 'uptime-kuma'),
+    ntfy: getDashboardIcon('svg', 'ntfy'),
 };
 
 export const AppOSIcon: React.FC<AppOSIconProps> = ({ slug, ...boxProps }) => {

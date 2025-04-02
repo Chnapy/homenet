@@ -9,27 +9,29 @@ export const OSLine: React.FC = () => {
     const { device } = DeviceContext.useValue();
     const instance = InstanceContext.useValueNullable();
 
-    const deviceLike = instance ?? device;
-
     const { data, isLoading } = useNetEntityAccessMap();
 
     if (isLoading) {
         return 'loading';
     }
 
-    if (!data) {
+    if (!data
+        || instance?.type === 'docker'
+    ) {
         return null;
     }
 
-    const netEntityAccess = data[ deviceLike.id ].os;
+    const entity = instance ?? device;
 
-    const { name, description } = getOSMeta(deviceLike.os);
+    const netEntityAccess = data[ entity.id ].os;
+
+    const { name, description } = getOSMeta(entity.os);
 
     const osMainAccess = netEntityAccess[ 0 ];
     const osOthersAccessList = netEntityAccess.filter(access => access !== osMainAccess)
 
     return <AppOSLine
-        slug={deviceLike.os}
+        slug={entity.os}
         name={name}
         description={description}
         mainAccess={osMainAccess}

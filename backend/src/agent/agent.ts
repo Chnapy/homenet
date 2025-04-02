@@ -1,5 +1,5 @@
 
-export type AgentOS = 'openwrt-glinet' | 'haos' | 'proxmox' | 'android-tv' | 'windows';
+export type AgentOS = 'debian' | 'openwrt-glinet' | 'haos' | 'proxmox' | 'android-tv' | 'windows';
 
 export type AgentDHCPItem = {
     address: string;
@@ -14,14 +14,18 @@ export type AgentApp =
     | {
         slug: 'wireguard';
         // /etc/config/wireguard_server
+        // docker exec wireguard wg show
         mode: 'client' | 'server';
+        // docker exec wireguard wg show
         address: string;
         // /etc/config/wireguard_server
+        // docker exec wireguard wg show
         clients?: string[];
     }
     | {
-        slug: 'nginx';
+        slug: 'nginx' | 'caddy';
         // /etc/nginx
+        // /etc/caddy/Caddyfile
         reverseProxy?: {
             from: {
                 domain: string;
@@ -48,6 +52,12 @@ export type AgentApp =
         | 'zigbee2mqtt'
         | 'plex'
         | 'sunshine'
+        // docker inspect ntfy
+        // Config.ExposedPorts
+        | 'uptime-kuma'
+        // docker inspect ntfy
+        // Config.Env.NTFY_LISTEN_HTTP
+        | 'ntfy'
         web: {
             port?: number;
             ssl?: boolean;
@@ -60,9 +70,24 @@ export type AgentApp =
         slug: 'moonlight';
     }
 
-export type AgentInstance = Pick<AgentDevice, 'os' | 'lan' | 'web' | 'ssh' | 'apps'> & {
-    type: 'proxmox' | 'docker';
-}
+type AgentInstanceBase = Pick<AgentDevice, 'lan' | 'apps'>;
+
+type AgentInstanceDocker = AgentInstanceBase
+    & {
+        type: 'docker';
+        // docker ps
+    };
+
+type AgentInstanceProxmox = AgentInstanceBase
+    & Pick<AgentDevice, 'os' | 'web' | 'ssh'>
+    & {
+        type: 'proxmox';
+        // qm list, then:
+        //   qm terminal
+        //   or use ssh
+    };
+
+export type AgentInstance = AgentInstanceDocker | AgentInstanceProxmox;
 
 export type AgentDevice = {
     os: AgentOS;
@@ -80,110 +105,3 @@ export type AgentDevice = {
     apps?: AgentApp[];
     instances?: AgentInstance[];
 };
-
-// const router: AgentDevice = {
-//     // uname -a
-//     // /etc/os-release
-//     // /etc/glversion
-//     os: 'openwrt-glinet',
-//     // ip route
-//     lan: '192.168.8.1',
-//     wan: '176.131.38.39',
-//     // etc/config/gl_ddns
-//     ddns: 'ss32d57.glddns.com',
-//     // /etc/config/dhcp
-//     //   config dnsmasq
-//     //     option domain 'lan'
-//     dhcp: [
-//         {
-//             address: '192.168.8.138',
-//             alias: 'proxmox.lan'
-//         }
-//     ],
-//     web: [ {
-//         ssl: true,
-//     } ],
-//     // /etc/config/dropbear
-//     // /etc/sshd
-//     ssh: {
-//         port: 22,
-//     },
-//     apps: [
-//         {
-//             name: 'wireguard',
-//             // /etc/config/wireguard_server
-//             mode: 'server',
-//             address: '10.0.0.1',
-//             // /etc/config/wireguard_server
-//             clients: [
-//                 '10.0.0.2',
-//                 '10.0.0.3',
-//             ],
-//         },
-//         {
-//             name: 'nginx',
-//             // /etc/nginx
-//             reverseProxy: [
-//                 {
-//                     from: {
-//                         domain: 'proxmox.richardhaddad.fr',
-//                         ssl: true,
-//                     },
-//                     to: {
-//                         address: '192.168.8.138',
-//                         ssl: true,
-//                         port: 8006,
-//                     }
-//                 }
-//             ]
-//         },
-//         {
-//             name: 'adguard-home',
-//             // /etc/AdGuardHome/config.yaml
-//             // http
-//             //   address
-//             port: 3000,
-//         },
-//     ]
-// };
-
-// const proxmox: AgentDevice = {
-//     os: 'proxmox',
-//     lan: '192.168.8.138',
-//     web: [ {
-//         port: 8006,
-//         ssl: true,
-//     } ],
-//     ssh: {},
-//     apps: [],
-//     // qm list, then:
-//     //   qm terminal
-//     //   or use ssh
-//     instances: [
-//         {
-//             os: 'haos',
-//             lan: '192.168.8.206',
-//             web: [
-//                 {
-//                     port: 8123,
-//                 },
-//                 {
-//                     port: 4357,
-//                 },
-//             ],
-//             // ha addons info <slug>
-//             // network
-//             ssh: {},
-//             apps: [
-//                 {
-//                     name: 'node-red',
-//                     port: 1880,
-//                 },
-//                 {
-//                     name: 'node-red',
-//                     port: 8099,
-//                 }
-//             ],
-//         }
-//     ]
-// };

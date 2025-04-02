@@ -3,9 +3,14 @@ import React from 'react';
 import { AccessLine } from '../ui/access-line';
 import { useNetEntityMap } from '../network/hooks/use-net-entity-map';
 import { DeviceContext } from './provider/device-provider';
+import { InstanceContext } from '../instance/provider/instance-provider';
 
 export const DeviceAccessLineList: React.FC = () => {
     const { device } = DeviceContext.useValue();
+    const instance = InstanceContext.useValueNullable();
+
+    const entity = instance ?? device;
+
     const netEntityMap = useNetEntityMap();
 
     if (netEntityMap.isLoading) {
@@ -16,7 +21,7 @@ export const DeviceAccessLineList: React.FC = () => {
         return null;
     }
 
-    const netEntity = netEntityMap.data[ device.id ];
+    const netEntity = netEntityMap.data[ entity.id ];
 
     return <Box sx={{
         display: 'flex',

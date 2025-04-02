@@ -57,5 +57,20 @@ export const getAppMeta = (app: DeviceApp): {
                 name: 'Sunshine',
                 description: 'Game streaming host',
             };
+        case 'caddy':
+            return {
+                name: 'Caddy',
+                description: 'Web server with auto https',
+            };
+        case 'uptime-kuma':
+            return {
+                name: 'Uptime Kuma',
+                description: 'Monitoring services uptime',
+            };
+        case 'ntfy':
+            return {
+                name: 'Ntfy',
+                description: 'Notification service',
+            };
     }
 }

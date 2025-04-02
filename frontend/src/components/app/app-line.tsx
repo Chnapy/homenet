@@ -10,7 +10,7 @@ export const AppLine: React.FC = () => {
     const { device } = DeviceContext.useValue();
     const instance = InstanceContext.useValueNullable();
 
-    const deviceLike = instance ?? device;
+    const entity = instance ?? device;
 
     const app = AppContext.useValue();
 
@@ -26,7 +26,7 @@ export const AppLine: React.FC = () => {
 
     const { name, description } = getAppMeta(app);
 
-    const netEntityAccess = data[ deviceLike.id ].apps[ app.slug ];
+    const netEntityAccess = data[ entity.id ].apps[ app.slug ];
 
     const appMainAccess = netEntityAccess[ 0 ];
     const appOthersAccessList = netEntityAccess.filter(access => access !== appMainAccess)

@@ -15,3 +15,6 @@ export type DeviceAppSlug = DeviceApp[ 'slug' ];
 export type DeviceInstance = NonNullable<Device[ 'instances' ]>[ number ];
 
 export type DeviceInstanceType = DeviceInstance[ 'type' ];
+
+export const isAppReverseProxy = (app: DeviceApp): app is Extract<DeviceApp, { slug: 'nginx' | 'caddy' }> =>
+    app.slug === 'nginx' || app.slug === 'caddy';

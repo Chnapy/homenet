@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
-import { Device, DeviceInstance } from '../../../data/types/get-devices';
+import { Device, DeviceInstance, isAppReverseProxy } from '../../../data/types/get-devices';
 
 export type NetAccess = {
     type: 'address-only' | 'web' | 'ssh';
@@ -100,7 +100,7 @@ export const useNetEntityMap = () => {
                 .map(dhcpItem => dhcpItem.alias);
 
             const innerDomains = entityList
-                .flatMap(device => device.apps?.flatMap(app => app.slug === 'nginx' && app.reverseProxy || []) ?? [])
+                .flatMap(entity => entity.apps?.flatMap(app => isAppReverseProxy(app) && app.reverseProxy || []) ?? [])
                 .filter(proxy => [
                     lan, wan, ddns, ...lanAliases
                 ].includes(proxy.to.address))

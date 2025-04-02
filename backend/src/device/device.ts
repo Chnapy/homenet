@@ -116,9 +116,6 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
             } ],
             ssh: {},
             apps: [],
-            // qm list, then:
-            //   qm terminal
-            //   or use ssh
             instances: [
                 {
                     id: 'uuid-homelab_instance-0',
@@ -187,6 +184,71 @@ export const getDeviceMap = async (): Promise<DeviceMap> => {
                         port: 47990,
                     } ],
                 },
+            ]
+        },
+
+        'uuid-vps': {
+            id: 'uuid-vps',
+            os: 'debian',
+            wan: '141.94.221.48',
+            lan: '192.168.100.1',
+            ddns: 'vps-0c88ff97.vps.ovh.net',
+            ssh: {},
+            apps: [
+                {
+                    slug: 'docker',
+                }
+            ],
+            instances: [
+                {
+                    id: 'uuid-vps_instance-0',
+                    type: 'docker',
+                    lan: '192.168.100.2',
+                    apps: [
+                        {
+                            slug: 'wireguard',
+                            mode: 'client',
+                            address: '10.0.0.5',
+                        },
+                        {
+                            slug: 'caddy',
+                            reverseProxy: [
+                                {
+                                    from: {
+                                        domain: 'uptime.richardhaddad.fr',
+                                        ssl: true,
+                                    },
+                                    to: {
+                                        address: '192.168.100.2',
+                                        port: 3001,
+                                    }
+                                },
+                                {
+                                    from: {
+                                        domain: 'ntfy.richardhaddad.fr',
+                                        ssl: true,
+                                    },
+                                    to: {
+                                        address: '192.168.100.2',
+                                        port: 8080,
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            slug: 'uptime-kuma',
+                            web: [ {
+                                port: 3001,
+                            } ]
+                        },
+                        {
+                            slug: 'ntfy',
+                            web: [ {
+                                port: 8080,
+                            } ]
+                        }
+                    ],
+                }
             ]
         },
     };

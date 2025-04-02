@@ -58,7 +58,7 @@ export const DeviceCard: React.FC = () => {
                 })}
 
                 {instances.map(instance => {
-                    return <InstanceContext.Provider key={instance.os} value={instance}>
+                    return <InstanceContext.Provider key={instance.id} value={instance}>
                         <InstanceCard />
                     </InstanceContext.Provider>;
                 })}

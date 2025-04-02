@@ -29,6 +29,11 @@ export const getOSMeta = (slug: DeviceOSSlug): {
             return {
                 name: 'Windows',
                 description: 'OS',
-            }
+            };
+        case 'debian':
+            return {
+                name: 'Debian',
+                description: 'OS',
+            };
     }
 }

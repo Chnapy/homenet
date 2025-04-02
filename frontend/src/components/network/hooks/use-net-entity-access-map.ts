@@ -1,5 +1,5 @@
 import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
-import { Device, DeviceAppSlug, DeviceInstance } from '../../../data/types/get-devices';
+import { Device, DeviceAppSlug, DeviceInstance, isAppReverseProxy } from '../../../data/types/get-devices';
 import { NetAccess, useNetEntityMap } from './use-net-entity-map';
 
 type AppNetAccess = NetAccess & {
@@ -37,7 +37,7 @@ export const useNetEntityAccessMap = () => {
         ...deviceList.flatMap(device => device.instances ?? [])
             .flatMap(instance => instance.apps ?? []),
     ]
-        .flatMap(app => app.slug === 'nginx' && app.reverseProxy || []);
+        .flatMap(app => isAppReverseProxy(app) && app.reverseProxy || []);
 
     const getEntityAccess = (payload: {
         type: 'device';
@@ -88,14 +88,14 @@ export const useNetEntityAccessMap = () => {
         };
 
         const os: NetAccess[] = [
-            ...getWebAccessList(payload.entity.web),
+            ...('web' in payload.entity ? getWebAccessList(payload.entity.web) : []),
 
             // ssh
-            ...(payload.entity.ssh
+            ...('ssh' in payload.entity && payload.entity.ssh
                 ? netEntity.asList.map((net): NetAccess => ({
                     ...net,
                     type: 'ssh',
-                    port: payload.entity.ssh!.port
+                    port: 'ssh' in payload.entity ? payload.entity.ssh!.port : undefined,
                 }))
                 : []),
         ];
@@ -107,7 +107,7 @@ export const useNetEntityAccessMap = () => {
                 .map((access): AppNetAccess => ({
                     appSlug: app.slug,
                     ...access,
-                }))
+                }));
 
             return {
                 ...acc,

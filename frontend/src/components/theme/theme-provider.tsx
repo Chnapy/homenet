@@ -168,6 +168,21 @@ export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
             },
         },
     }),
+
+    yellow: createTheme({
+        ...themeBase,
+        palette: {
+            ...themeBase.palette,
+            primary: {
+                ...themeBase.palette.primary,
+                main: '#5f4a5f',
+            },
+            background: {
+                default: '#222200',
+                paper: '#363622'
+            },
+        },
+    }),
 };
 
 type ThemeProviderProps = {

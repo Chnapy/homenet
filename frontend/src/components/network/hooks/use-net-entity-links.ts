@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
-import { DeviceAppSlug } from '../../../data/types/get-devices';
+import { DeviceAppSlug, isAppReverseProxy } from '../../../data/types/get-devices';
 import { useNetEntityMap } from './use-net-entity-map';
 
 type NetDeviceLink = {
@@ -24,7 +24,7 @@ export type NetEntityLinks = {
 export const getIPMask = (ip: string) => ip.split('.').slice(0, -1).join('.') + '.';
 
 const injectLinkId = (link: Omit<NetDeviceLink, 'id'>): NetDeviceLink => {
-    const id = `${link.from.device}_${link.from.relatedApp}-${link.to.device}_${link.to.relatedApp}`;
+    const id = `${link.from.device}_${link.from.relatedApp}-${link.to.device}_${link.to.relatedApp}-${link.label}`;
 
     return { ...link, id };
 };
@@ -113,12 +113,12 @@ export const useNetEntityLinks = () => {
                     );
                 }
 
-                const reverseProxy = device.apps?.find(app => app.slug === 'nginx')?.reverseProxy;
+                const reverseProxyApp = device.apps?.find(isAppReverseProxy);
 
                 // http reverse proxy
-                if (reverseProxy?.length) {
+                if (reverseProxyApp?.reverseProxy?.length) {
                     links.push(
-                        ...reverseProxy.map(proxy => {
+                        ...reverseProxyApp.reverseProxy.map(proxy => {
                             const entity = netEntityList.find(entity => [
                                 entity.lan, ...(entity.lanAliases ?? []), entity.wan, entity.ddns,
                             ].includes(proxy.to.address)
@@ -134,7 +134,7 @@ export const useNetEntityLinks = () => {
                                 type: 'link',
                                 from: {
                                     device: netEntity.id,
-                                    relatedApp: 'nginx',
+                                    relatedApp: reverseProxyApp.slug,
                                 },
                                 to: {
                                     device: entity!.id,
