@@ -8,7 +8,7 @@ export type DeviceNodeType = Node<{
     sources?: ElkEdgeSection[];
     targets?: ElkEdgeSection[];
     offset?: ElkPoint;
-}>;
+}, 'device'>;
 
 export const DeviceNode: React.FC<NodeProps<DeviceNodeType>> = (props) => {
 

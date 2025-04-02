@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import React from 'react';
-import { useTRPC } from '../../../data/trpc';
+import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
 import { DeviceAppSlug } from '../../../data/types/get-devices';
 import { useNetEntityMap } from './use-net-entity-map';
 
@@ -15,6 +14,7 @@ type NetDeviceLink = {
         device: string;
         relatedApp?: DeviceAppSlug;
     };
+    label?: string;
 };
 
 export type NetEntityLinks = {
@@ -23,31 +23,28 @@ export type NetEntityLinks = {
 
 export const getIPMask = (ip: string) => ip.split('.').slice(0, -1).join('.') + '.';
 
-const injectLinkId = ({ type, from, to }: Omit<NetDeviceLink, 'id'>): NetDeviceLink => {
-    const id = `${from.device}_${from.relatedApp}-${to.device}_${to.relatedApp}`;
+const injectLinkId = (link: Omit<NetDeviceLink, 'id'>): NetDeviceLink => {
+    const id = `${link.from.device}_${link.from.relatedApp}-${link.to.device}_${link.to.relatedApp}`;
 
-    return { id, type, from, to };
+    return { ...link, id };
 };
 
 export const useNetEntityLinks = () => {
-    const trpc = useTRPC();
-    const devicesFull = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const devicesFullQuery = useDevicesFullQuery();
 
     const netEntityMap = useNetEntityMap();
 
-    const isLoading = devicesFull.isLoading || netEntityMap.isLoading;
+    const isLoading = devicesFullQuery.isLoading || netEntityMap.isLoading;
 
     return React.useMemo(() => {
-        if (!devicesFull.data || !netEntityMap.data) {
+        if (!devicesFullQuery.data || !netEntityMap.data) {
             return {
                 data: undefined,
                 isLoading,
             };
         }
 
-        const { deviceMap } = devicesFull.data;
+        const { deviceMap } = devicesFullQuery.data;
 
         const entityList = Object.values(deviceMap)
             .flatMap(device => [ device, ...device.instances ?? [] ]);
@@ -81,6 +78,7 @@ export const useNetEntityLinks = () => {
                                     to: {
                                         device: entity.id,
                                     },
+                                    label: entity.lan,
                                 });
                             })
                     );
@@ -109,6 +107,7 @@ export const useNetEntityLinks = () => {
                                         device: entity.id,
                                         relatedApp: 'wireguard',
                                     },
+                                    label: entity.vpn,
                                 });
                             })
                     );
@@ -120,13 +119,18 @@ export const useNetEntityLinks = () => {
                 if (reverseProxy?.length) {
                     links.push(
                         ...reverseProxy.map(proxy => {
-                            return netEntityList.find(entity => [
+                            const entity = netEntityList.find(entity => [
                                 entity.lan, ...(entity.lanAliases ?? []), entity.wan, entity.ddns,
                             ].includes(proxy.to.address)
                             );
+
+                            return {
+                                proxy,
+                                entity,
+                            };
                         })
-                            .filter(Boolean)
-                            .map((entity): NetDeviceLink => injectLinkId({
+                            .filter(obj => obj.entity)
+                            .map(({ proxy, entity }): NetDeviceLink => injectLinkId({
                                 type: 'link',
                                 from: {
                                     device: netEntity.id,
@@ -135,6 +139,7 @@ export const useNetEntityLinks = () => {
                                 to: {
                                     device: entity!.id,
                                 },
+                                label: proxy.from.domain,
                             }))
                     );
                 }
@@ -165,5 +170,5 @@ export const useNetEntityLinks = () => {
             data: devicesLinks,
             isLoading,
         };
-    }, [ devicesFull.data, netEntityMap.data, isLoading ]);
+    }, [ devicesFullQuery.data, netEntityMap.data, isLoading ]);
 };

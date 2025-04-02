@@ -1,16 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
 import { Handle, NodeProps, Position } from '@xyflow/react';
 import { ElkPoint } from 'elkjs';
 import React from 'react';
-import { useTRPC } from '../../../data/trpc';
+import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
 import { useNetEntityLinks } from '../../network/hooks/use-net-entity-links';
 import { DeviceNodeType } from './device-node';
 
 export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({ data, width, height, ...rest }) => {
-    const trpc = useTRPC();
-    const devicesFullQuery = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const devicesFullQuery = useDevicesFullQuery();
     const deviceList = Object.values(devicesFullQuery.data?.deviceMap ?? {});
 
     const deviceIds = deviceList.flatMap(device => {
@@ -160,6 +156,12 @@ export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({ data, w
 
     return <>
         {handles}
+
+        <style dangerouslySetInnerHTML={{
+            __html: `.react-flow__handle { 
+            // z-index: 1;
+            opacity: 0;
+        }` }} />
     </>;
 
 };

@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import { useNodesInitialized } from '@xyflow/react';
-import ELK, { ElkExtendedEdge, ElkNode } from 'elkjs/lib/elk.bundled.js';
+import ELK, { ElkExtendedEdge, ElkLabel, ElkNode } from 'elkjs/lib/elk.bundled.js';
 import React from 'react';
-import { useTRPC } from '../../../data/trpc';
+import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
 import { getIPMask, useNetEntityLinks } from '../../network/hooks/use-net-entity-links';
+import { iconMap } from '../../ui/app-os-icon/app-icon';
 
 export type ElkDeviceNode = ElkNode & {
     type?: 'device' | 'group';
@@ -11,11 +11,12 @@ export type ElkDeviceNode = ElkNode & {
     children: ElkDeviceNode[];
 };
 
+export type ElkLabelWithIcon = ElkLabel & {
+    icon?: string;
+};
+
 export const useLayoutAlgorithm = () => {
-    const trpc = useTRPC();
-    const devicesFull = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const devicesFullQuery = useDevicesFullQuery();
 
     const netEntityLinks = useNetEntityLinks();
 
@@ -23,11 +24,11 @@ export const useLayoutAlgorithm = () => {
 
     return React.useMemo(() => {
 
-        if (!areNodesInitialized || !devicesFull.data || !netEntityLinks.data) {
+        if (!areNodesInitialized || !devicesFullQuery.data || !netEntityLinks.data) {
             return;
         }
 
-        const { deviceMap } = devicesFull.data;
+        const { deviceMap } = devicesFullQuery.data;
         const deviceList = Object.values(deviceMap);
 
         const elk = new ELK();
@@ -57,29 +58,50 @@ export const useLayoutAlgorithm = () => {
 
                     const lanMasq = getIPMask(device.lan);
 
-                    const netNode: ElkDeviceNode = acc[ lanMasq ] ?? {
+                    const groupNode: ElkDeviceNode = acc[ lanMasq ] ?? {
                         id: lanMasq,
                         type: 'group',
                         children: [],
+                        labels: [
+                            {
+                                id: lanMasq + '-label',
+                                text: lanMasq + '0',
+                                width: lanMasq.length * 6,  // font-size: 16
+                                height: 30,
+                                layoutOptions: {
+                                    'elk.nodeLabels.placement': 'H_LEFT V_TOP OUTSIDE',
+                                },
+                            }
+                        ],
                     };
 
                     const node: ElkDeviceNode = {
                         id,
-                        parent: netNode,
+                        parent: groupNode,
                         type: 'device',
                         width: card.clientWidth,
                         height: card.clientHeight,
                         children: [],
                     };
 
-                    netNode.children!.push(node);
+                    groupNode.children!.push(node);
 
                     return {
                         ...acc,
-                        [ lanMasq ]: netNode,
+                        [ lanMasq ]: groupNode,
                     };
                 }, {} as Record<string, ElkDeviceNode>)
-            );
+
+                // remove groups with only 1 child
+            ).map(node => {
+                if (node.children?.length === 1) {
+                    const child = node.children[ 0 ];
+                    delete child.parent;
+                    return child;
+                }
+
+                return node;
+            });
 
             const edges = netEntityLinks.data
                 .map((link): ElkExtendedEdge => {
@@ -103,6 +125,43 @@ export const useLayoutAlgorithm = () => {
                         id: link.id,
                         sources: [ fromId ],
                         targets: [ toId ],
+                        labels: [
+                            link.from.relatedApp && {
+                                id: link.id + '-label-tail',
+                                text: link.from.relatedApp,
+                                icon: iconMap[ link.from.relatedApp ],
+                                width: 18,
+                                height: 18,
+                                layoutOptions: {
+                                    'elk.edgeLabels.placement': 'TAIL',
+                                }
+                            },
+                            link.label && {
+                                id: link.id + '-label-center',
+                                text: link.label,
+                                width: link.label.length * 5,
+                                height: 18,
+                                layoutOptions: {
+                                    // 'elk.edgeLabels.placement': 'HEAD',
+                                    // 'elk.spacing.edgeLabel': '0',
+                                    // 'elk.spacing.labelPortHorizontal': '0',
+                                    // 'elk.edgeLabels.inline': 'true',
+                                    // 'elk.graphviz.labelDistance': '0',
+                                    // 'elk.spacing.labelNode': '0',
+                                    // 'elk.layered.edgeLabels.sideSelection': 'ALWAYS_UP',
+                                }
+                            },
+                            link.to.relatedApp && {
+                                id: link.id + '-label-head',
+                                text: link.to.relatedApp,
+                                icon: iconMap[ link.to.relatedApp ],
+                                width: 18,
+                                height: 18,
+                                layoutOptions: {
+                                    'elk.edgeLabels.placement': 'HEAD',
+                                }
+                            },
+                        ].filter(Boolean) as ElkLabelWithIcon[],
                     };
                 });
 
@@ -119,5 +178,5 @@ export const useLayoutAlgorithm = () => {
 
             return data;
         };
-    }, [ areNodesInitialized, devicesFull.data, netEntityLinks.data ]);
+    }, [ areNodesInitialized, devicesFullQuery.data, netEntityLinks.data ]);
 };

@@ -120,7 +120,7 @@ const themeBase = createTheme({
     // colorSchemes,
 });
 
-const themeMap: Record<DeviceUserMetaTheme, Theme> = {
+export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
     default: themeBase,
 
     mauve: createTheme({
@@ -167,7 +167,7 @@ const themeMap: Record<DeviceUserMetaTheme, Theme> = {
             },
         },
     }),
-}
+};
 
 type ThemeProviderProps = {
     themeName?: DeviceUserMetaTheme;

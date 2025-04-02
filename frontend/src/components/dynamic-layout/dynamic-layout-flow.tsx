@@ -1,19 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { Background, EdgeTypes, NodeTypes, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react';
+import { Background, EdgeTypes, MarkerType, Node, NodeTypes, ReactFlow, useEdgesState, useNodesState } from '@xyflow/react';
 import { ElkPoint } from 'elkjs';
 import React from 'react';
-import { useTRPC } from '../../data/trpc';
+import { useDevicesFullQuery } from '../../data/query/use-devices-full-query';
 import { useNetEntityLinks } from '../network/hooks/use-net-entity-links';
+import { themeMap } from '../theme/theme-provider';
 import { ContainerFluid } from '../ui/container-fluid';
-import ChangeLogger from './devtools/change-logger';
-import { CursorPosition } from './devtools/cursor-position';
-import NodeInspector from './devtools/node-inspector';
 import ViewportLogger from './devtools/viewport-logger';
 import { PolylineEdge, PolylineEdgeType } from './edge/polyline-edge';
 import { useLayoutAlgorithm } from './hooks/use-layout-algorithm';
 import { DeviceNode, DeviceNodeType } from './node/device-node';
 
 import '@xyflow/react/dist/style.css';
+
+type AnyNode = DeviceNodeType | Node<{ label: React.ReactNode }, "default">;
 
 const nodeTypes: NodeTypes = {
     device: DeviceNode,
@@ -24,28 +23,22 @@ const edgeTypes: EdgeTypes = {
 };
 
 export const DynamicLayoutFlow: React.FC = () => {
-    const trpc = useTRPC();
-    const devicesFullQuery = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
-
+    const devicesFullQuery = useDevicesFullQuery();
     const netEntityLinks = useNetEntityLinks();
 
     const getNodesState = () => Object.keys(devicesFullQuery.data?.deviceMap ?? {})
-        .map((deviceKey): DeviceNodeType => ({
+        .map((deviceKey): AnyNode => ({
             type: 'device',
             id: deviceKey,
             data: {},
             position: { x: 0, y: 0 }
         }));
 
-    const [ nodes, setNodes, onNodesChange ] = useNodesState<DeviceNodeType>(getNodesState());
+    const [ nodes, setNodes, onNodesChange ] = useNodesState<AnyNode>(getNodesState());
     const [ edges, setEdges, onEdgesChange ] = useEdgesState<PolylineEdgeType>([]);
     // const { fitView } = useReactFlow();
 
     const getLayoutAlgorithm = useLayoutAlgorithm();
-
-    // console.log({ data, nodes, edges });
 
     // query results
     React.useEffect(() => {
@@ -66,43 +59,71 @@ export const DynamicLayoutFlow: React.FC = () => {
                 .flatMap(child => [ child, ...child.children ?? [] ]);
 
             const newNodes = everyChildren.map(({
-                id, x, y, width, height, type, parent
-            }): DeviceNodeType => {
+                id, x, y, width, height, type, labels, parent
+            }): AnyNode => {
+
+                const partialNode = {
+                    id,
+                    parentId: parent?.id,
+                    position: { x: x!, y: y! },
+                    width,
+                    height,
+                    measured: { width, height },
+                    draggable: false,
+                } satisfies Partial<AnyNode>;
+
+                if (type === 'group') {
+                    const groupLabel = labels?.[ 0 ];
+                    return {
+                        ...partialNode,
+                        selectable: false,
+                        data: {
+                            label: groupLabel && <div
+                                style={{
+                                    float: 'left',
+                                    transform: `translate(${groupLabel.x}px, ${groupLabel.y}px)`,
+                                    fontSize: 16,
+                                }}
+                            >
+                                {groupLabel.text ?? null}
+                            </div>,
+                        },
+                        style: {
+                            backgroundColor: 'transparent',
+                            border: '2px dashed currentColor',
+                            borderRadius: 16
+                        },
+                    }
+                }
 
                 return {
                     type,
-                    id,
-                    parentId: parent?.id,
+                    ...partialNode,
                     data: {
-                        sources: edgesSections
-                            .filter(section => section.incomingShape === id),
-                        targets: edgesSections
-                            .filter(section => section.outgoingShape === id),
+                        sources: edgesSections.filter(section => section.incomingShape === id),
+                        targets: edgesSections.filter(section => section.outgoingShape === id),
                         offset: {
                             x: parent?.x ?? 0,
                             y: parent?.y ?? 0,
                         },
                     },
-                    position: { x: x!, y: y! },
-                    width,
-                    height,
-                    measured: { width, height },
-                    draggable: type === 'group',
                 };
             });
 
             const newEdges = (layout.edges ?? []).map(({
-                id, sources, targets, sections
+                id, sources, targets, sections, labels
             }): PolylineEdgeType => {
+                // const link = netEntityLinks.data!.find(link => link.id === id)!;
 
                 const source = sources[ 0 ];
                 const target = targets[ 0 ];
 
+                // get source/target offset handling group/no-group cases
                 const getOffset = (): ElkPoint | undefined => {
                     const sourceNode = everyChildren.find(child => child.id === source);
                     const targetNode = everyChildren.find(child => child.id === target);
 
-                    if (sourceNode?.parent && targetNode?.parent) {
+                    if (sourceNode?.parent && sourceNode.parent.id === targetNode?.parent?.id) {
                         return {
                             x: sourceNode.parent.x ?? 0,
                             y: sourceNode.parent.y ?? 0,
@@ -110,8 +131,17 @@ export const DynamicLayoutFlow: React.FC = () => {
                     }
                 };
 
+                const deviceUserMetaMap = devicesFullQuery.data?.deviceUserMetaMap ?? {};
+
+                const inMeta = deviceUserMetaMap[ source ];
+                // const ouMeta = deviceUserMetaMap[ target ];
+
+                const inTheme = themeMap[ inMeta.theme ];
+                // const ouTheme = themeMap[ ouMeta.theme ];
+
+                const pathColor = `color-mix(in HSL, ${inTheme.palette.background.paper} 88%, #FFF)`;
+
                 return {
-                    // type: 'smoothstep',
                     type: 'polyline',
                     id,
                     source,
@@ -121,16 +151,23 @@ export const DynamicLayoutFlow: React.FC = () => {
                     data: {
                         offset: getOffset(),
                         section: sections![ 0 ],
+                        labels
+                    },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        strokeWidth: 1,
+                        color: pathColor,
+                        width: 8
                     },
                 };
             });
 
-            console.log({ layout, newNodes, newEdges, edgesSections });
-
             setNodes(newNodes);
             setEdges(newEdges);
+
+            console.log({ layout, newNodes, newEdges, edgesSections });
         });
-    }, [ getLayoutAlgorithm, setEdges, setNodes ]);
+    }, [ devicesFullQuery.data, getLayoutAlgorithm, setEdges, setNodes ]);
 
     return (
         <ContainerFluid>
@@ -143,22 +180,21 @@ export const DynamicLayoutFlow: React.FC = () => {
                 edgeTypes={edgeTypes}
                 // minZoom={1}
                 // maxZoom={1}
-                // fitView
+                draggable={false}
                 proOptions={{ hideAttribution: true }}
                 style={{
-                    cursor: 'crosshair',
                     opacity: edges.length > 0 ? 1 : 0,
                     transition: 'opacity .2s',
                 }}
             >
                 <Background />
 
-                <ChangeLogger />
-                <NodeInspector />
+                {/* <ChangeLogger />
+                <NodeInspector /> */}
                 <ViewportLogger />
             </ReactFlow>
 
-            <CursorPosition />
+            {/* <CursorPosition /> */}
         </ContainerFluid>
     );
 };

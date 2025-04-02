@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import React from 'react';
-import { useTRPC } from '../../../data/trpc';
+import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
 import { Device, DeviceInstance } from '../../../data/types/get-devices';
 
 export type NetAccess = {
@@ -58,10 +57,7 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
 }
 
 export const useNetEntityMap = () => {
-    const trpc = useTRPC();
-    const { data, isLoading } = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const { data, isLoading } = useDevicesFullQuery();
 
     return React.useMemo(() => {
 

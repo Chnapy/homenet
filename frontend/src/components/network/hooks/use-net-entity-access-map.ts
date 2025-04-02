@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
-import { useTRPC } from '../../../data/trpc';
+import { useDevicesFullQuery } from '../../../data/query/use-devices-full-query';
 import { Device, DeviceAppSlug, DeviceInstance } from '../../../data/types/get-devices';
 import { NetAccess, useNetEntityMap } from './use-net-entity-map';
 
@@ -14,10 +13,7 @@ export type NetEntityAccess = {
 };
 
 export const useNetEntityAccessMap = () => {
-    const trpc = useTRPC();
-    const devicesFullQuery = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const devicesFullQuery = useDevicesFullQuery();
 
     const netEntityMapQuery = useNetEntityMap();
 

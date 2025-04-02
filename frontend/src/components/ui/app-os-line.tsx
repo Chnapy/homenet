@@ -82,7 +82,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
                 ? <Box sx={{
                     display: 'flex'
                 }} >
-                    <CardActionArea>
+                    <CardActionArea onClick={() => console.log('click', slug)}>
                         {content}
                     </CardActionArea>
 

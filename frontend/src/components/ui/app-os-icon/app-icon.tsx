@@ -9,7 +9,8 @@ export type AppOSIconProps = {
     slug: DeviceAppSlug | DeviceOSSlug;
 } & BoxProps;
 
-const iconMap: Record<Exclude<AppOSIconProps[ 'slug' ], 'unknown'>, string> = {
+export const iconMap: Record<AppOSIconProps[ 'slug' ], string | undefined> = {
+    unknown: undefined,
 
     // os
     "openwrt-glinet": getDashboardIcon('svg', 'openwrt'),
@@ -31,8 +32,9 @@ const iconMap: Record<Exclude<AppOSIconProps[ 'slug' ], 'unknown'>, string> = {
 };
 
 export const AppOSIcon: React.FC<AppOSIconProps> = ({ slug, ...boxProps }) => {
+    const icon = iconMap[ slug ];
 
-    if (slug === 'unknown') {
+    if (!icon) {
         return <Box
             component={HelpIcon}
             {...boxProps}
@@ -41,7 +43,7 @@ export const AppOSIcon: React.FC<AppOSIconProps> = ({ slug, ...boxProps }) => {
 
     return <Box
         component='img'
-        src={iconMap[ slug ]}
+        src={icon}
         {...boxProps}
     />;
 };

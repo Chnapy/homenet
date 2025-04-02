@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import React from 'react';
-import { useTRPC } from '../../data/trpc';
+import { useDevicesFullQuery } from '../../data/query/use-devices-full-query';
 import { DeviceCard } from '../device/device-card';
 import { DeviceContext } from '../device/provider/device-provider';
 import { ThemeProvider } from '../theme/theme-provider';
@@ -12,10 +11,7 @@ export type DeviceProps = {
 
 export const Device: React.FC<React.PropsWithChildren<DeviceProps>> = ({ deviceId, children }) => {
     const rootRef = React.useRef<HTMLElement>(null);
-    const trpc = useTRPC();
-    const devicesFullQuery = useQuery(
-        trpc.getDevicesFull.queryOptions()
-    );
+    const devicesFullQuery = useDevicesFullQuery();
 
     if (!devicesFullQuery.data) {
         return null;
