@@ -104,6 +104,8 @@ export const useLayoutAlgorithm = () => {
             });
 
             const edges = netEntityLinks.data
+                // filter 'lan' links
+                .filter(link => link.type !== 'network' || link.from.relatedApp || link.to.relatedApp)
                 .map((link): ElkExtendedEdge => {
                     const getId = (entityId: string) => {
                         if (deviceMap[ entityId ]) {

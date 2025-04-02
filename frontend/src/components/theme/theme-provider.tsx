@@ -120,6 +120,7 @@ const themeBase = createTheme({
     // colorSchemes,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
     default: themeBase,
 

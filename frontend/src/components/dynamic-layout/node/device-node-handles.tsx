@@ -111,13 +111,13 @@ export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({ data, w
                 return null;
             }
 
+            const startPoint = data.sources?.find(value => value.id === link.id + '_s0')?.startPoint
+
             return <Handle
                 id={link.id}
                 type="source"
-                {...(data.sources
-                    ? getPositionAndStyle(
-                        data.sources.find(value => value.id === link.id + '_s0')!.startPoint
-                    )
+                {...(startPoint
+                    ? getPositionAndStyle(startPoint)
                     : {
                         position: Position.Left,
                         style: {
@@ -132,13 +132,13 @@ export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({ data, w
                 return null;
             }
 
+            const endPoint = data.targets?.find(value => value.id === link.id + '_s0')?.endPoint
+
             return <Handle
                 id={link.id}
                 type="target"
-                {...(data.targets
-                    ? getPositionAndStyle(
-                        data.targets.find(value => value.id === link.id + '_s0')!.endPoint
-                    )
+                {...(endPoint
+                    ? getPositionAndStyle(endPoint)
                     : {
                         position: Position.Left,
                         style: {

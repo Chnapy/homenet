@@ -9,6 +9,7 @@ export type AppOSIconProps = {
     slug: DeviceAppSlug | DeviceOSSlug;
 } & BoxProps;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const iconMap: Record<AppOSIconProps[ 'slug' ], string | undefined> = {
     unknown: undefined,
 
