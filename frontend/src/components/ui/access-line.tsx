@@ -1,10 +1,11 @@
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import CloudIcon from '@mui/icons-material/Cloud';
 import LanIcon from '@mui/icons-material/Lan';
 import LinkIcon from '@mui/icons-material/Link';
-import CloudIcon from '@mui/icons-material/Cloud';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { NetAccess } from '../network/hooks/use-net-entity-map';
+import { getAccessWebHref } from './utils/get-web-href';
 
 type AccessLineProps = NetAccess & {
     link?: boolean;
@@ -33,7 +34,7 @@ export const AccessLine: React.FC<AccessLineProps> = ({
 
     const value = type === 'ssh'
         ? `ssh ${address}${port && port !== 22 ? ' -p ' + port : ''}`
-        : `${ssl ? 'https' : 'http'}://${address}${port ? ':' + port : ''}`;
+        : getAccessWebHref({ address, port, ssl });
 
     const content = <>
         <ListItemIcon sx={{ minWidth: 0 }}>

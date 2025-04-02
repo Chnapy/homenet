@@ -6,6 +6,7 @@ import { DeviceAppSlug, DeviceOSSlug } from '../../data/types/get-devices';
 import { NetAccess } from '../network/hooks/use-net-entity-map';
 import { AccessLine } from './access-line';
 import { AppOSIcon } from './app-os-icon/app-icon';
+import { getAccessWebHref } from './utils/get-web-href';
 
 type AppOSLineProps = {
     slug: DeviceAppSlug | DeviceOSSlug;
@@ -69,7 +70,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
             </>}
 
         </Box>
-    )
+    );
 
     return (
         <Paper data-slug={slug} elevation={mainAccess ? 2 : 1} sx={{
@@ -82,7 +83,12 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
                 ? <Box sx={{
                     display: 'flex'
                 }} >
-                    <CardActionArea onClick={() => console.log('click', slug)}>
+                    <CardActionArea onClick={() => {
+                        if (mainAccess.type !== 'ssh') {
+                            const href = getAccessWebHref(mainAccess);
+                            window.open(href, '_blank');
+                        }
+                    }}>
                         {content}
                     </CardActionArea>
 
