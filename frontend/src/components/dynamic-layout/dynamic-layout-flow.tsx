@@ -148,6 +148,8 @@ export const DynamicLayoutFlow: React.FC = () => {
                     sourceHandle: id,
                     target,
                     targetHandle: id,
+                    selectable: false,
+                    // animated: true,
                     data: {
                         offset: getOffset(),
                         section: sections![ 0 ],
