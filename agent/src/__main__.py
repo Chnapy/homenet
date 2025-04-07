@@ -1,11 +1,12 @@
-import json
-from src.agent import collect_device_info, run_server
+from src.env import env
+from src.mode import active, passive
 
 if __name__ == "__main__":
     try:
+        if env.get("MODE") == "active":
+            active.run()
+        else:
+            passive.run()
 
-        print("Startup collected info", json.dumps(collect_device_info(), indent=2))
-
-        run_server()
     except KeyboardInterrupt:
         print("\nAgent stopped.")

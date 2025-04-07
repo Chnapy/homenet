@@ -21,6 +21,4 @@ dist-ssr
 *.sln
 *.sw?
 
-__pycache__/
-agent/environments/my_env
-agent/build/
+.env

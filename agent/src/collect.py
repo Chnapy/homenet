@@ -1,4 +1,4 @@
-from src.provider.provider import ProviderPayload
+from src.grpc.agent_pb2 import AgentOS, AgentInstance
 from src.exec.exec import Exec
 from src.provider.debian import Debian
 
@@ -7,12 +7,14 @@ from src.provider.proxmox import Proxmox
 from src.utils.get_properties import get_properties
 
 
-def collect(exec: Exec) -> ProviderPayload:
-    if exec.exec("uname -r").endswith("-haos"):
-        return HAOS(exec).get_all()
+def get_current_instance(exec: Exec) -> AgentInstance:
+    uname = exec.exec("uname -a")
+
+    if "-haos" in uname:
+        return HAOS(exec).get_instance()
 
     if exec.isDir("/etc/pve"):
-        return Proxmox(exec).get_all()
+        return Proxmox(exec).get_instance()
 
     osReleasePath = "/etc/os-release"
     if exec.isFile(osReleasePath):
@@ -20,13 +22,13 @@ def collect(exec: Exec) -> ProviderPayload:
         configs = get_properties(config_file)
         osName = configs["NAME"]
         if osName and "debian" in osName.lower():
-            return Debian(exec).get_all()
+            return Debian(exec).get_instance()
 
-    return {
-        "os": "unknown",
-        "lan": "unknown",
-        "ssh": None,
-        "web": [],
-        "apps": [],
-        "instances": [],
-    }
+    return AgentInstance(
+        os=AgentOS.UNKNOWN,
+        unknownOS=uname,
+        lan="",
+        web=[],
+        apps=[],
+        instances=[],
+    )

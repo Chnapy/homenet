@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 # from src.exec.local_exec import LocalExec
 
+
 class Exec(ABC):
-    def __init__(self, parentExec: 'Exec'):
+    def __init__(self, parentExec: "Exec"):
         self.parentExec = parentExec
 
     @abstractmethod
@@ -11,10 +12,16 @@ class Exec(ABC):
         pass
 
     def isDir(self, path: str) -> bool:
-        return bool(self.exec(f'test -d {path} && echo 1'))
+        return bool(self.exec(f"test -d {path} && echo 1"))
 
     def isFile(self, path: str) -> bool:
-        return bool(self.exec(f'test -f {path} && echo 1'))
+        return bool(self.exec(f"test -f {path} && echo 1"))
+
+    def isWritable(self, path: str) -> bool:
+        return bool(self.exec(f"test -w {path} && echo 1"))
 
     def open(self, path: str) -> str:
-        return self.exec(f'cat {path}')
+        return self.exec(f"cat {path}")
+
+    def formatOutputForLog(self, output: str) -> str:
+        return "\n".join(output.splitlines()[:20])[:1000]

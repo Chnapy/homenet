@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+// The greeting service definition.
+service Agent {
+  // Sends a greeting
+  rpc update (AgentUpdateRequest) returns (AgentUpdateResponse) {}
+}
+
+message AgentMetadata {
+  int32 releaseID = 1;
+  int32 computeStartTime = 2;
+  int32 computeDuration = 3;
+  map<string, string> env = 4;
+}
+
+enum AgentOS {
+  UNKNOWN_OS = 0;
+  OPENWRT_GLINET = 1;
+  HAOS = 2;
+  PROXMOX = 3;
+  ANDROID_TV = 4;
+  WINDOWS = 5;
+  DEBIAN = 6;
+}
+
+message AgentWebItem {
+  optional int32 port = 1;
+  bool ssl = 2;
+}
+
+message AgentSSH {
+  repeated int32 ports = 1;
+}
+
+message AgentApp {
+
+  enum AgentAppSlug {
+    UNKNOWN_APP = 0;
+    WIREGUARD = 2;
+    NGINX = 3;
+    CADDY = 4;
+    // /etc/AdGuardHome/config.yaml
+    // http
+    //   address
+    ADGUARD_HOME = 5;
+    // ha addons info <slug>
+    // network
+    NODE_RED = 6;
+    // ha addons info <slug>
+    // network
+    ZIGBEE2MQTT = 7;
+    PLEX = 8;
+    SUNSHINE = 9;
+    // docker inspect uptime
+    // Config.ExposedPorts
+    UPTIME_KUMA = 10;
+    // docker inspect ntfy
+    // Config.Env.NTFY_LISTEN_HTTP
+    NTFY = 11;
+    DOCKER = 12;
+    MOONLIGHT = 13;
+    CODE_SERVER = 14;
+  }
+
+  enum AgentVpnMode {
+    UNKNOWN_VPN = 0;
+    CLIENT = 1;
+    SERVER = 2;
+  }
+
+  message AgentReverseProxy {
+    message From {
+      string domain = 1;
+      bool ssl = 2;
+    }
+    message To {
+      string address = 1;
+      bool ssl = 2;
+      optional int32 port = 3;
+    }
+  
+    From from = 1;
+    To to = 2;
+  }
+
+  AgentAppSlug slug = 1;
+
+  // /etc/config/wireguard_server
+  // docker exec wireguard wg show
+  optional AgentVpnMode vpnMode = 3;
+  // docker exec wireguard wg show
+  optional string vpnAddress = 4;
+  // /etc/config/wireguard_server
+  // docker exec wireguard wg show
+  repeated string vpnClients = 5;
+
+  // /etc/nginx
+  // /etc/caddy/Caddyfile
+  optional AgentReverseProxy reverseProxy = 6;
+
+  repeated AgentWebItem web = 7;
+}
+
+message AgentInstance {
+
+  enum AgentInstanceType {
+    UNKNOWN_TYPE = 0;
+    DEVICE = 1;
+    PROXMOX = 2;
+    DOCKER = 3;
+  }
+    
+  message AgentDHCPItem {
+    string address = 1;
+    string alias = 2;
+  }
+
+  AgentInstanceType type = 1;
+
+  AgentOS os = 2;
+  optional string unknownOS = 11;
+
+  string lan = 3;
+  optional string wan = 4;
+  optional string ddns = 5;
+  repeated AgentDHCPItem dhcp = 6;
+  
+  repeated AgentWebItem web = 7;
+  optional AgentSSH ssh = 8;
+
+  repeated AgentApp apps = 9;
+  repeated AgentInstance instances = 10;
+}
+
+message AgentUpdateRequest {
+
+  message AgentDHCPItem {
+    string address = 1;
+    string alias = 2;
+  }
+
+  AgentMetadata agentMetadata = 1;
+
+  AgentInstance device = 2;
+}
+
+message AgentUpdateResponse {
+  string foo = 1;
+}

@@ -8,10 +8,8 @@ class QMExec(Exec):
         self.id = id
 
     def exec(self, command: str):
-        print(f"qm {command}")
         output = self.parentExec.exec(f"qm guest exec {self.id} -- {command}")
         obj = json.loads(output)
-        # print(output, obj, obj['out-data'])
 
         if "err-data" in obj:
             raise RuntimeError(obj["err-data"])

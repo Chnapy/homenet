@@ -1,25 +1,26 @@
 import json
 import yaml
+from src.grpc.agent_pb2 import AgentApp, AgentOS, AgentSSH, AgentWebItem
 from src.provider.debian import Debian
-from src.provider.provider import Provider, ProviderSSHItem, ProviderWebItem
+from src.provider.provider import Provider
 
 
 class HAOS(Provider):
     def get_os(self):
-        return "haos"
+        return AgentOS.HAOS
 
     def get_lan(self):
         return Debian(self.exec).get_lan()
 
-    def get_web(self) -> list[ProviderWebItem]:
-        webList: list[ProviderWebItem] = []
+    def get_web(self) -> list[AgentWebItem]:
+        webList: list[AgentWebItem] = []
 
         haInfo = self.exec.exec("ha core info")
         properties = yaml.safe_load(haInfo)
 
         if properties["port"]:
             webList.append(
-                ProviderWebItem(
+                AgentWebItem(
                     port=int(properties["port"]),
                     ssl=True if properties["ssl"] == "true" else False,
                 )
@@ -33,7 +34,7 @@ class HAOS(Provider):
         ]
         if observerPort:
             webList.append(
-                ProviderWebItem(
+                AgentWebItem(
                     port=int(observerPort),
                     ssl=False,
                 )
@@ -41,7 +42,7 @@ class HAOS(Provider):
 
         return webList
 
-    def get_ssh(self):
+    def get_ssh(self) -> AgentSSH | None:
         ports: list[int] = []
 
         addonListOutput = self.exec.exec("ha addons --raw-json")
@@ -62,12 +63,12 @@ class HAOS(Provider):
                     ports.append(port)
 
         if len(ports) > 0:
-            return ProviderSSHItem(ports=ports)
+            return AgentSSH(ports=ports)
 
         return None
 
-    def get_apps(self) -> list[object]:
-        apps: list[object] = []
+    def get_apps(self) -> list[AgentApp]:
+        apps: list[AgentApp] = []
 
         addonListOutput = self.exec.exec("ha addons --raw-json")
         addonList: list[dict[str, str]] = json.loads(addonListOutput)["data"]["addons"]
@@ -92,12 +93,12 @@ class HAOS(Provider):
             if not port:
                 continue
 
-            web: list[ProviderWebItem] = [ProviderWebItem(port=int(port), ssl=False)]
+            web = [AgentWebItem(port=int(port), ssl=False)]
             apps.append(
-                {
-                    "slug": addonInfo["name"].lower(),
-                    "web": web,
-                }
+                AgentApp(
+                    slug=addonInfo["name"].lower(),
+                    web=web,
+                )
             )
 
         return apps

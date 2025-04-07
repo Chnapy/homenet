@@ -1,12 +1,12 @@
 import os
 import yaml
-
-from src.provider.provider import Provider, ProviderSSHItem, ProviderWebItem
+from src.grpc.agent_pb2 import AgentApp, AgentSSH, AgentWebItem, AgentOS
+from src.provider.provider import Provider
 
 
 class Debian(Provider):
     def get_os(self):
-        return "debian"
+        return AgentOS.DEBIAN
 
     def get_lan(self):
         try:
@@ -19,10 +19,10 @@ class Debian(Provider):
         except Exception as e:
             return f"Error retrieving IP: {e}"
 
-    def get_web(self) -> list[ProviderWebItem]:
+    def get_web(self) -> list[AgentWebItem]:
         return []
 
-    def get_ssh(self):
+    def get_ssh(self) -> AgentSSH | None:
         """Extrait le(s) port(s) SSH configurés depuis sshd_config"""
         file_path = "/etc/ssh/sshd_config"
         ports: list[int] = []
@@ -44,33 +44,34 @@ class Debian(Provider):
                         continue  # Port invalide ignoré
 
         if ports.__len__() > 0:
-            return ProviderSSHItem(ports=ports)
+            return AgentSSH(ports=ports)
 
-        return ProviderSSHItem(ports=[22])
+        return AgentSSH(ports=[22])
 
-    def get_apps(self):
+    def get_apps(self) -> list[AgentApp]:
         return list(filter(None, [self.get_code_server()]))
 
-    def get_code_server(self) -> object:
+    def get_code_server(self) -> AgentApp | None:
         if not self.exec.isFile("/bin/code-server"):
             return None
 
-        baseObj = {
-            "slug": "code-server",
-        }
+        app = AgentApp(
+            slug=AgentApp.AgentAppSlug.CODE_SERVER,
+        )
 
         home_dir = os.path.expanduser("~")
         configPath = f"{home_dir}/.config/code-server/config.yaml"
         if not self.exec.isFile(configPath):
-            return baseObj
+            return app
 
         stream = self.exec.open(configPath)
         try:
             config = yaml.safe_load(stream)
 
-            port = config["bind-addr"].split(":")[1]
+            port: str = config["bind-addr"].split(":")[1]
 
-            return {**baseObj, "web": [{"port": port}]}
+            app.web.append(AgentWebItem(port=int(port), ssl=False))
         except yaml.YAMLError as exc:
             print(exc)
-            return baseObj
+
+        return app
