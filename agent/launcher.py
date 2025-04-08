@@ -1,3 +1,4 @@
+import sys
 import time
 import subprocess
 from src.check.check_release import check_release
@@ -16,7 +17,9 @@ def start():
     print("\033[92m" + f"homenet agent - start" + "\033[0m")
 
     try:
-        process = subprocess.Popen(f"./{consts.AGENT_PATH}", shell=True)
+        process = subprocess.Popen(
+            f"./{consts.AGENT_PATH} {sys.executable}", shell=True
+        )
         process.wait()
 
         time.sleep(1)

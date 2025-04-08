@@ -8,8 +8,8 @@ service Agent {
 
 message AgentMetadata {
   int32 releaseID = 1;
-  int32 computeStartTime = 2;
-  int32 computeDuration = 3;
+  int64 computeStartTime = 2;
+  int64 computeDuration = 3;
   map<string, string> env = 4;
 }
 

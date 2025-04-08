@@ -9,6 +9,19 @@ from src.grpc.agent_pb2_grpc import AgentStub
 from google.protobuf.json_format import MessageToDict
 import time
 
+# from src.exec.ssh_exec import SSHExec
+
+
+def getExec():
+    # exec = SSHExec(LocalExec())
+    # exec.connect(
+    #     hostname="proxmox.lan",
+    #     username="root",
+    #     password="gringolo1",
+    # )
+    # return exec
+    return LocalExec()
+
 
 def sendData():
 
@@ -16,9 +29,9 @@ def sendData():
     if not route:
         raise RuntimeError("Missing env: ACTIVE_BACKEND_ROUTE")
 
-    startTime = time.time()
+    startTime = time.time() * 1000
 
-    exec = LocalExec()
+    exec = getExec()
 
     device = get_current_instance(exec)
 
@@ -27,7 +40,7 @@ def sendData():
     with insecure_channel(route) as channel:
         stub = AgentStub(channel)
 
-        duration = time.time() - startTime
+        duration = time.time() * 1000 - startTime
 
         request = AgentUpdateRequest(
             agentMetadata=AgentMetadata(

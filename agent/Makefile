@@ -22,6 +22,7 @@ check:
 
 gen-grpc:
 	python -m grpc_tools.protoc -I../protos --python_out=./src/grpc --pyi_out=./src/grpc --mypy_grpc_out=./src/grpc --grpc_python_out=./src/grpc ../protos/* \
-	&& sed -i 's/import agent_pb2/from . import agent_pb2/' src/grpc/agent_pb2_grpc.py
+	&& sed -i 's/import agent_pb2/from . import agent_pb2/' src/grpc/agent_pb2_grpc.py \
+	&& sed -i 's/import agent_pb2/from . import agent_pb2/' src/grpc/agent_pb2_grpc.pyi
 
 # scp ./dist/launcher root@proxmox.lan:/root/homenet/

@@ -25,7 +25,7 @@ def get_current_instance(exec: Exec) -> AgentInstance:
             return Debian(exec).get_instance()
 
     return AgentInstance(
-        os=AgentOS.UNKNOWN,
+        os=AgentOS.UNKNOWN_OS,
         unknownOS=uname,
         lan="",
         web=[],

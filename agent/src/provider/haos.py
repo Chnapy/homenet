@@ -93,10 +93,21 @@ class HAOS(Provider):
             if not port:
                 continue
 
+            slugStr: str = addonInfo["name"].lower()
+            slug = AgentApp.AgentAppSlug.UNKNOWN_APP
+
+            match slugStr:
+                case "zigbee2mqtt":
+                    slug = AgentApp.AgentAppSlug.ZIGBEE2MQTT
+                case "node-red":
+                    slug = AgentApp.AgentAppSlug.NODE_RED
+                case _:
+                    pass
+
             web = [AgentWebItem(port=int(port), ssl=False)]
             apps.append(
                 AgentApp(
-                    slug=addonInfo["name"].lower(),
+                    slug=slug,
                     web=web,
                 )
             )

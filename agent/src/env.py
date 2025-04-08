@@ -20,7 +20,7 @@ class Env(TypedDict):
     ACTIVE_BACKEND_ROUTE: str | None
 
     # hours interval for each data push
-    ACTIVE_SEND_DATA_INTERVAL: int
+    ACTIVE_SEND_DATA_CRON: str
 
 
 def get_default_env():
@@ -29,7 +29,7 @@ def get_default_env():
         MODE="active",
         RELEASE_CHECK_INTERVAL=None,
         ACTIVE_BACKEND_ROUTE=None,
-        ACTIVE_SEND_DATA_INTERVAL=6,
+        ACTIVE_SEND_DATA_CRON="0 */6 * * *",  # every 6 hours
     )
 
 
