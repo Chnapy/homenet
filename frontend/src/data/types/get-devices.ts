@@ -1,20 +1,28 @@
-import { GetDevicesFull } from './get-devices-full';
+import { GetDevicesFull } from "./get-devices-full";
 
-export type DeviceMap = GetDevicesFull[ 'deviceMap' ];
+export type DeviceList = GetDevicesFull["deviceList"];
+export type InstanceList = GetDevicesFull["instanceList"];
+export type AppList = GetDevicesFull["appList"];
+export type NetEntityMap = GetDevicesFull["netEntityMap"];
 
-export type Device = DeviceMap[ string ];
+export type NetEntity = NetEntityMap[string];
+export type NetAccess = NetEntity["asList"][number];
 
-export type DeviceOSSlug = Device[ 'os' ];
+export type Device = DeviceList[number];
 
-export type DeviceDHCP = NonNullable<Device[ 'dhcp' ]>[ number ];
+export type DeviceOSSlug = Device["os"];
 
-export type DeviceApp = NonNullable<Device[ 'apps' ]>[ number ];
+export type DeviceDHCP = NonNullable<Device["dhcp"]>[number];
 
-export type DeviceAppSlug = DeviceApp[ 'slug' ];
+export type DeviceApp = AppList[number];
 
-export type DeviceInstance = NonNullable<Device[ 'instances' ]>[ number ];
+export type DeviceAppSlug = DeviceApp["slug"];
 
-export type DeviceInstanceType = DeviceInstance[ 'type' ];
+export type DeviceInstance = InstanceList[number];
 
-export const isAppReverseProxy = (app: DeviceApp): app is Extract<DeviceApp, { slug: 'nginx' | 'caddy' }> =>
-    app.slug === 'nginx' || app.slug === 'caddy';
+export type DeviceInstanceType = DeviceInstance["type"];
+
+export const isAppReverseProxy = (
+  app: DeviceApp
+): app is Extract<DeviceApp, { slug: "nginx" | "caddy" }> =>
+  app.slug === "nginx" || app.slug === "caddy";

@@ -7,12 +7,13 @@ import { DeviceNodeType } from './device-node';
 
 export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({ data, width, height, ...rest }) => {
     const devicesFullQuery = useDevicesFullQuery();
-    const deviceList = Object.values(devicesFullQuery.data?.deviceMap ?? {});
+    const deviceList = devicesFullQuery.data?.deviceList ?? [];
+    const instanceList = devicesFullQuery.data?.instanceList ?? [];
 
     const deviceIds = deviceList.flatMap(device => {
         const allIds = [
             device.id,
-            ...(device.instances ?? []).map(instance => instance.id),
+            ...(instanceList.filter(instance => instance.parentId === device.id)).map(instance => instance.id),
         ];
 
         if (allIds.includes(rest.id)) {

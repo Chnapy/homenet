@@ -1,56 +1,69 @@
-import { Box, Card, CardContent } from '@mui/material';
-import React from 'react';
-import { AppLine } from '../app/app-line';
-import { AppContext } from '../app/provider/app-provider';
-import { DeviceAccessLineList } from '../device/device-access-line-list';
-import { OSLine } from '../os/os-line';
-import { InstanceIcon } from './instance-icon';
-import { InstanceContext } from './provider/instance-provider';
+import { Box, Card, CardContent } from "@mui/material";
+import React from "react";
+import { AppLine } from "../app/app-line";
+import { AppContext } from "../app/provider/app-provider";
+import { DeviceAccessLineList } from "../device/device-access-line-list";
+import { OSLine } from "../os/os-line";
+import { InstanceIcon } from "./instance-icon";
+import { InstanceContext } from "./provider/instance-provider";
+import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 
 export const InstanceCard: React.FC = () => {
-    const instance = InstanceContext.useValue();
+  const instance = InstanceContext.useValue();
+  const devicesFullQuery = useDevicesFullQuery();
 
-    return <Box data-instanceid={instance.id}>
+  if (!devicesFullQuery.data) {
+    return null;
+  }
 
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 2,
-            px: 2
-        }}>
-            <Box sx={{
-                display: 'flex',
-                width: 32,
-                marginBottom: '-16px',
-                zIndex: 1,
-            }}>
-                <InstanceIcon />
-            </Box>
+  const { appList } = devicesFullQuery.data;
 
-            <DeviceAccessLineList />
+  const apps = appList.filter((app) => app.parentId === instance.id);
 
+  return (
+    <Box data-instanceid={instance.id}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 2,
+          px: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            width: 32,
+            marginBottom: "-16px",
+            zIndex: 1,
+          }}
+        >
+          <InstanceIcon />
         </Box>
 
-        <Card variant='outlined'>
-            <OSLine />
+        <DeviceAccessLineList />
+      </Box>
 
-            <CardContent sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-                pb: '16px !important'
-            }}>
+      <Card variant="outlined">
+        <OSLine />
 
-                {instance.apps?.map(app => {
-                    return <AppContext.Provider
-                        key={app.slug}
-                        value={app}
-                    >
-                        <AppLine />
-                    </AppContext.Provider>;
-                })}
-
-            </CardContent>
-        </Card>
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            pb: "16px !important",
+          }}
+        >
+          {apps?.map((app) => {
+            return (
+              <AppContext.Provider key={app.slug} value={app}>
+                <AppLine />
+              </AppContext.Provider>
+            );
+          })}
+        </CardContent>
+      </Card>
     </Box>
+  );
 };

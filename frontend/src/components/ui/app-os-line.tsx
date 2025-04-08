@@ -1,133 +1,153 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import { Box, CardActionArea, Collapse, Divider, List, Paper, Typography } from '@mui/material';
-import React from 'react';
-import { DeviceAppSlug, DeviceOSSlug } from '../../data/types/get-devices';
-import { NetAccess } from '../network/hooks/use-net-entity-map';
-import { AccessLine } from './access-line';
-import { AppOSIcon } from './app-os-icon/app-icon';
-import { getAccessWebHref } from './utils/get-web-href';
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import {
+  Box,
+  CardActionArea,
+  Collapse,
+  Divider,
+  List,
+  Paper,
+  Typography,
+} from "@mui/material";
+import React from "react";
+import {
+  DeviceAppSlug,
+  DeviceOSSlug,
+  NetAccess,
+} from "../../data/types/get-devices";
+import { AccessLine } from "./access-line";
+import { AppOSIcon } from "./app-os-icon/app-icon";
+import { getAccessWebHref } from "./utils/get-web-href";
 
 type AppOSLineProps = {
-    slug: DeviceAppSlug | DeviceOSSlug;
-    name: string;
-    description: string;
-    mainAccess?: NetAccess;
-    accessList?: NetAccess[];
-}
+  slug: DeviceAppSlug | DeviceOSSlug;
+  name: string;
+  description: string;
+  mainAccess?: NetAccess;
+  accessList?: NetAccess[];
+};
 
 export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
-    slug,
-    name,
-    description,
-    mainAccess,
-    accessList = [],
-    children,
+  slug,
+  name,
+  description,
+  mainAccess,
+  accessList = [],
+  children,
 }) => {
-    const [ expanded, setExpanded ] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
 
-    const content = (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            p: 2
-        }}>
-            <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2
-            }}>
-                <AppOSIcon
-                    slug={slug}
-                    sx={{
-                        width: 32,
-                        height: 'fit-content'
-                    }}
-                />
+  const content = (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        p: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <AppOSIcon
+          slug={slug}
+          sx={{
+            width: 32,
+            height: "fit-content",
+          }}
+        />
 
-                <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant='body1' fontWeight={500}>
-                        {name}
-                    </Typography>
-                    <Typography variant='body2'>
-                        {description}
-                    </Typography>
-                </Box>
-            </Box>
-
-            {mainAccess && <>
-                <Divider variant='fullWidth' />
-
-                <AccessLine
-                    {...mainAccess}
-                    disablePadding
-                />
-            </>}
-
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="body1" fontWeight={500}>
+            {name}
+          </Typography>
+          <Typography variant="body2">{description}</Typography>
         </Box>
-    );
+      </Box>
 
-    return (
-        <Paper data-slug={slug} elevation={mainAccess ? 2 : 1} sx={{
-            position: 'relative',
-            ...(mainAccess ? {} : {
-                boxShadow: 'none'
+      {mainAccess && (
+        <>
+          <Divider variant="fullWidth" />
+
+          <AccessLine {...mainAccess} disablePadding />
+        </>
+      )}
+    </Box>
+  );
+
+  return (
+    <Paper
+      data-slug={slug}
+      elevation={mainAccess ? 2 : 1}
+      sx={{
+        position: "relative",
+        ...(mainAccess
+          ? {}
+          : {
+              boxShadow: "none",
             }),
-        }}>
-            {mainAccess
-                ? <Box sx={{
-                    display: 'flex'
-                }} >
-                    <CardActionArea onClick={() => {
-                        if (mainAccess.type !== 'ssh') {
-                            const href = getAccessWebHref(mainAccess);
-                            window.open(href, '_blank');
-                        }
-                    }}>
-                        {content}
-                    </CardActionArea>
+      }}
+    >
+      {mainAccess ? (
+        <Box
+          sx={{
+            display: "flex",
+          }}
+        >
+          <CardActionArea
+            onClick={() => {
+              if (mainAccess.type !== "ssh") {
+                const href = getAccessWebHref(mainAccess);
+                window.open(href, "_blank");
+              }
+            }}
+          >
+            {content}
+          </CardActionArea>
 
-                    {accessList.length > 0 && <>
+          {accessList.length > 0 && (
+            <>
+              <Divider orientation="vertical" flexItem />
 
-                        <Divider orientation='vertical' flexItem />
+              <Box sx={{ display: "flex" }}>
+                <CardActionArea
+                  onClick={handleExpandClick}
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <Box sx={{ px: 1, py: 2 }}>
+                    {expanded ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                  </Box>
+                </CardActionArea>
+              </Box>
+            </>
+          )}
+        </Box>
+      ) : (
+        content
+      )}
 
-                        <Box sx={{ display: 'flex' }}>
-                            <CardActionArea
-                                onClick={handleExpandClick}
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'flex-end',
-                                }}
-                            >
-                                <Box sx={{ px: 1, py: 2 }}>
-                                    {expanded
-                                        ? <ArrowDropUpIcon />
-                                        : <ArrowDropDownIcon />}
-                                </Box>
-                            </CardActionArea>
-                        </Box>
-                    </>}
-                </Box >
-                : content}
+      {accessList.length > 0 && (
+        <Collapse in={expanded} timeout="auto">
+          <List disablePadding>
+            {accessList.map((access, i) => (
+              <AccessLine key={i} {...access} link />
+            ))}
+          </List>
+        </Collapse>
+      )}
 
-            {accessList.length > 0 && <Collapse in={expanded} timeout="auto">
-                <List disablePadding>
-                    {accessList.map((access, i) => (
-                        <AccessLine
-                            key={i}
-                            {...access}
-                            link
-                        />
-                    ))}
-                </List>
-            </Collapse>}
-
-            {children}
-        </Paper >
-    );
-}
+      {children}
+    </Paper>
+  );
+};

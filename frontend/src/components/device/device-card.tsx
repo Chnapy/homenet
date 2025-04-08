@@ -1,70 +1,85 @@
-import { Box, Card, CardContent, Typography } from '@mui/material';
-import React from 'react';
-import { AppLine } from '../app/app-line';
-import { InstanceCard } from '../instance/instance-card';
-import { InstanceContext } from '../instance/provider/instance-provider';
-import { OSLine } from '../os/os-line';
-import { DeviceAccessLineList } from './device-access-line-list';
-import { DeviceIcon } from './device-icon';
-import { DeviceContext } from './provider/device-provider';
-import { AppContext } from '../app/provider/app-provider';
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import React from "react";
+import { AppLine } from "../app/app-line";
+import { InstanceCard } from "../instance/instance-card";
+import { InstanceContext } from "../instance/provider/instance-provider";
+import { OSLine } from "../os/os-line";
+import { DeviceAccessLineList } from "./device-access-line-list";
+import { DeviceIcon } from "./device-icon";
+import { DeviceContext } from "./provider/device-provider";
+import { AppContext } from "../app/provider/app-provider";
+import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 
 export const DeviceCard: React.FC = () => {
-    const { device, deviceUserMeta } = DeviceContext.useValue();
+  const { device, deviceUserMeta } = DeviceContext.useValue();
+  const devicesFullQuery = useDevicesFullQuery();
 
-    const { apps = [], instances = [] } = device;
+  if (!devicesFullQuery.data) {
+    return null;
+  }
 
-    return <Box>
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 2,
-            px: 2
-        }}>
+  const { appList, instanceList } = devicesFullQuery.data;
 
-            <Box sx={{
-                display: 'flex',
-                fontSize: 72,
-                marginBottom: '-24px'
-            }}>
-                <DeviceIcon />
-            </Box>
+  const apps = appList.filter((app) => app.parentId === device.id);
+  const instances = instanceList.filter(
+    (instance) => instance.parentId === device.id
+  );
 
-            <DeviceAccessLineList />
-
+  return (
+    <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 2,
+          px: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            fontSize: 72,
+            marginBottom: "-24px",
+          }}
+        >
+          <DeviceIcon />
         </Box>
 
-        <Card variant='outlined'>
-            <Typography variant="h6" sx={{ ml: '72px', px: 2, pl: 4 }}>
-                {deviceUserMeta.name}
-            </Typography>
+        <DeviceAccessLineList />
+      </Box>
 
-            <OSLine />
+      <Card variant="outlined">
+        <Typography variant="h6" sx={{ ml: "72px", px: 2, pl: 4 }}>
+          {deviceUserMeta.name}
+        </Typography>
 
-            <CardContent sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-                pb: '16px !important'
-            }}>
+        <OSLine />
 
-                {apps.map(app => {
-                    return <AppContext.Provider
-                        key={app.slug}
-                        value={app}
-                    >
-                        <AppLine />
-                    </AppContext.Provider>;
-                })}
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            pb: "16px !important",
+          }}
+        >
+          {apps.map((app) => {
+            return (
+              <AppContext.Provider key={app.slug} value={app}>
+                <AppLine />
+              </AppContext.Provider>
+            );
+          })}
 
-                {instances.map(instance => {
-                    return <InstanceContext.Provider key={instance.id} value={instance}>
-                        <InstanceCard />
-                    </InstanceContext.Provider>;
-                })}
-
-            </CardContent>
-        </Card>
+          {instances.map((instance) => {
+            return (
+              <InstanceContext.Provider key={instance.id} value={instance}>
+                <InstanceCard />
+              </InstanceContext.Provider>
+            );
+          })}
+        </CardContent>
+      </Card>
     </Box>
-}
-
+  );
+};

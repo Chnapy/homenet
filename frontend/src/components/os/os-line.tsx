@@ -1,7 +1,7 @@
 import React from 'react';
 import { DeviceContext } from '../device/provider/device-provider';
 import { InstanceContext } from '../instance/provider/instance-provider';
-import { useNetEntityAccessMap } from '../network/hooks/use-net-entity-access-map';
+import { useNetEntityMap } from '../network/hooks/use-net-entity-map';
 import { AppOSLine } from '../ui/app-os-line';
 import { getOSMeta } from './utils/get-os-meta';
 
@@ -9,14 +9,14 @@ export const OSLine: React.FC = () => {
     const { device } = DeviceContext.useValue();
     const instance = InstanceContext.useValueNullable();
 
-    const { data, isLoading } = useNetEntityAccessMap();
+    const {data, isLoading} = useNetEntityMap()
 
     if (isLoading) {
         return 'loading';
     }
 
     if (!data
-        || instance?.type === 'docker'
+        || instance?.instanceType === 'docker'
     ) {
         return null;
     }

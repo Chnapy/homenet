@@ -1,7 +1,7 @@
 import React from 'react';
 import { DeviceContext } from '../device/provider/device-provider';
 import { InstanceContext } from '../instance/provider/instance-provider';
-import { useNetEntityAccessMap } from '../network/hooks/use-net-entity-access-map';
+import { useNetEntityMap } from '../network/hooks/use-net-entity-map';
 import { AppOSLine } from '../ui/app-os-line';
 import { AppContext } from './provider/app-provider';
 import { getAppMeta } from './utils/get-app-meta';
@@ -14,7 +14,7 @@ export const AppLine: React.FC = () => {
 
     const app = AppContext.useValue();
 
-    const { data, isLoading } = useNetEntityAccessMap();
+    const { data, isLoading } = useNetEntityMap();
 
     if (isLoading) {
         return 'loading';

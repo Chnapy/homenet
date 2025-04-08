@@ -17,9 +17,9 @@ export const Device: React.FC<React.PropsWithChildren<DeviceProps>> = ({ deviceI
         return null;
     }
 
-    const { deviceMap, deviceUserMetaMap } = devicesFullQuery.data;
+    const { deviceList, deviceUserMetaMap } = devicesFullQuery.data;
 
-    const device = deviceMap[ deviceId ];
+    const device = deviceList.find(device => device.id === deviceId)!;
     const deviceUserMeta = deviceUserMetaMap[ deviceId ];
 
     return (
