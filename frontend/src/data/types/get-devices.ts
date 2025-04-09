@@ -1,9 +1,9 @@
-import { GetDevicesFull } from "./get-devices-full";
+import { DevicesFullQuery } from "../query/use-devices-full-query";
 
-export type DeviceList = GetDevicesFull["deviceList"];
-export type InstanceList = GetDevicesFull["instanceList"];
-export type AppList = GetDevicesFull["appList"];
-export type NetEntityMap = GetDevicesFull["netEntityMap"];
+export type DeviceList = DevicesFullQuery["deviceList"];
+export type InstanceList = DevicesFullQuery["instanceList"];
+export type AppList = DevicesFullQuery["appList"];
+export type NetEntityMap = DevicesFullQuery["netEntityMap"];
 
 export type NetEntity = NetEntityMap[string];
 export type NetAccess = NetEntity["asList"][number];
@@ -21,8 +21,3 @@ export type DeviceAppSlug = DeviceApp["slug"];
 export type DeviceInstance = InstanceList[number];
 
 export type DeviceInstanceType = DeviceInstance["type"];
-
-export const isAppReverseProxy = (
-  app: DeviceApp
-): app is Extract<DeviceApp, { slug: "nginx" | "caddy" }> =>
-  app.slug === "nginx" || app.slug === "caddy";

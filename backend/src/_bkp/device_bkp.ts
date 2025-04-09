@@ -1,22 +1,5 @@
-import { AgentApp, AgentDevice, AgentInstance } from "../agent/agent";
-import { getNetEntityMap, NetEntityMap } from "./get-net-entity-map";
-
-export type Device = AgentDevice;
-
-export type Instance = AgentInstance;
-
-export type App = AgentApp & {
-  id: string;
-  parentId: string;
-};
-
-export const getDeviceInfos = async (): Promise<{
-  deviceList: Device[];
-  instanceList: Instance[];
-  appList: App[];
-  netEntityMap: NetEntityMap;
-}> => {
-  const deviceList: Device[] = [
+const getDeviceInfos = async () => {
+  const deviceList = [
     {
       id: "uuid-router",
       type: "device",
@@ -61,7 +44,6 @@ export const getDeviceInfos = async (): Promise<{
         port: 22,
       },
     },
-
     {
       id: "uuid-homelab",
       type: "device",
@@ -75,21 +57,18 @@ export const getDeviceInfos = async (): Promise<{
       ],
       ssh: {},
     },
-
     {
       id: "uuid-media",
       type: "device",
       lan: "192.168.8.248",
       os: "android-tv",
     },
-
     {
       id: "uuid-desktop",
       type: "device",
       lan: "192.168.8.147",
       os: "windows",
     },
-
     {
       id: "uuid-vps",
       type: "device",
@@ -101,7 +80,7 @@ export const getDeviceInfos = async (): Promise<{
     },
   ];
 
-  const instanceList: Instance[] = [
+  const instanceList = [
     {
       id: "uuid-homelab_instance-0",
       os: "haos",
@@ -130,7 +109,7 @@ export const getDeviceInfos = async (): Promise<{
     },
   ];
 
-  const appList: App[] = [
+  const appList = [
     {
       id: "uuid-router-wireguard",
       parentId: "uuid-router",
@@ -296,12 +275,9 @@ export const getDeviceInfos = async (): Promise<{
     },
   ];
 
-  const netEntityMap = getNetEntityMap(deviceList, instanceList, appList);
-
   return {
     deviceList,
     instanceList,
     appList,
-    netEntityMap,
   };
 };

@@ -96,7 +96,7 @@ message AgentApp {
 
   // /etc/nginx
   // /etc/caddy/Caddyfile
-  optional AgentReverseProxy reverseProxy = 6;
+  repeated AgentReverseProxy reverseProxy = 6;
 
   repeated AgentWebItem web = 7;
 }

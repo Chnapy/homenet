@@ -1,9 +1,6 @@
 import React from "react";
 import { useDevicesFullQuery } from "../../../data/query/use-devices-full-query";
-import {
-  DeviceAppSlug,
-  isAppReverseProxy,
-} from "../../../data/types/get-devices";
+import { DeviceAppSlug } from "../../../data/types/get-devices";
 import { useNetEntityMap } from "./use-net-entity-map";
 
 type NetDeviceLink = {
@@ -93,7 +90,7 @@ export const useNetEntityLinks = () => {
       const wireguardServer =
         netEntity.vpn &&
         deviceApps?.find(
-          (app) => app.slug === "wireguard" && app.mode === "server"
+          (app) => app.slug === "WIREGUARD" && app.vpnMode === "SERVER"
         );
 
       // vpn server network
@@ -113,11 +110,11 @@ export const useNetEntityLinks = () => {
                 type: "network",
                 from: {
                   device: netEntity.id,
-                  relatedApp: "wireguard",
+                  relatedApp: "WIREGUARD",
                 },
                 to: {
                   device: entity.id,
-                  relatedApp: "wireguard",
+                  relatedApp: "WIREGUARD",
                 },
                 label: entity.vpn,
               });
@@ -125,7 +122,7 @@ export const useNetEntityLinks = () => {
         );
       }
 
-      const reverseProxyApp = deviceApps?.find(isAppReverseProxy);
+      const reverseProxyApp = deviceApps?.find((app) => app.reverseProxy);
 
       // http reverse proxy
       if (reverseProxyApp?.reverseProxy?.length) {
@@ -138,7 +135,7 @@ export const useNetEntityLinks = () => {
                   ...(entity.lanAliases ?? []),
                   entity.wan,
                   entity.ddns,
-                ].includes(proxy.to.address)
+                ].includes(proxy.to!.address)
               );
 
               return {
@@ -158,28 +155,28 @@ export const useNetEntityLinks = () => {
                   to: {
                     device: entity!.id,
                   },
-                  label: proxy.from.domain,
+                  label: proxy.from!.domain,
                 })
             )
         );
       }
 
       // moonlight -> sunshine
-      if (deviceApps?.some((app) => app.slug === "moonlight")) {
+      if (deviceApps?.some((app) => app.slug === "MOONLIGHT")) {
         links.push(
           ...appList
-            .filter((app) => app.slug === "sunshine")
+            .filter((app) => app.slug === "SUNSHINE")
             .map(
               (sunshineApp): NetDeviceLink =>
                 injectLinkId({
                   type: "link",
                   from: {
                     device: netEntity.id,
-                    relatedApp: "moonlight",
+                    relatedApp: "MOONLIGHT",
                   },
                   to: {
                     device: sunshineApp.parentId,
-                    relatedApp: "sunshine",
+                    relatedApp: "SUNSHINE",
                   },
                 })
             )

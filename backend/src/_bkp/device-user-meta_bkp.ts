@@ -1,4 +1,4 @@
-export type DeviceUserMeta = {
+type DeviceUserMeta = {
   deviceId: string;
   // agentAddress?: string;
   name: string;
@@ -6,11 +6,11 @@ export type DeviceUserMeta = {
   theme: "default" | "mauve" | "blue" | "green" | "yellow";
 };
 
-export type DeviceUserMetaMap = {
+type DeviceUserMetaMap = {
   [deviceId: string]: DeviceUserMeta;
 };
 
-export const getDeviceUserMetaMap = async (): Promise<DeviceUserMetaMap> => {
+const getDeviceUserMetaMap = async (): Promise<DeviceUserMetaMap> => {
   return {
     "uuid-router": {
       deviceId: "uuid-router",

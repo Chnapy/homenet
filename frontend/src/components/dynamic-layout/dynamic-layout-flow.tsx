@@ -214,7 +214,7 @@ export const DynamicLayoutFlow: React.FC = () => {
         draggable={false}
         proOptions={{ hideAttribution: true }}
         style={{
-          opacity: edges.length > 0 ? 1 : 0,
+          opacity: nodes.length === 1 || edges.length > 0 ? 1 : 0,
           transition: "opacity .2s",
         }}
       >

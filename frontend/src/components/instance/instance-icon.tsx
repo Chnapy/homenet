@@ -7,7 +7,7 @@ export const InstanceIcon: React.FC = () => {
 
   return (
     <AppOSIcon
-      slug={instance.instanceType === "proxmox" ? "proxmox" : "docker"}
+      slug={instance.type === "PROXMOX" ? "PROXMOX" : "DOCKER"}
       sx={{
         width: "100%",
       }}

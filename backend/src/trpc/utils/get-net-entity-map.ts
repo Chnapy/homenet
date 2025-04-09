@@ -1,4 +1,5 @@
-import { App, Device, Instance } from "./device";
+import { App } from "../entities/app";
+import { Instance } from "../entities/instance";
 
 export type NetAccess = {
   type: "address-only" | "web" | "ssh";
@@ -64,29 +65,27 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
 
 const isAppReverseProxy = (
   app: App
-): app is Extract<App, { slug: "nginx" | "caddy" }> =>
-  app.slug === "nginx" || app.slug === "caddy";
+): app is Extract<App, { slug: "CADDY" | "CADDY" }> =>
+  app.slug === "NGINX" || app.slug === "CADDY";
 
 export const getNetEntityMap = (
-  deviceList: Device[],
+  deviceList: Instance[],
   instanceList: Instance[],
   appList: App[]
 ): NetEntityMap => {
   const entityList = [...deviceList, ...instanceList];
 
-  const httpProxies = appList.flatMap(
-    (app) => (isAppReverseProxy(app) && app.reverseProxy) || []
-  );
+  const httpProxies = appList.flatMap((app) => app.reverseProxy ?? []);
 
-  const getEntity = (entity: Device | Instance): NetEntity => {
+  const getEntity = (entity: Instance): NetEntity => {
     const { lan } = entity;
 
     const id = entity.id;
     const entityApps = appList.filter((app) => app.parentId === id);
 
-    const wan = entity.type === "device" ? entity.wan : undefined;
+    const wan = entity.type === "DEVICE" ? entity.wan : undefined;
 
-    const ddns = entity.type === "device" ? entity.ddns : undefined;
+    const ddns = entity.type === "DEVICE" ? entity.ddns : undefined;
 
     const lanAliases = deviceList
       .flatMap((device) => device.dhcp ?? [])
@@ -94,13 +93,13 @@ export const getNetEntityMap = (
       .map((dhcpItem) => dhcpItem.alias);
 
     const innerDomains = appList
-      .flatMap((app) => (isAppReverseProxy(app) && app.reverseProxy) || [])
+      .flatMap((app) => app.reverseProxy ?? [])
       .filter((proxy) =>
-        [lan, wan, ddns, ...lanAliases].includes(proxy.to.address)
+        [lan, wan, ddns, ...lanAliases].includes(proxy.to?.address)
       )
-      .map((proxy) => proxy.from.domain);
+      .map((proxy) => proxy.from!.domain);
 
-    const vpn = entityApps?.find((app) => app.slug === "wireguard")?.address;
+    const vpn = entityApps?.find((app) => app.slug === "WIREGUARD")?.vpnAddress;
 
     const asList: NetAccess[] = [
       {
@@ -147,7 +146,7 @@ export const getNetEntityMap = (
     asList.sort(accessSortFn);
 
     const relatedHttpProxies = httpProxies.filter(({ to }) => {
-      return asList.some((addr) => addr.address === to.address);
+      return asList.some((addr) => addr.address === to?.address);
     });
 
     const getWebAccessList = (
@@ -163,7 +162,7 @@ export const getNetEntityMap = (
             .flatMap((net) =>
               relatedHttpProxies.filter(
                 ({ to }) =>
-                  to.address === net.address &&
+                  to?.address === net.address &&
                   !!to.ssl === !!web.ssl &&
                   to.port === web.port
               )
@@ -172,8 +171,8 @@ export const getNetEntityMap = (
               (proxy): NetAccess => ({
                 type: "web",
                 scope: "dns-domain",
-                address: proxy.from.domain,
-                ssl: proxy.from.ssl,
+                address: proxy.from!.domain,
+                ssl: proxy.from!.ssl,
               })
             )
         ),
@@ -193,16 +192,18 @@ export const getNetEntityMap = (
     };
 
     const os: NetAccess[] = [
-      ...("web" in entity ? getWebAccessList(entity.web) : []),
+      ...getWebAccessList(entity.web),
 
       // ssh
-      ...("ssh" in entity && entity.ssh
-        ? asList.map(
-            (net): NetAccess => ({
-              ...net,
-              type: "ssh",
-              port: "ssh" in entity ? entity.ssh!.port : undefined,
-            })
+      ...(entity.ssh
+        ? asList.flatMap((net) =>
+            entity.ssh!.ports.map(
+              (port): NetAccess => ({
+                ...net,
+                type: "ssh",
+                port,
+              })
+            )
           )
         : []),
     ];

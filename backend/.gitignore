@@ -1,1 +1,5 @@
-src/grpc/*.ts
+**/generated/*
+!**/generated/.gitkeep
+
+*.db
+*.db-lock

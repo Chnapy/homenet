@@ -1,76 +1,82 @@
-import { DeviceApp } from '../../../data/types/get-devices';
+import { DeviceApp } from "../../../data/types/get-devices";
 
-export const getAppMeta = (app: DeviceApp): {
-    name: string;
-    description: string;
+export const getAppMeta = (
+  app: DeviceApp
+): {
+  name: string;
+  description: string;
 } => {
-    switch (app.slug) {
-        case 'unknown':
-            return ({
-                name: app.value,
-                description: 'Unknown app',
-            });
-        case 'wireguard':
-            return ({
-                name: `Wireguard`,
-                description: app.mode === 'server'
-                    ? 'VPN Server'
-                    : 'VPN Client'
-            });
-        case 'nginx':
-            return ({
-                name: `Nginx`,
-                description: 'Web server'
-            });
-        case "adguard-home":
-            return ({
-                name: `AdGuard Home`,
-                description: 'Ad blocker'
-            });
-        case "node-red":
-            return ({
-                name: 'Node RED',
-                description: 'Low code flows',
-            });
-        case 'zigbee2mqtt':
-            return ({
-                name: 'Zigbee2MQTT',
-                description: 'Zigbee IoT bridge',
-            });
-        case 'docker':
-            return {
-                name: 'Docker',
-                description: 'Containers'
-            };
-        case 'plex':
-            return {
-                name: 'Plex',
-                description: 'Media server',
-            };
-        case 'moonlight':
-            return {
-                name: 'Moonlight',
-                description: 'Game streaming client'
-            };
-        case 'sunshine':
-            return {
-                name: 'Sunshine',
-                description: 'Game streaming host',
-            };
-        case 'caddy':
-            return {
-                name: 'Caddy',
-                description: 'Web server with auto https',
-            };
-        case 'uptime-kuma':
-            return {
-                name: 'Uptime Kuma',
-                description: 'Monitoring services uptime',
-            };
-        case 'ntfy':
-            return {
-                name: 'Ntfy',
-                description: 'Notification service',
-            };
-    }
-}
+  switch (app.slug) {
+    case "UNRECOGNIZED":
+    case "UNKNOWN_APP":
+      return {
+        name: "Unknown", // TODO
+        description: "Unknown app",
+      };
+    case "WIREGUARD":
+      return {
+        name: `Wireguard`,
+        description: app.vpnMode === "SERVER" ? "VPN Server" : "VPN Client",
+      };
+    case "NGINX":
+      return {
+        name: `Nginx`,
+        description: "Web server",
+      };
+    case "ADGUARD_HOME":
+      return {
+        name: `AdGuard Home`,
+        description: "Ad blocker",
+      };
+    case "NODE_RED":
+      return {
+        name: "Node RED",
+        description: "Low code flows",
+      };
+    case "ZIGBEE2MQTT":
+      return {
+        name: "Zigbee2MQTT",
+        description: "Zigbee IoT bridge",
+      };
+    case "DOCKER":
+      return {
+        name: "Docker",
+        description: "Containers",
+      };
+    case "PLEX":
+      return {
+        name: "Plex",
+        description: "Media server",
+      };
+    case "MOONLIGHT":
+      return {
+        name: "Moonlight",
+        description: "Game streaming client",
+      };
+    case "SUNSHINE":
+      return {
+        name: "Sunshine",
+        description: "Game streaming host",
+      };
+    case "CADDY":
+      return {
+        name: "Caddy",
+        description: "Web server with auto https",
+      };
+    case "UPTIME_KUMA":
+      return {
+        name: "Uptime Kuma",
+        description: "Monitoring services uptime",
+      };
+    case "NTFY":
+      return {
+        name: "Ntfy",
+        description: "Notification service",
+      };
+    case "CODE_SERVER":
+      return {
+        name: "VS Code",
+        description: "code-server",
+      };
+  }
+};

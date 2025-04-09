@@ -1,9 +1,9 @@
-import { GetDevicesFull } from './get-devices-full';
+import { DevicesFullQuery } from "../query/use-devices-full-query";
 
-export type DeviceUserMetaMap = GetDevicesFull[ 'deviceUserMetaMap' ];
+export type DeviceUserMetaMap = DevicesFullQuery["deviceUserMetaMap"];
 
-export type DeviceUserMeta = DeviceUserMetaMap[ string ];
+export type DeviceUserMeta = DeviceUserMetaMap[string];
 
-export type DeviceUserMetaType = DeviceUserMeta[ 'type' ];
+export type DeviceUserMetaType = DeviceUserMeta["type"];
 
-export type DeviceUserMetaTheme = DeviceUserMeta[ 'theme' ];
+export type DeviceUserMetaTheme = DeviceUserMeta["theme"];

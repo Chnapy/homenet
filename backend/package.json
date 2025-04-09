@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "tsx --watch ./src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "gen:grpc": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/grpc/ --ts_proto_opt=outputServices=grpc-js ../protos/* -I../protos"
+    "gen:grpc": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/grpc/generated/ --ts_proto_opt=outputServices=grpc-js ../protos/* -I../protos"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.1",
@@ -11,6 +11,7 @@
     "@grpc/proto-loader": "^0.7.13",
     "@trpc/server": "^11.0.0",
     "fastify": "^5.2.2",
+    "lmdb": "^3.2.6",
     "zod": "^3.24.2"
   },
   "devDependencies": {
