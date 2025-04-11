@@ -49,11 +49,10 @@ WORKDIR /app
 
 RUN uname -a
 
-COPY requirements.txt .
+COPY . .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN make build-agent
 
-COPY . .
-
-CMD ["python", "src/__main__.py"]
+CMD ["./dist/agent"]
