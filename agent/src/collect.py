@@ -7,7 +7,6 @@ from src.provider.proxmox import Proxmox
 
 
 def get_current_instance(exec: Exec) -> AgentInstance:
-    uname = exec.exec("uname -a")
 
     providerList = [
         HAOS,
@@ -21,6 +20,7 @@ def get_current_instance(exec: Exec) -> AgentInstance:
         if provider.check():
             return provider.get_instance()
 
+    uname = exec.exec("uname -a")
     return AgentInstance(
         os=AgentOS.UNKNOWN_OS,
         unknownOS=uname,

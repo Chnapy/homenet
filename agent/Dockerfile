@@ -47,8 +47,12 @@ RUN apt update && apt install -y \
 
 WORKDIR /app
 
+RUN uname -a
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+RUN make build-agent
 
 COPY . .
 
