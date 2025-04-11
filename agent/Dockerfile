@@ -35,7 +35,7 @@ RUN apt update && apt install -y \
     # python3-dev \
     libc6-dev-armel-cross \
     zlib1g-dev \
-    binutils-arm-linux-gnueabi \
+    # binutils-arm-linux-gnueabi \
     libncurses5-dev \
     build-essential \
     bison \
