@@ -19,11 +19,12 @@ jobs:
       - name: Build and push Docker image for ARMv7
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./agent
           push: false
           tags: homenet:armv7
           platforms: linux/arm/v7
 
       - name: Test the Docker image
         run: |
+          cd agent
           docker run --rm homenet:armv7 python --version
