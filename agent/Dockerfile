@@ -29,7 +29,7 @@
 # #     -lpython3.11 \
 # #     -static
 
-FROM python:3.11-slim
+FROM arm32v7/python:3.11-slim
 
 RUN apt update && apt install -y \
     # python3-dev \
@@ -41,6 +41,8 @@ RUN apt update && apt install -y \
     bison \
     flex \
     libssl-dev \
+    libffi-dev \
+    libsodium-dev \
     bc
 
 WORKDIR /app
