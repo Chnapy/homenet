@@ -31,6 +31,18 @@
 
 FROM python:3.11-slim
 
+RUN apt update && apt install -y \
+    # python3-dev \
+    libc6-dev-armel-cross \
+    zlib1g-dev \
+    binutils-arm-linux-gnueabi \
+    libncurses5-dev \
+    build-essential \
+    bison \
+    flex \
+    libssl-dev \
+    bc
+
 WORKDIR /app
 
 COPY requirements.txt .
