@@ -135,7 +135,7 @@ export const useNetEntityLinks = () => {
                   ...(entity.lanAliases ?? []),
                   entity.wan,
                   entity.ddns,
-                ].includes(proxy.to!.address)
+                ].includes(proxy.toAddress!.address)
               );
 
               return {
@@ -155,7 +155,7 @@ export const useNetEntityLinks = () => {
                   to: {
                     device: entity!.id,
                   },
-                  label: proxy.from!.domain,
+                  label: proxy.fromDomain!.domain,
                 })
             )
         );

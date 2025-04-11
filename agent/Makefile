@@ -12,10 +12,10 @@ build-all:
 	make gen-grpc && make build-launcher && make build-agent
 
 build-agent:
-	pyinstaller -n agent --onefile --windowed src/__main__.py
+	pyinstaller -s -n agent --specpath ./dist/ --onefile src/__main__.py
 
 build-launcher:
-	pyinstaller -n launcher --onefile --windowed launcher.py
+	pyinstaller -s -n launcher --specpath ./dist/ --onefile launcher.py
 
 check:
 	mypy --check-untyped-defs src

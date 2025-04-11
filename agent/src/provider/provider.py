@@ -14,10 +14,17 @@ class Provider(ABC):
     def __init__(self, exec: "Exec"):
         self.exec = exec
 
+    @abstractmethod
+    def check(self) -> bool:
+        pass
+
     def get_instance(self) -> AgentInstance:
         return AgentInstance(
             os=self.get_os(),
             lan=self.get_lan(),
+            wan=self.get_wan(),
+            ddns=self.get_ddns(),
+            dhcp=self.get_dhcp(),
             web=self.get_web(),
             ssh=self.get_ssh(),
             apps=self.get_apps(),
@@ -30,6 +37,18 @@ class Provider(ABC):
 
     @abstractmethod
     def get_lan(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_wan(self) -> str | None:
+        pass
+
+    @abstractmethod
+    def get_ddns(self) -> str | None:
+        pass
+
+    @abstractmethod
+    def get_dhcp(self) -> list[AgentInstance.AgentDHCPItem] | None:
         pass
 
     @abstractmethod

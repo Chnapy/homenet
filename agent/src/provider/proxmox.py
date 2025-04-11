@@ -6,11 +6,23 @@ from src.provider.provider import Provider
 
 
 class Proxmox(Provider):
+    def check(self):
+        return self.exec.isDir("/etc/pve")
+
     def get_os(self):
         return AgentOS.PROXMOX
 
     def get_lan(self):
         return Debian(self.exec).get_lan()
+
+    def get_wan(self):
+        return Debian(self.exec).get_wan()
+
+    def get_ddns(self):
+        pass
+
+    def get_dhcp(self):
+        pass
 
     def get_web(self):
         return [AgentWebItem(port=8006, ssl=True)]

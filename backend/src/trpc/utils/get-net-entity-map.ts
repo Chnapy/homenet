@@ -95,9 +95,9 @@ export const getNetEntityMap = (
     const innerDomains = appList
       .flatMap((app) => app.reverseProxy ?? [])
       .filter((proxy) =>
-        [lan, wan, ddns, ...lanAliases].includes(proxy.to?.address)
+        [lan, wan, ddns, ...lanAliases].includes(proxy.toAddress?.address)
       )
-      .map((proxy) => proxy.from!.domain);
+      .map((proxy) => proxy.fromDomain!.domain);
 
     const vpn = entityApps?.find((app) => app.slug === "WIREGUARD")?.vpnAddress;
 
@@ -145,8 +145,8 @@ export const getNetEntityMap = (
 
     asList.sort(accessSortFn);
 
-    const relatedHttpProxies = httpProxies.filter(({ to }) => {
-      return asList.some((addr) => addr.address === to?.address);
+    const relatedHttpProxies = httpProxies.filter(({ toAddress }) => {
+      return asList.some((addr) => addr.address === toAddress?.address);
     });
 
     const getWebAccessList = (
@@ -161,18 +161,18 @@ export const getNetEntityMap = (
           asList
             .flatMap((net) =>
               relatedHttpProxies.filter(
-                ({ to }) =>
-                  to?.address === net.address &&
-                  !!to.ssl === !!web.ssl &&
-                  to.port === web.port
+                ({ toAddress }) =>
+                  toAddress?.address === net.address &&
+                  !!toAddress.ssl === !!web.ssl &&
+                  toAddress.port === web.port
               )
             )
             .map(
               (proxy): NetAccess => ({
                 type: "web",
                 scope: "dns-domain",
-                address: proxy.from!.domain,
-                ssl: proxy.from!.ssl,
+                address: proxy.fromDomain!.domain,
+                ssl: proxy.fromDomain!.ssl,
               })
             )
         ),

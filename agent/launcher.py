@@ -8,7 +8,7 @@ from src import consts
 process: subprocess.Popen[bytes] | None = None
 
 
-def start():
+def start(releaseId: int):
     global process
 
     if process:
@@ -18,7 +18,7 @@ def start():
 
     try:
         process = subprocess.Popen(
-            f"./{consts.AGENT_PATH} {sys.executable}", shell=True
+            f"./{consts.AGENT_PATH} {sys.executable} {releaseId}", shell=True
         )
         process.wait()
 
@@ -38,5 +38,5 @@ def stop():
 
 
 if __name__ == "__main__":
-    check_release(stop)
-    start()
+    releaseId = check_release(stop)
+    start(releaseId)

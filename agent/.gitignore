@@ -4,7 +4,6 @@ dist
 __pycache__/
 environments/my_env
 build/
-*.spec
 RELEASE_ID
 
 .env

@@ -15,7 +15,7 @@ exec = LocalExec()
 
 def check_release(
     stopFn: Callable[[], None],
-):
+) -> int:
     global exec, Authorization, RELEASE_ID_PATH, RELEASE_ROUTE
 
     print("Check agent last release...")
@@ -38,11 +38,11 @@ def check_release(
     )
     release = dict(releaseResponse.json())
 
-    releaseId = release.get("id")
+    releaseId = int(release.get("id") or -1)
     if releaseId == currentId:
         print(f"Same release ({currentId}), update cancelled")
         # start()
-        return
+        return releaseId
 
     print(f"New release: {releaseId}")
     assetsUrl = release.get("assets_url") or ""
@@ -55,6 +55,7 @@ def check_release(
     )
     assets: list[dict[str, str]] = assetsResponse.json()
 
+    # https://api.github.com/repos/Chnapy/homenet/releases/assets/245403085
     fileUrl = ""
     for asset in assets:
         if asset["name"] == "agent":
@@ -81,4 +82,4 @@ def check_release(
 
     print(f"Agent updated with last release ({releaseId})")
 
-    # start()
+    return releaseId

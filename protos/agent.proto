@@ -79,8 +79,8 @@ message AgentApp {
       optional int32 port = 3;
     }
   
-    From from = 1;
-    To to = 2;
+    From fromDomain = 1;
+    To toAddress = 2;
   }
 
   AgentAppSlug slug = 1;

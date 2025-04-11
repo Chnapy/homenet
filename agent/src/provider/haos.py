@@ -6,11 +6,24 @@ from src.provider.provider import Provider
 
 
 class HAOS(Provider):
+    def check(self):
+        uname = self.exec.exec("uname -a")
+        return "-haos" in uname
+
     def get_os(self):
         return AgentOS.HAOS
 
     def get_lan(self):
         return Debian(self.exec).get_lan()
+
+    def get_wan(self):
+        return Debian(self.exec).get_wan()
+
+    def get_ddns(self):
+        pass
+
+    def get_dhcp(self):
+        pass
 
     def get_web(self) -> list[AgentWebItem]:
         webList: list[AgentWebItem] = []

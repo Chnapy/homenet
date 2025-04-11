@@ -1,5 +1,7 @@
 import json
+import sys
 from grpc import insecure_channel
+from src.exec.ssh_exec import SSHExec
 from src.check.check_cron import check_cron
 from src.exec.local_exec import LocalExec
 from src.collect import get_current_instance
@@ -9,10 +11,11 @@ from src.grpc.agent_pb2_grpc import AgentStub
 from google.protobuf.json_format import MessageToDict
 import time
 
-# from src.exec.ssh_exec import SSHExec
+RELEASE_ID = sys.argv[2] if len(sys.argv) > 2 else None
 
 
 def getExec():
+    # PROXMOX
     # exec = SSHExec(LocalExec())
     # exec.connect(
     #     hostname="proxmox.lan",
@@ -20,6 +23,16 @@ def getExec():
     #     password="gringolo1",
     # )
     # return exec
+
+    # ROUTER
+    # exec = SSHExec(LocalExec())
+    # exec.connect(
+    #     hostname="192.168.8.1",
+    #     username="root",
+    #     password="6Je6bBIMjXdzd7",
+    # )
+    # return exec
+
     return LocalExec()
 
 
@@ -44,7 +57,7 @@ def sendData():
 
         request = AgentUpdateRequest(
             agentMetadata=AgentMetadata(
-                releaseID=123,
+                releaseID=int(RELEASE_ID or -1),
                 computeStartTime=int(startTime),
                 computeDuration=int(duration),
                 env=envStr,

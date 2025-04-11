@@ -66,3 +66,9 @@ export const getAppWithId = (
 });
 
 export const openDeviceDB = prepareDBToOpen<AgentInstanceWithId>("device");
+
+// const foo = openDeviceDB(openRootDB());
+
+// const keysToRemove = foo.getKeys().asArray.filter((k) => !k.startsWith("192"));
+
+// keysToRemove.forEach((k) => foo.removeSync(k));
