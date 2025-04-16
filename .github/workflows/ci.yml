@@ -31,11 +31,13 @@ jobs:
           go get google.golang.org/protobuf/cmd/protoc-gen-go \
             google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
-          make install-deps
-
       - name: Generate gRPC code
         working-directory: agent
         run: make gen-grpc
+
+      - name: Install Go dependencies
+        working-directory: agent
+        run: make install-deps
 
       - name: Build for ARM 32bits
         working-directory: agent
