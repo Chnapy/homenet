@@ -1,4 +1,7 @@
 
+install-deps:
+	go get ./src
+
 dev:
 	go run ./src
 

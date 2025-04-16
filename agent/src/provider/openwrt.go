@@ -97,9 +97,13 @@ func (e *OpenWRTProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
 }
 
 func (a *OpenWRTProvider) GetWeb() []*gen.AgentWebItem {
-	var webList []*gen.AgentWebItem
-
-	return webList
+	port32 := int32(443)
+	return []*gen.AgentWebItem{
+		{
+			Port: &port32,
+			Ssl:  true,
+		},
+	}
 }
 
 func (a *OpenWRTProvider) GetSSH() *gen.AgentSSH {

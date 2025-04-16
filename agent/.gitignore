@@ -5,4 +5,4 @@ RELEASE_ID
 
 .env
 
-grpc/generated/*
+src/grpc/generated/*
