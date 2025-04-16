@@ -6,3 +6,4 @@ RELEASE_ID
 .env
 
 src/grpc/generated/*
+!src/grpc/generated/.gitkeep
