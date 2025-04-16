@@ -54,13 +54,15 @@ def check_release(
         },
     )
     assets: list[dict[str, str]] = assetsResponse.json()
+    print(assets)
 
     # https://api.github.com/repos/Chnapy/homenet/releases/assets/245403085
     fileUrl = ""
     for asset in assets:
+        print(f"{asset['name']} - {asset['url']}")
         if asset["name"] == "agent":
             fileUrl = asset["url"]
-            break
+            # break
 
     stopFn()
 

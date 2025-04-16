@@ -1,12 +1,8 @@
 
 dist
 
-__pycache__/
-environments/my_env
-build/
 RELEASE_ID
 
 .env
 
-src/grpc/*
-!src/grpc/__init__.py
+grpc/generated/*

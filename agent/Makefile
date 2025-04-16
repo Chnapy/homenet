@@ -1,28 +1,17 @@
 
-# install:
-#     pip install -r requirements.txt
-
-start:
-	python3 launcher.py
-
 dev:
-	python3 -m src
+	go run ./src
 
-build-all:
-	make gen-grpc && make build-launcher && make build-agent
+build-arm-32:
+	GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o dist/agent_arm
 
-build-agent:
-	pyinstaller -s -n agent --specpath ./dist/ --onefile src/__main__.py
+build-linux-64:
+	GOOS=linux GOARCH=amd64 GOARM=7 CGO_ENABLED=0 go build -o dist/agent_linux
 
-build-launcher:
-	pyinstaller -s -n launcher --specpath ./dist/ --onefile launcher.py
-
-check:
-	mypy --check-untyped-defs src
+build-windows-64:
+	GOOS=windows GOARCH=amd64 go build -o dist/agent_windows.exe
 
 gen-grpc:
-	python -m grpc_tools.protoc -I../protos --python_out=./src/grpc --pyi_out=./src/grpc --mypy_grpc_out=./src/grpc --grpc_python_out=./src/grpc ../protos/* \
-	&& sed -i 's/import agent_pb2/from . import agent_pb2/' src/grpc/agent_pb2_grpc.py \
-	&& sed -i 's/import agent_pb2/from . import agent_pb2/' src/grpc/agent_pb2_grpc.pyi
-
-# scp ./dist/launcher root@proxmox.lan:/root/homenet/
+	protoc -I../protos --go_out=./src/grpc/generated --go_opt=paths=source_relative \
+    --go-grpc_out=./src/grpc/generated --go-grpc_opt=paths=source_relative \
+    ../protos/*
