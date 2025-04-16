@@ -136,6 +136,7 @@ func (e *DebianProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
 	}
 
 	dhcpContent := e.executor.Open(dhcpFilePath)
+
 	var dhcpList []*gen.AgentInstance_AgentDHCPItem
 	var domain string
 	var currentItem *gen.AgentInstance_AgentDHCPItem
@@ -148,16 +149,13 @@ func (e *DebianProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
 		}
 
 		parts := strings.Fields(line)
-		if len(parts) < 3 {
-			continue
-		}
 
 		switch parts[0] {
 		case "config":
 			currentItem = &gen.AgentInstance_AgentDHCPItem{}
 		case "option":
+			optionValue := strings.ReplaceAll(parts[2], "'", "")
 			optionType := parts[1]
-			optionValue := strings.Trim(parts[2], "'")
 
 			switch optionType {
 			case "domain":

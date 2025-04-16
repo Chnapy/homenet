@@ -8,6 +8,7 @@ import (
 func GetCurrentInstance(executor ex.Executor) gen.AgentInstance {
 
 	var providerList = []Provider{
+		NewOpenWRTProvider(executor),
 		NewHAOSProvider(executor),
 		NewProxmoxProvider(executor),
 		NewDebianProvider(executor),
