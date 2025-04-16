@@ -18,16 +18,20 @@ jobs:
         with:
           go-version: 1.24.2
 
-      - name: Install protoc
+      - name: Install protoc & dependencies
+        working-directory: agent
         run: |
           PB_REL="https://github.com/protocolbuffers/protobuf/releases"
           curl -LO $PB_REL/download/v30.2/protoc-30.2-linux-x86_64.zip
           unzip protoc-30.2-linux-x86_64.zip -d $HOME/.local
           export PATH="$PATH:$HOME/.local/bin"
 
-      - name: Install dependencies
-        working-directory: agent
-        run: make install-deps
+          export GO111MODULE=on
+
+          go install google.golang.org/protobuf/cmd/protoc-gen-go \
+            google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+          make install-deps
 
       - name: Generate gRPC code
         working-directory: agent
