@@ -43,7 +43,7 @@ jobs:
 
       - name: Create Draft Release
         id: create_release
-        uses: actions/create-release
+        uses: actions/create-release@1
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         with:
@@ -72,7 +72,7 @@ jobs:
         run: make build-windows-64
 
       - name: Upload ARM Asset
-        uses: actions/upload-release-asset
+        uses: actions/upload-release-asset@1
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         with:
