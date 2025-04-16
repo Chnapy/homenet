@@ -7,7 +7,10 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+var releaseID string
+
 func main() {
+	fmt.Println("release", releaseID)
 
 	// var launcherPath string = ""
 	var releaseId int32 = 123

@@ -41,27 +41,49 @@ jobs:
         working-directory: agent
         run: make install-deps
 
+      - name: Create Draft Release
+        id: create_release
+        uses: actions/create-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+        with:
+          tag_name: draft
+          release_name: ${{ github.event.repository.updated_at }}
+          draft: true
+          body: |
+            Release ${{ github.event.repository.updated_at }}
+
       - name: Build for ARM 32bits
         working-directory: agent
+        env:
+          RELEASE_ID: ${{ steps.create_release.outputs.id }}
         run: make build-arm-32
 
       - name: Build for Linux 64bits
         working-directory: agent
+        env:
+          RELEASE_ID: ${{ steps.create_release.outputs.id }}
         run: make build-linux-64
 
       - name: Build for Windows 64bits
         working-directory: agent
+        env:
+          RELEASE_ID: ${{ steps.create_release.outputs.id }}
         run: make build-windows-64
 
-      - name: Create release
-        uses: softprops/action-gh-release@v2
+      - name: Upload ARM Asset
+        uses: actions/upload-release-asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         with:
-          token: ${{ secrets.RELEASE_PAT_TOKEN }}
-          tag_name: draft
-          prerelease: false
-          draft: false
-          files: agent/dist/*
-          generate_release_notes: false
-          name: ${{ github.event.repository.updated_at }}
-          body: |
-            Release ${{ github.event.repository.updated_at }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./agent/dist/agent_arm
+          asset_name: agent_arm
+          asset_content_type: application/octet-stream
+
+      - name: Publish Release
+        uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
