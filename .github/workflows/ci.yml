@@ -25,13 +25,13 @@ jobs:
           unzip protoc-30.2-linux-x86_64.zip -d $HOME/.local
           export PATH="$PATH:$HOME/.local/bin"
 
-      - name: Generate gRPC code
-        working-directory: agent
-        run: make gen-grpc
-
       - name: Install dependencies
         working-directory: agent
         run: make install-deps
+
+      - name: Generate gRPC code
+        working-directory: agent
+        run: make gen-grpc
 
       - name: Build for ARM 32bits
         working-directory: agent
