@@ -7,10 +7,10 @@ import (
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
-func AutoUpdate(releaseID string) error {
-	fmt.Println("Release ID:", releaseID)
-	if releaseID == "" {
-		panic("Release ID is empty")
+func AutoUpdate(releaseTag string) error {
+	fmt.Println("Release tag:", releaseTag)
+	if releaseTag == "" {
+		panic("Release tag is empty")
 	}
 
 	token := "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"
@@ -22,7 +22,7 @@ func AutoUpdate(releaseID string) error {
 		Filters:  []string{".*"},
 	})
 
-	v := semver.MustParse(releaseID)
+	v := semver.MustParse(releaseTag)
 	latestRelease, err := updater.UpdateSelf(v, "chnapy/homenet")
 	fmt.Println("Last release", latestRelease)
 

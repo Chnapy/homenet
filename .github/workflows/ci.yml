@@ -48,47 +48,45 @@ jobs:
         working-directory: agent
         run: make install-deps
 
-      - name: Create draft release
-        id: create_release
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.RELEASE_PAT_TOKEN }}
-          script: |
-            const response = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: "${{ steps.tag.outputs.tag }}",
-              name: "${{ steps.tag.outputs.tag }}",
-              draft: true,
-              prerelease: false,
-              generate_release_notes: false,
-            });
-            core.setOutput('id', response.data.id);
-
       # - name: Create draft release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
-      #   run: |
-      #     gh release create ${{ steps.tag.outputs.tag }} --draft --title "${{ steps.tag.outputs.tag }}" --notes "Release ${{ steps.tag.outputs.tag }}"
-      #     RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.tag.outputs.tag }} --jq '.id')
-      #     echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
+      #   id: create_release
+      #   uses: actions/github-script@v6
+      #   with:
+      #     github-token: ${{ secrets.RELEASE_PAT_TOKEN }}
+      #     script: |
+      #       const response = await github.rest.repos.createRelease({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         tag_name: "${{ steps.tag.outputs.tag }}",
+      #         name: "${{ steps.tag.outputs.tag }}",
+      #         draft: true,
+      #         prerelease: false,
+      #         generate_release_notes: false,
+      #       });
+      #       core.setOutput('id', response.data.id);
+
+      - name: Create draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+        run: |
+          gh release create ${{ steps.tag.outputs.tag }} --draft --title "${{ steps.tag.outputs.tag }}" --notes "Release ${{ steps.tag.outputs.tag }}"
 
       - name: Build for ARM 32bits
         working-directory: agent
         env:
-          RELEASE_ID: ${{ steps.create_release.outputs.id }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
         run: make build-arm-32
 
       - name: Build for Linux 64bits
         working-directory: agent
         env:
-          RELEASE_ID: ${{ steps.create_release.outputs.id }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
         run: make build-linux-64
 
       - name: Build for Windows 64bits
         working-directory: agent
         env:
-          RELEASE_ID: ${{ steps.create_release.outputs.id }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
         run: make build-windows-64
 
       - name: Update release with uploads

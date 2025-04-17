@@ -7,10 +7,10 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var releaseID string
+var releaseTag string
 
 func main() {
-	if err := AutoUpdate(releaseID); err != nil {
+	if err := AutoUpdate(releaseTag); err != nil {
 		fmt.Printf("Mise à jour échouée: %v", err)
 	}
 
