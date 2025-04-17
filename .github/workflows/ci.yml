@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         run: |
           gh release upload ${{ steps.tag.outputs.tag }} agent/dist/agent_arm agent/dist/agent_linux agent/dist/agent_windows.exe
-          gh release create ${{ steps.tag.outputs.tag }} --draft=false
+          gh release edit ${{ steps.tag.outputs.tag }} --draft=false
 
       # - name: Upload ARM asset
       #   uses: svenstaro/upload-release-action@v2
