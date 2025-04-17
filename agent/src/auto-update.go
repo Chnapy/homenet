@@ -8,6 +8,11 @@ import (
 )
 
 func AutoUpdate(releaseID string) error {
+	fmt.Println("Release ID:", releaseID)
+	if releaseID == "" {
+		panic("Release ID is empty")
+	}
+
 	token := "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"
 
 	selfupdate.EnableLog()

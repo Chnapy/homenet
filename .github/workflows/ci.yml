@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - .github/**
       - agent/**
   pull_request:
 
@@ -52,6 +53,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         run: |
           gh release create ${{ steps.tag.outputs.tag }} --draft --title "${{ steps.tag.outputs.tag }}" --notes "Release ${{ steps.tag.outputs.tag }}"
+          RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.tag.outputs.tag }} --jq '.id')
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
 
       - name: Build for ARM 32bits
         working-directory: agent

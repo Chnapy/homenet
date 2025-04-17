@@ -10,7 +10,6 @@ import (
 var releaseID string
 
 func main() {
-	fmt.Println("releaseID", releaseID)
 	if err := AutoUpdate(releaseID); err != nil {
 		fmt.Printf("Mise à jour échouée: %v", err)
 	}
