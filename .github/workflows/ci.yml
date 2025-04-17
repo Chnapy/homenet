@@ -15,6 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Format commit tag
+        id: tag
+        run: |
+          formatted_date=$(date -d "${{ github.event.head_commit.timestamp }}" +'v%Y%m%dT%H%MZ')
+          echo "tag=$formatted_date" >> $GITHUB_OUTPUT
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -42,17 +48,20 @@ jobs:
         run: make install-deps
 
       - name: Create draft release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          token: ${{ secrets.RELEASE_PAT_TOKEN }}
-          tag_name: draft
-          prerelease: false
-          draft: true
-          generate_release_notes: false
-          name: ${{ github.event.repository.updated_at }}
-          body: |
-            Release ${{ github.event.repository.updated_at }}
+        # uses: softprops/action-gh-release@v2
+        # with:
+        #   token: ${{ secrets.RELEASE_PAT_TOKEN }}
+        #   tag_name: ${{ steps.tag.outputs.tag }}
+        #   prerelease: false
+        #   draft: true
+        #   generate_release_notes: false
+        #   name: ${{ steps.tag.outputs.tag }}
+        #   body: |
+        #     Release ${{ steps.tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+        run: |
+          gh release create ${{ steps.tag.outputs.tag }} --draft --title "${{ github.event.repository.updated_at }}" --notes "Release ${{ github.event.repository.updated_at }}"
 
       - name: Build for ARM 32bits
         working-directory: agent
@@ -72,19 +81,47 @@ jobs:
           RELEASE_ID: ${{ steps.create_release.outputs.id }}
         run: make build-windows-64
 
-      - name: Upload ARM Asset
-        uses: actions/upload-release-asset@1
+      - name: Update release
+        # uses: softprops/action-gh-release@v2
+        # with:
+        #   token: ${{ secrets.RELEASE_PAT_TOKEN }}
+        #   tag_name: ${{ steps.tag.outputs.tag }}
+        #   prerelease: false
+        #   draft: false
+        #   files: agent/dist/*
+        #   generate_release_notes: false
+        #   name: ${{ steps.tag.outputs.tag }}
+        #   body: |
+        #     Release ${{ steps.tag.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./agent/dist/agent_arm
-          asset_name: agent_arm
-          asset_content_type: application/octet-stream
+        run: |
+          gh release upload ${{ steps.tag.outputs.tag }} agent/dist/agent_arm agent/dist/agent_linux agent/dist/agent_windows
+          gh release create ${{ steps.tag.outputs.tag }} --draft=false
 
-      - name: Publish Release
-        uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
-        with:
-          release_id: ${{ steps.create_release.outputs.id }}
+      # - name: Upload ARM asset
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.RELEASE_PAT_TOKEN }}
+      #     file: agent/dist/agent_arm
+      #     asset_name: agent_arm
+      #     tag: ${{ github.ref }}
+      #     overwrite: true
+      #     body: "This is my release text"
+
+      # - name: Upload ARM Asset
+      #   uses: actions/upload-release-asset@1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./agent/dist/agent_arm
+      #     asset_name: agent_arm
+      #     asset_content_type: application/octet-stream
+
+      # - name: Publish Release
+      #   uses: eregon/publish-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
+      #   with:
+      #     release_id: ${{ steps.create_release.outputs.id }}
