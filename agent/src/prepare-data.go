@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func PrepareData(releaseTag int32) *gen.AgentUpdateRequest {
+func PrepareData(releaseTag string) *gen.AgentUpdateRequest {
 
 	startTime := time.Now().UnixMilli()
 
@@ -20,7 +20,7 @@ func PrepareData(releaseTag int32) *gen.AgentUpdateRequest {
 
 	data := gen.AgentUpdateRequest{
 		AgentMetadata: &gen.AgentMetadata{
-			ReleaseID:        releaseTag,
+			ReleaseTag:       releaseTag,
 			ComputeStartTime: startTime,
 			ComputeDuration:  duration,
 		},

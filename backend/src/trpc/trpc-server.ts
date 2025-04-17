@@ -4,6 +4,7 @@ import {
   FastifyTRPCPluginOptions,
 } from "@trpc/server/adapters/fastify";
 import fastify from "fastify";
+import { getAgentByOSRoute } from "./procedures/get-agent-by-os";
 import { AppRouter, appRouter } from "./router";
 
 export const setupTRPCServer = () => {
@@ -20,6 +21,8 @@ export const setupTRPCServer = () => {
       },
     } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
   });
+
+  tRPCServer.get("/agent/:os", getAgentByOSRoute);
 
   tRPCServer.listen(
     {

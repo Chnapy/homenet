@@ -14,7 +14,7 @@ func main() {
 		fmt.Printf("Mise à jour échouée: %v", err)
 	}
 
-	data := PrepareData(123)
+	data := PrepareData(releaseTag)
 
 	marshaler := protojson.MarshalOptions{
 		Indent:          "  ",
