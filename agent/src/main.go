@@ -10,12 +10,12 @@ import (
 var releaseID string
 
 func main() {
-	fmt.Println("release", releaseID)
+	fmt.Println("releaseID", releaseID)
+	if err := AutoUpdate(releaseID); err != nil {
+		fmt.Printf("Mise à jour échouée: %v", err)
+	}
 
-	// var launcherPath string = ""
-	var releaseId int32 = 123
-
-	data := PrepareData(releaseId)
+	data := PrepareData(123)
 
 	marshaler := protojson.MarshalOptions{
 		Indent:          "  ",
