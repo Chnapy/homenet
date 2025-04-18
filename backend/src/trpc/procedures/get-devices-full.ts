@@ -48,6 +48,21 @@ export const getDevicesFull = publicProcedure.query(
 
     const netEntityMap = getNetEntityMap(deviceList, instanceList, appList);
 
+    const duplicatedIds = checkIDDuplicates([
+      ...deviceList,
+      ...instanceList,
+      ...appList,
+    ]);
+    const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
+
+    if (duplicatedIds.length > 0) {
+      console.error("Duplicated IDs", duplicatedIds);
+    }
+
+    if (duplicatedLans.length > 0) {
+      console.error("Duplicated Lans", duplicatedLans);
+    }
+
     return {
       deviceUserMetaMap,
       deviceList,
@@ -57,3 +72,35 @@ export const getDevicesFull = publicProcedure.query(
     };
   }
 );
+
+const checkIDDuplicates = (list: { id: string }[]) => {
+  const duplicatedItems = list
+    .filter((item) => {
+      return list.some((item2) => {
+        if (item === item2) {
+          return false;
+        }
+
+        return item.id === item2.id;
+      });
+    })
+    .map((item) => item.id);
+
+  return [...new Set(duplicatedItems)];
+};
+
+const checkLanDuplicates = (list: { lan: string }[]) => {
+  const duplicatedItems = list
+    .filter((item) => {
+      return list.some((item2) => {
+        if (item === item2) {
+          return false;
+        }
+
+        return item.lan === item2.lan;
+      });
+    })
+    .map((item) => item.lan);
+
+  return [...new Set(duplicatedItems)];
+};

@@ -217,7 +217,6 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 
 		ingressPort := strconv.Itoa(addonInfo.IngressPort)
 		port := ingressPort
-		// fmt.Println("Port", port)
 
 		_, port1ok := network[port]
 		_, port2ok := network[port+"/tcp"]
@@ -232,11 +231,9 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 				port = strconv.Itoa(http1)
 			} else if http2ok {
 				port = strconv.Itoa(http2)
+			} else {
+				continue
 			}
-		}
-
-		if port == "0" {
-			continue
 		}
 
 		slug := gen.AgentApp_UNKNOWN_APP
