@@ -12,6 +12,10 @@ import (
 
 func CheckCron() {
 	launcherPath, _ := os.Executable()
+	if strings.HasPrefix(launcherPath, "/tmp/") {
+		fmt.Println("Launcher in tmp dir, check-cron ignored")
+		return
+	}
 
 	sendDataCron := env.Env.UpdateCron
 	log.Printf("Check cron : %s %s\n", sendDataCron, launcherPath)

@@ -10,9 +10,14 @@ import (
 var releaseTag string
 
 func main() {
+	updated, err := AutoUpdate(releaseTag)
 
-	if err := AutoUpdate(releaseTag); err != nil {
-		fmt.Printf("Mise à jour échouée: %v", err)
+	if err != nil {
+		fmt.Printf("Auto-update failed: %v", err)
+	}
+
+	if updated {
+		return
 	}
 
 	CheckCron()

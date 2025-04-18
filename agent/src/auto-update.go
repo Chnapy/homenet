@@ -6,17 +6,16 @@ import (
 	"os/exec"
 	"runtime"
 	"syscall"
-	"time"
 
 	"github.com/blang/semver"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
-func AutoUpdate(releaseTag string) error {
+func AutoUpdate(releaseTag string) (bool, error) {
 	fmt.Println("Release tag:", releaseTag)
 	if releaseTag == "" {
 		fmt.Println("Release tag is empty, auto-update ignored")
-		return nil
+		return false, nil
 	}
 
 	token := "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"
@@ -33,22 +32,22 @@ func AutoUpdate(releaseTag string) error {
 	fmt.Println("Last release", latestRelease)
 
 	if err != nil {
-		return fmt.Errorf("échec récupération release: %w", err)
+		return false, fmt.Errorf("échec récupération release: %w", err)
 	}
 
 	if latestRelease.Version.Equals(v) {
 		fmt.Printf("Agent already up-to-date %s\n", latestRelease.Version.String())
-	} else {
-		fmt.Printf("Agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
-		restart()
-		time.Sleep(1 * time.Second)
-		os.Exit(0)
+
+		return false, nil
 	}
 
-	return nil
+	fmt.Printf("Agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
+	Restart()
+
+	return true, nil
 }
 
-func restart() error {
+func Restart() error {
 	exe, err := os.Executable()
 	if err != nil {
 		return err
