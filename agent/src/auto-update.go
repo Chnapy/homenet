@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
@@ -40,6 +41,7 @@ func AutoUpdate(releaseTag string) error {
 	} else {
 		fmt.Printf("Agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
 		restart()
+		time.Sleep(1 * time.Second)
 		os.Exit(0)
 	}
 
