@@ -75,7 +75,7 @@ export const getNetEntityMap = (
 ): NetEntityMap => {
   const entityList = [...deviceList, ...instanceList];
 
-  const httpProxies = appList.flatMap((app) => app.reverseProxy ?? []);
+  const httpProxies = appList.flatMap((app) => app.reverseProxy);
 
   const getEntity = (entity: Instance): NetEntity => {
     const { lan } = entity;
@@ -93,7 +93,7 @@ export const getNetEntityMap = (
       .map((dhcpItem) => dhcpItem.alias);
 
     const innerDomains = appList
-      .flatMap((app) => app.reverseProxy ?? [])
+      .flatMap((app) => app.reverseProxy)
       .filter((proxy) =>
         [lan, wan, ddns, ...lanAliases].includes(proxy.toAddress?.address)
       )

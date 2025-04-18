@@ -122,10 +122,12 @@ export const useNetEntityLinks = () => {
         );
       }
 
-      const reverseProxyApp = deviceApps?.find((app) => app.reverseProxy);
+      const reverseProxyApp = deviceApps?.find(
+        (app) => app.reverseProxy.length > 0
+      );
 
       // http reverse proxy
-      if (reverseProxyApp?.reverseProxy?.length) {
+      if (reverseProxyApp) {
         links.push(
           ...reverseProxyApp.reverseProxy
             .map((proxy) => {

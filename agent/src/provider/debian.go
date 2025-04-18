@@ -166,7 +166,11 @@ func (e *DebianProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
 				}
 			case "name":
 				if currentItem != nil && domain != "" {
-					currentItem.Alias = fmt.Sprintf("%s.%s", optionValue, domain)
+					if strings.HasSuffix(optionValue, ".com") {
+						currentItem.Alias = optionValue
+					} else {
+						currentItem.Alias = fmt.Sprintf("%s.%s", optionValue, domain)
+					}
 				}
 			}
 		}
