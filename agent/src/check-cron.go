@@ -126,24 +126,22 @@ func checkJobExists(entries []string, launcherPath string, isReboot bool) bool {
 			continue
 		}
 
-		var schedule, command string
 		if strings.HasPrefix(line, "@reboot") {
-			schedule = "@reboot"
-			command = strings.TrimSpace(line[len("@reboot"):])
+			command := strings.TrimSpace(line[len("@reboot"):])
+
+			if isReboot && strings.HasPrefix(command, launcherPath) {
+				return true
+			}
+
 		} else {
 			parts := strings.Fields(line)
 			if len(parts) < 6 {
 				continue
 			}
-			schedule = strings.Join(parts[:5], " ")
-			command = strings.Join(parts[5:], " ")
-		}
+			command := strings.TrimSpace(strings.Join(parts[5:], " "))
 
-		if command == launcherPath {
-			if isReboot {
-				return schedule == "@reboot"
-			} else {
-				return schedule != "@reboot"
+			if !isReboot && strings.HasPrefix(command, launcherPath) {
+				return true
 			}
 		}
 	}

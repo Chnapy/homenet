@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/mattn/go-shellwords"
 )
 
 // LocalExec implémente l'interface Exec pour l'exécution locale
@@ -25,12 +27,27 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 		fmt.Printf("local-in <- %s\n", command)
 	}
 
-	cmd := exec.Command("sh", "-c", command)
+	// parts := strings.Fields(command)
+	parts, _ := shellwords.Parse(command)
+	var name string
+	var args []string
+	if len(parts) > 1 && parts[0] == "pct" && parts[1] == "exec" {
+		name = "pct"
+		args = parts[1:]
+	} else if len(parts) > 2 && parts[0] == "qm" && parts[2] == "exec" {
+		name = "qm"
+		args = parts[1:]
+	} else {
+		name = "sh"
+		args = append([]string{"-c"}, command)
+	}
+
+	cmd := exec.Command(name, args...)
 	output, err := cmd.CombinedOutput()
 	result := strings.TrimSpace(string(output))
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, name, args)
 	}
 
 	if env.Env.LogLevel == env.LogLevelDebug {
