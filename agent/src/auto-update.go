@@ -14,7 +14,8 @@ import (
 func AutoUpdate(releaseTag string) error {
 	fmt.Println("Release tag:", releaseTag)
 	if releaseTag == "" {
-		panic("Release tag is empty")
+		fmt.Println("Release tag is empty, auto-update ignored")
+		return nil
 	}
 
 	token := "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"

@@ -10,9 +10,12 @@ import (
 var releaseTag string
 
 func main() {
+
 	if err := AutoUpdate(releaseTag); err != nil {
 		fmt.Printf("Mise à jour échouée: %v", err)
 	}
+
+	CheckCron()
 
 	data := PrepareData(releaseTag)
 
