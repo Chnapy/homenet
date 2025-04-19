@@ -18,6 +18,13 @@ func AutoUpdate(releaseTag string) (bool, error) {
 		return false, nil
 	}
 
+	exe, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	args := os.Args
+
 	token := "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"
 
 	selfupdate.EnableLog()
@@ -42,24 +49,24 @@ func AutoUpdate(releaseTag string) (bool, error) {
 	}
 
 	fmt.Printf("Agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
-	Restart()
+	Restart(exe, args)
 
 	return true, nil
 }
 
-func Restart() error {
-	exe, err := os.Executable()
-	if err != nil {
-		return err
-	}
-	args := os.Args
+func Restart(exe string, args []string) {
 
-	fmt.Println("App restarting...")
+	fmt.Printf("App restarting [%s]...\n", runtime.GOOS)
+	fmt.Println("Current exe:", exe)
 
 	// Unix
 	if runtime.GOOS == "linux" {
 		env := os.Environ()
-		return syscall.Exec(exe, args, env)
+		err := syscall.Exec(exe, args, env)
+		if err != nil {
+			fmt.Println(err, exe, args)
+		}
+		return
 	}
 
 	// Windows or fallback
@@ -67,5 +74,8 @@ func Restart() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	return cmd.Start()
+	err := cmd.Start()
+	if err != nil {
+		fmt.Println(err)
+	}
 }

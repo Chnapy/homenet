@@ -10,6 +10,8 @@ import (
 var releaseTag string
 
 func main() {
+	fmt.Println("Homenet agent")
+
 	updated, err := AutoUpdate(releaseTag)
 
 	if err != nil {
