@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	grpc "agent/src/grpc"
+
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -40,5 +42,5 @@ func main() {
 	fmt.Println()
 	fmt.Println(string(out))
 
-	grcp.Grpc(data)
+	grpc.Grpc(data)
 }
