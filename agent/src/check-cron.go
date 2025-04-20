@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 )
 
@@ -16,9 +17,7 @@ func CheckCron() {
 		fmt.Println("Launcher in tmp dir, check-cron ignored")
 		return
 	}
-
-	sendDataCron := env.Env.UpdateCron
-	log.Printf("Check cron : %s %s\n", sendDataCron, launcherPath)
+	fmt.Println("Check Cron jobs")
 
 	var entries []string
 	var err error
@@ -34,40 +33,97 @@ func CheckCron() {
 		return
 	}
 
-	jobTimedExists := checkJobExists(entries, launcherPath, false)
-	jobRebootExists := checkJobExists(entries, launcherPath, true)
+	pathParts := strings.Split(env.Env.Path, ":")
+	slices.Sort(pathParts)
+	pathEnv := strings.Join(slices.Compact(pathParts), ":")
 
+	timedCron := env.Env.UpdateCron
+	commandCron := fmt.Sprintf("PATH=%s %s", pathEnv, launcherPath)
+
+	expectedJobTimed := fmt.Sprintf("%s %s # Homenet agent Cron Job (time)", timedCron, commandCron)
+	expectedJobReboot := fmt.Sprintf("@reboot %s # Homenet agent Cron Job (reboot)", commandCron)
+
+	log.Printf("Check cron : %s %s\n", timedCron, commandCron)
+
+	jobTimedExists := false
+	jobRebootExists := false
 	updated := false
 
+	for index, line := range entries {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		if strings.HasPrefix(line, "@reboot") {
+			command := strings.TrimSpace(line[len("@reboot"):])
+
+			if strings.Contains(command, launcherPath) {
+				if jobRebootExists {
+					entries[index] = ""
+				} else {
+					jobRebootExists = true
+
+					if !strings.HasPrefix(command, commandCron) {
+						entries[index] = expectedJobReboot
+						updated = true
+						log.Println("Cron job (reboot) updated.")
+					}
+				}
+			}
+
+		} else {
+			parts := strings.Fields(line)
+			if len(parts) < 6 {
+				continue
+			}
+
+			time := strings.Join(parts[:5], " ")
+			command := strings.TrimSpace(strings.Join(parts[5:], " "))
+
+			if strings.Contains(command, launcherPath) {
+				if jobTimedExists {
+					entries[index] = ""
+				} else {
+					jobTimedExists = true
+
+					if !strings.HasPrefix(command, commandCron) ||
+						time != timedCron {
+						entries[index] = expectedJobTimed
+						updated = true
+						log.Println("Cron job (time) updated.")
+					}
+				}
+			}
+		}
+	}
+
 	if !jobTimedExists {
-		entry := fmt.Sprintf("%s %s # Homenet agent Cron Job (time)", sendDataCron, launcherPath)
-		entries = append(entries, entry)
+		entries = append(entries, expectedJobTimed)
 		updated = true
-		log.Println("Tâche cron (time) ajoutée.")
-	} else {
-		log.Println("Tâche cron (time) existe déjà.")
+		log.Println("Cron job (time) added.")
 	}
 
 	if !jobRebootExists {
-		entry := fmt.Sprintf("@reboot %s # Homenet agent Cron Job (reboot)", launcherPath)
-		entries = append(entries, entry)
+		entries = append(entries, expectedJobReboot)
 		updated = true
-		log.Println("Tâche cron (reboot) ajoutée.")
-	} else {
-		log.Println("Tâche cron (reboot) existe déjà.")
+		log.Println("Cron job (reboot) added.")
 	}
 
 	if updated {
+		// fmt.Print(strings.Join(entries, "\n\n"))
 		if runtime.GOOS == "windows" {
 			err = writeWindowsCron(entries)
 		} else {
 			err = writeUnixCron(entries)
 		}
 		if err != nil {
-			log.Printf("Erreur d'écriture du cron : %v", err)
+			log.Printf("Cron write error : %v", err)
 			return
 		}
-		log.Println("Cron mis à jour.")
+		log.Println("Cron jobs updated.")
+	} else {
+		log.Println("Cron jobs already clean, not update needed.")
 	}
 }
 
@@ -121,33 +177,4 @@ func writeUnixCron(entries []string) error {
 		return fmt.Errorf("crontab install failed: %v, output: %s", err, output)
 	}
 	return nil
-}
-
-func checkJobExists(entries []string, launcherPath string, isReboot bool) bool {
-	for _, line := range entries {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		if strings.HasPrefix(line, "@reboot") {
-			command := strings.TrimSpace(line[len("@reboot"):])
-
-			if isReboot && strings.HasPrefix(command, launcherPath) {
-				return true
-			}
-
-		} else {
-			parts := strings.Fields(line)
-			if len(parts) < 6 {
-				continue
-			}
-			command := strings.TrimSpace(strings.Join(parts[5:], " "))
-
-			if !isReboot && strings.HasPrefix(command, launcherPath) {
-				return true
-			}
-		}
-	}
-	return false
 }

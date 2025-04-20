@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/melbahja/goph"
 )
@@ -46,12 +47,20 @@ func (l *SSHExecutor) Exec(command string) (string, error) {
 		fmt.Println("ssh-in <- " + command)
 	}
 
+	startTime := time.Now().UnixMilli()
+
 	out, err := l.client.Run(command)
 
 	output := strings.TrimSpace(string(out))
 
-	if env.Env.LogLevel == env.LogLevelDebug {
-		fmt.Println("ssh-out ->", l.FormatOutputForLog(output), err)
+	duration := time.Now().UnixMilli() - startTime
+
+	if err != nil {
+		fmt.Printf("ssh-err [%d] -> %s\n", duration, err)
+	}
+
+	if env.Env.LogLevel == env.LogLevelDebug && len(output) > 0 {
+		fmt.Printf("ssh-out [%d] -> %s\n", duration, l.FormatOutputForLog(output))
 	}
 
 	return output, err

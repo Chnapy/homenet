@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/mattn/go-shellwords"
 )
@@ -27,6 +28,8 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 		fmt.Printf("local-in <- %s\n", command)
 	}
 
+	startTime := time.Now().UnixMilli()
+
 	// parts := strings.Fields(command)
 	parts, _ := shellwords.Parse(command)
 	var name string
@@ -46,12 +49,14 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 	output, err := cmd.CombinedOutput()
 	result := strings.TrimSpace(string(output))
 
+	duration := time.Now().UnixMilli() - startTime
+
 	if err != nil {
-		fmt.Println(err, name, args)
+		fmt.Printf("local-err [%d] -> %s\n", duration, err)
 	}
 
-	if env.Env.LogLevel == env.LogLevelDebug {
-		fmt.Printf("local-out -> %s\n", l.FormatOutputForLog(result))
+	if env.Env.LogLevel == env.LogLevelDebug && len(result) > 0 {
+		fmt.Printf("local-out [%d] -> %s\n", duration, l.FormatOutputForLog(result))
 	}
 
 	return result, err

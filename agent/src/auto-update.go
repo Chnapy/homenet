@@ -12,11 +12,11 @@ import (
 )
 
 func AutoUpdate(releaseTag string) (bool, error) {
-	fmt.Println("Release tag:", releaseTag)
 	if releaseTag == "" {
 		fmt.Println("Release tag is empty, auto-update ignored")
 		return false, nil
 	}
+	fmt.Println("Release tag:", releaseTag)
 
 	exe, err := os.Executable()
 	if err != nil {

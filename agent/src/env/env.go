@@ -6,6 +6,8 @@ type EnvType struct {
 	LogLevel     string
 	BackendRoute string
 	UpdateCron   string
+	Path         string
+	FromCron     string
 }
 
 const (
@@ -14,9 +16,11 @@ const (
 )
 
 var defaultEnv = EnvType{
-	LogLevel:     LogLevelInfo, //LogLevelDebug,
+	LogLevel:     LogLevelDebug, //LogLevelDebug,
 	BackendRoute: "192.168.8.217:50051",
 	UpdateCron:   "0 */6 * * *",
+	Path:         "",
+	FromCron:     "",
 }
 
 func GetenvWithDefault(key string, defaultValue string) string {
@@ -32,4 +36,6 @@ var Env = EnvType{
 	LogLevel:     GetenvWithDefault("LOG_LEVEL", defaultEnv.LogLevel),
 	BackendRoute: GetenvWithDefault("BACKEND_ROUTE", defaultEnv.BackendRoute),
 	UpdateCron:   GetenvWithDefault("UPDATE_CRON", defaultEnv.UpdateCron),
+	Path:         GetenvWithDefault("PATH", defaultEnv.Path),
+	FromCron:     GetenvWithDefault("FROM_CRON", defaultEnv.FromCron),
 }

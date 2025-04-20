@@ -1,8 +1,8 @@
 package main
 
 import (
-	grcp "agent/src/grpc"
 	"fmt"
+	"log"
 
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -10,7 +10,7 @@ import (
 var releaseTag string
 
 func main() {
-	fmt.Println("Homenet agent")
+	log.Println("Homenet agent")
 
 	updated, err := AutoUpdate(releaseTag)
 

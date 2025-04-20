@@ -47,16 +47,19 @@ func (b *BaseExecutor) Open(e Executor, path string) string {
 
 func (b *BaseExecutor) FormatOutputForLog(e Executor, output string) string {
 
-	var lines = strings.SplitN(output, "\n", 21)
-	if len(lines) > 20 {
-		lines = lines[:20]
+	nbrLines := 10
+	nbrCharacters := 500
+
+	var lines = strings.SplitN(output, "\n", nbrLines+1)
+	if len(lines) > nbrLines {
+		lines = lines[:nbrLines]
 	}
 	truncated := strings.Join(lines, "\n")
 
 	// Limite à 400 caractères
-	if utf8.RuneCountInString(truncated) > 1000 {
+	if utf8.RuneCountInString(truncated) > nbrCharacters {
 		runes := []rune(truncated)
-		truncated = string(runes[:1000])
+		truncated = string(runes[:nbrCharacters])
 	}
 
 	return truncated

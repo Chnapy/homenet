@@ -55,26 +55,10 @@ func (l *QMExecutor) Exec(command string) (string, error) {
 }
 
 func (l *QMExecutor) IsDir(path string) bool {
-
-	// var output = (*ex.parentExecutor).Exec("qm guest exec " + ex.id + " -- test -d " + path)
-
-	// var jsonOutput QMOutput
-	// json.Unmarshal([]byte(output), &jsonOutput)
-
-	// return jsonOutput.exitcode == 0
-
 	return l.BaseExecutor.IsDir(l, path)
 }
 
 func (l *QMExecutor) IsFile(path string) bool {
-
-	// var output = (*ex.parentExecutor).Exec("qm guest exec " + ex.id + " -- test -f " + path)
-
-	// var jsonOutput QMOutput
-	// json.Unmarshal([]byte(output), &jsonOutput)
-
-	// return jsonOutput.exitcode == 0
-
 	return l.BaseExecutor.IsFile(l, path)
 }
 
