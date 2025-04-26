@@ -33,12 +33,12 @@ export const getAgentByOSRoute: RouteHandlerMethod = async (request, reply) => {
 
     reply
       .header("Content-Disposition", `attachment; filename="${asset.name}"`)
-      .type(asset.content_type);
+      .type("application/octet-stream");
 
     const assetResponse = await fetch(asset.url, {
       headers: {
         Authorization,
-        Accept: asset.content_type,
+        Accept: "application/octet-stream",
       },
     });
 

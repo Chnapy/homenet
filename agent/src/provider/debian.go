@@ -5,10 +5,12 @@ import (
 	gen "agent/src/grpc/generated"
 	utils "agent/src/utils"
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -28,6 +30,13 @@ func NewDebianProvider(executor ex.Executor) *DebianProvider {
 
 // Méthode abstraite (panique si non implémentée)
 func (e *DebianProvider) Check() bool {
+
+	uname, _ := e.executor.Exec("uname -a")
+
+	if strings.Contains(strings.ToLower(uname), "debian") {
+		return true
+	}
+
 	osReleasePath := "/etc/os-release"
 
 	// Vérification de l'existence du fichier
@@ -61,7 +70,12 @@ func (e *DebianProvider) GetOS() gen.AgentOS {
 
 func (e *DebianProvider) GetLan() string {
 	// Exécution de la commande "ip addr"
-	result, _ := e.executor.Exec("ip addr")
+	result, err := e.executor.Exec("ip addr")
+
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
 
 	// Découpage du résultat en lignes
 	scanner := bufio.NewScanner(strings.NewReader(result))
@@ -244,6 +258,11 @@ func (e *DebianProvider) GetSSH() *gen.AgentSSH {
 func (e *DebianProvider) GetApps() []*gen.AgentApp {
 	return slices.DeleteFunc(
 		[]*gen.AgentApp{
+			e.GetDocker(),
+			e.GetWireguard(),
+			e.GetCaddy(),
+			e.GetNtfy(),
+			e.GetUptimeKuma(),
 			e.GetCodeServer(),
 		},
 		func(app *gen.AgentApp) bool {
@@ -253,7 +272,201 @@ func (e *DebianProvider) GetApps() []*gen.AgentApp {
 }
 
 func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
-	return []*gen.AgentInstance{}
+
+	instances := []*gen.AgentInstance{}
+
+	containerListOut, err := e.executor.Exec("docker ps --format=json")
+
+	if err != nil {
+		fmt.Println(err)
+		return instances
+	}
+
+	type DockerPS struct {
+		ID    string
+		Names string
+		Ports string
+		Image string
+	}
+
+	mapByNames := map[string]*gen.AgentInstance{}
+
+	for _, line := range strings.Split(containerListOut, "\n") {
+
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		var containerItem DockerPS
+		var _ = json.Unmarshal([]byte(line), &containerItem)
+
+		containerId := containerItem.ID
+
+		dockerExec := ex.NewDockerExecutor(e.executor, containerId)
+
+		dockerInstance := GetCurrentInstance(dockerExec)
+		dockerInstance.Type = gen.AgentInstance_DOCKER
+
+		if dockerInstance.Lan == "" {
+			out, _ := e.executor.Exec("docker inspect --format '{{json .NetworkSettings.Networks}}' " + containerId)
+
+			var dockerNetwork map[string]struct {
+				IPAddress string
+			}
+			var _ = json.Unmarshal([]byte(out), &dockerNetwork)
+
+			for _, network := range dockerNetwork {
+				dockerInstance.Lan = network.IPAddress
+			}
+		}
+
+		mapByNames[containerItem.Names] = &dockerInstance
+
+		instances = append(instances, &dockerInstance)
+	}
+
+	for _, instance := range mapByNames {
+		for _, app := range instance.Apps {
+			for _, proxy := range app.ReverseProxy {
+				instanceByName, ok := mapByNames[proxy.ToAddress.Address]
+				if !ok {
+					continue
+				}
+
+				proxy.ToAddress.Address = instanceByName.Lan
+			}
+		}
+	}
+
+	return instances
+}
+
+func (a *DebianProvider) GetDocker() *gen.AgentApp {
+	_, err := a.executor.Exec("docker -v")
+	if err != nil {
+		return nil
+	}
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_DOCKER,
+	}
+}
+
+func (a *DebianProvider) GetWireguard() *gen.AgentApp {
+	// TODO
+
+	return nil
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_WIREGUARD,
+		// VpnMode: ,
+		// VpnAddress: ,
+		// VpnClients: ,
+	}
+}
+
+func (a *DebianProvider) GetNtfy() *gen.AgentApp {
+	out, _ := a.executor.Exec("sh -c 'echo $NTFY_LISTEN_HTTP'")
+	if out == "" {
+		return nil
+	}
+
+	portInt, _ := strconv.Atoi(strings.Split(out, ":")[1])
+	portInt32 := int32(portInt)
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_NTFY,
+		Web: []*gen.AgentWebItem{
+			{
+				Port: &portInt32,
+			},
+		},
+	}
+}
+
+func (a *DebianProvider) GetUptimeKuma() *gen.AgentApp {
+	out := a.executor.Open("/app/package.json")
+	if out == "" {
+		return nil
+	}
+
+	var packagejson struct {
+		Name string `json:"name"`
+	}
+	var err = json.Unmarshal([]byte(out), &packagejson)
+
+	if err != nil || packagejson.Name != "uptime-kuma" {
+		return nil
+	}
+
+	portInt32 := int32(3001)
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_UPTIME_KUMA,
+		Web: []*gen.AgentWebItem{
+			{
+				Port: &portInt32,
+			},
+		},
+	}
+}
+
+func (a *DebianProvider) GetCaddy() *gen.AgentApp {
+	var reverseProxy []*gen.AgentApp_AgentReverseProxy
+
+	configPath := "/etc/caddy/Caddyfile"
+	if !a.executor.IsFile(configPath) {
+		return nil
+	}
+
+	fileContent := a.executor.Open(configPath)
+
+	pattern := regexp.MustCompile(`(?ms)^(https?://[^\s{]+)[^{]*\{[^}]*?reverse_proxy\s+([^\s}]+)`)
+
+	matches := pattern.FindAllStringSubmatch(fileContent, -1)
+
+	for _, match := range matches {
+		fmt.Println(match[1], match[2])
+		if len(match) < 3 {
+			continue
+		}
+
+		// fromPort := match[1]
+		domainParts := strings.Split(match[1], "://")
+		domain := domainParts[1]
+		domainSsl := domainParts[0] == "https"
+
+		toAddress := match[2]
+		if !strings.Contains(toAddress, "://") {
+			toAddress = "http://" + toAddress
+		}
+		addressParts := strings.Split(toAddress, "://")
+		ssl := addressParts[0] == "https"
+		toParts := strings.Split(addressParts[1], ":")
+
+		var port32 int32
+		if len(toParts) > 1 {
+			port, _ := strconv.Atoi(toParts[1])
+			port32 = int32(port)
+		}
+
+		reverseProxy = append(reverseProxy, &gen.AgentApp_AgentReverseProxy{
+			FromDomain: &gen.AgentApp_AgentReverseProxy_From{
+				Domain: domain,
+				Ssl:    domainSsl,
+			},
+			ToAddress: &gen.AgentApp_AgentReverseProxy_To{
+				Address: toParts[0],
+				Ssl:     ssl,
+				Port:    &port32,
+			},
+		})
+	}
+
+	return &gen.AgentApp{
+		Slug:         gen.AgentApp_CADDY,
+		ReverseProxy: reverseProxy,
+	}
 }
 
 func (e *DebianProvider) GetCodeServer() *gen.AgentApp {

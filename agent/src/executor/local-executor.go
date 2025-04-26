@@ -40,6 +40,9 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 	} else if len(parts) > 2 && parts[0] == "qm" && parts[2] == "exec" {
 		name = "qm"
 		args = parts[1:]
+	} else if len(parts) > 1 && parts[0] == "docker" && parts[1] == "exec" {
+		name = "docker"
+		args = parts[1:]
 	} else {
 		name = "sh"
 		args = append([]string{"-c"}, command)
