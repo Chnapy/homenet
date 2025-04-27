@@ -57,6 +57,9 @@ func (l *SSHExecutor) Exec(command string) (string, error) {
 
 	if err != nil {
 		fmt.Printf("ssh-err [%d] -> %s\n", duration, err)
+		if !strings.HasPrefix(command, "sudo ") && strings.Contains(output, "Permission denied") {
+			return l.Exec("sudo " + command)
+		}
 	}
 
 	if env.Env.LogLevel == env.LogLevelDebug && len(output) > 0 {

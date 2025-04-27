@@ -56,6 +56,9 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 
 	if err != nil {
 		fmt.Printf("local-err [%d] -> %s\n", duration, err)
+		if !strings.HasPrefix(command, "sudo ") && strings.Contains(result, "Permission denied") {
+			return l.Exec("sudo " + command)
+		}
 	}
 
 	if env.Env.LogLevel == env.LogLevelDebug && len(result) > 0 {

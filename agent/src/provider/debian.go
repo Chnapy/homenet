@@ -140,7 +140,12 @@ func (e *DebianProvider) GetWan() *string {
 }
 
 func (e *DebianProvider) GetDDNS() *string {
-	return nil
+	out, err := e.executor.Exec("hostname -f")
+	if err != nil || !strings.Contains(out, ".") {
+		return nil
+	}
+
+	return &out
 }
 
 func (e *DebianProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
@@ -353,15 +358,42 @@ func (a *DebianProvider) GetDocker() *gen.AgentApp {
 }
 
 func (a *DebianProvider) GetWireguard() *gen.AgentApp {
-	// TODO
+	configDirPath := "/etc/wireguard"
+	if !a.executor.IsDir(configDirPath) {
+		return nil
+	}
 
-	return nil
+	output, _ := a.executor.Exec("find " + configDirPath + " -type f -name '*.conf'")
+	configFilesPaths := strings.Split(output, "\n")
+
+	vpnAddress := ""
+
+	for _, path := range configFilesPaths {
+		content := a.executor.Open(path)
+
+		for _, lineRaw := range strings.Split(content, "\n") {
+			line := strings.TrimSpace(lineRaw)
+			if strings.HasPrefix(line, "#") {
+				continue
+			}
+
+			parts := strings.Fields(line)
+
+			if len(parts) < 3 || parts[0] != "Address" {
+				continue
+			}
+
+			vpnAddress = strings.Split(parts[2], "/")[0]
+		}
+	}
+
+	var agentVpnModeClient gen.AgentApp_AgentVpnMode = gen.AgentApp_CLIENT
 
 	return &gen.AgentApp{
-		Slug: gen.AgentApp_WIREGUARD,
-		// VpnMode: ,
-		// VpnAddress: ,
-		// VpnClients: ,
+		Slug:       gen.AgentApp_WIREGUARD,
+		VpnMode:    &agentVpnModeClient,
+		VpnAddress: &vpnAddress,
+		VpnClients: []string{},
 	}
 }
 
