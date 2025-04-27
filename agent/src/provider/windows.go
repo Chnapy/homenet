@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -41,9 +43,21 @@ func (e *WindowsProvider) GetLan() string {
 	ipconfigOutput, _ := e.executor.Exec("ipconfig")
 
 	re := regexp.MustCompile(`Adresse IPv4[^\d]+(\d+\.\d+\.\d+\.\d+)`)
-	match := re.FindStringSubmatch(ipconfigOutput)
+	matchs := re.FindAllStringSubmatch(ipconfigOutput, -1)
 
-	return match[1]
+	ipList := []string{}
+
+	for _, match := range matchs {
+		ipList = append(ipList, match[1])
+	}
+
+	sort.Slice(ipList, func(i, j int) bool {
+		from, _ := strconv.Atoi(strings.Split(ipList[i], ".")[0])
+		to, _ := strconv.Atoi(strings.Split(ipList[j], ".")[0])
+		return from > to
+	})
+
+	return ipList[0]
 }
 
 func (e *WindowsProvider) GetWan() *string {
@@ -91,9 +105,21 @@ func (a *WindowsProvider) GetWireguard() *gen.AgentApp {
 	ipconfigOutput, _ := a.executor.Exec("ipconfig")
 
 	re := regexp.MustCompile(`Adresse IPv4[^\d]+(\d+\.\d+\.\d+\.\d+)`)
-	match := re.FindStringSubmatch(ipconfigOutput)
+	matchs := re.FindAllStringSubmatch(ipconfigOutput, -1)
 
-	vpnAddress := match[1]
+	ipList := []string{}
+
+	for _, match := range matchs {
+		ipList = append(ipList, match[1])
+	}
+
+	sort.Slice(ipList, func(i, j int) bool {
+		from, _ := strconv.Atoi(strings.Split(ipList[i], ".")[0])
+		to, _ := strconv.Atoi(strings.Split(ipList[j], ".")[0])
+		return from < to
+	})
+
+	vpnAddress := ipList[0]
 
 	var agentVpnModeClient gen.AgentApp_AgentVpnMode = gen.AgentApp_CLIENT
 
