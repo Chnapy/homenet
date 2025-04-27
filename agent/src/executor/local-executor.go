@@ -3,6 +3,7 @@ package executor
 import (
 	env "agent/src/env"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -28,13 +29,18 @@ func (l *LocalExecutor) Exec(command string) (string, error) {
 		fmt.Printf("local-in <- %s\n", command)
 	}
 
+	exe, _ := os.Executable()
+
 	startTime := time.Now().UnixMilli()
 
 	// parts := strings.Fields(command)
 	parts, _ := shellwords.Parse(command)
 	var name string
 	var args []string
-	if len(parts) > 1 && parts[0] == "pct" && parts[1] == "exec" {
+	if strings.HasSuffix(exe, ".exe") {
+		name = "cmd"
+		args = append([]string{"/C"}, parts...)
+	} else if len(parts) > 1 && parts[0] == "pct" && parts[1] == "exec" {
 		name = "pct"
 		args = parts[1:]
 	} else if len(parts) > 2 && parts[0] == "qm" && parts[2] == "exec" {

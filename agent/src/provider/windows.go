@@ -3,8 +3,10 @@ package provider
 import (
 	ex "agent/src/executor"
 	gen "agent/src/grpc/generated"
+	"os"
 	"regexp"
 	"slices"
+	"strings"
 )
 
 type WindowsProvider struct {
@@ -18,6 +20,11 @@ func NewWindowsProvider(executor ex.Executor) *WindowsProvider {
 }
 
 func (e *WindowsProvider) Check() bool {
+	exe, _ := os.Executable()
+	if strings.HasSuffix(exe, ".exe") {
+		return true
+	}
+
 	_, err := e.executor.Exec("uname -a")
 	return err != nil
 }
@@ -99,7 +106,7 @@ func (a *WindowsProvider) GetWireguard() *gen.AgentApp {
 }
 
 func (a *WindowsProvider) GetSunshine() *gen.AgentApp {
-	_, err := a.executor.Exec("dir \"\\program files\\Sunshine\"")
+	_, err := a.executor.Exec("dir \"C:/Program Files/Sunshine\"")
 	if err != nil {
 		return nil
 	}
