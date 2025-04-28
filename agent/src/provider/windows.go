@@ -85,6 +85,7 @@ func (a *WindowsProvider) GetApps() []*gen.AgentApp {
 		[]*gen.AgentApp{
 			a.GetWireguard(),
 			a.GetSunshine(),
+			a.GetMoonlight(),
 		},
 		func(app *gen.AgentApp) bool {
 			return app == nil
@@ -145,5 +146,16 @@ func (a *WindowsProvider) GetSunshine() *gen.AgentApp {
 				Port: &port32,
 			},
 		},
+	}
+}
+
+func (a *WindowsProvider) GetMoonlight() *gen.AgentApp {
+	_, err := a.executor.Exec("dir \"C:/Program Files/Moonlight Game Streaming\"")
+	if err != nil {
+		return nil
+	}
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_MOONLIGHT,
 	}
 }
