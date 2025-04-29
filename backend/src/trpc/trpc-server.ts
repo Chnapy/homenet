@@ -1,11 +1,19 @@
 import cors from "@fastify/cors";
 import {
+  CreateFastifyContextOptions,
   fastifyTRPCPlugin,
-  FastifyTRPCPluginOptions,
 } from "@trpc/server/adapters/fastify";
-import fastify from "fastify";
+import { HTTPErrorHandler } from "@trpc/server/unstable-core-do-not-import";
+import fastify, { FastifyRequest } from "fastify";
 import { getAgentByOSRoute } from "./procedures/get-agent-by-os";
-import { AppRouter, appRouter } from "./router";
+import { appRouter } from "./router";
+
+export type Context = Awaited<ReturnType<typeof createContext>>;
+
+const createContext = ({ req, res }: CreateFastifyContextOptions) => ({
+  req,
+  res,
+});
 
 export const setupTRPCServer = () => {
   const tRPCServer = fastify();
@@ -14,12 +22,12 @@ export const setupTRPCServer = () => {
     prefix: "/api",
     trpcOptions: {
       router: appRouter,
-      createContext: ({ req, res }) => ({ req, res }),
-      onError({ path, error }) {
+      createContext,
+      onError: (({ path, error }) => {
         // report to error monitoring
         console.error(`tRPC Error in handler on path '${path}':`, error);
-      },
-    } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
+      }) satisfies HTTPErrorHandler<any, FastifyRequest>,
+    },
   });
 
   tRPCServer.get("/agent/:os", getAgentByOSRoute);

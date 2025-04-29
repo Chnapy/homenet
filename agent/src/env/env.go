@@ -1,6 +1,9 @@
 package env
 
-import "os"
+import (
+	"encoding/json"
+	"os"
+)
 
 type EnvType struct {
 	LogLevel     string
@@ -38,4 +41,11 @@ var Env = EnvType{
 	UpdateCron:   GetenvWithDefault("UPDATE_CRON", defaultEnv.UpdateCron),
 	Path:         GetenvWithDefault("PATH", defaultEnv.Path),
 	FromCron:     GetenvWithDefault("FROM_CRON", defaultEnv.FromCron),
+}
+
+func GetEnvMap() map[string]string {
+	var envMap map[string]string
+	var envJson, _ = json.Marshal(Env)
+	json.Unmarshal(envJson, &envMap)
+	return envMap
 }

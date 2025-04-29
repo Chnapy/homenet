@@ -3,6 +3,7 @@ import { DevicesFullQuery } from "../query/use-devices-full-query";
 export type DeviceList = DevicesFullQuery["deviceList"];
 export type InstanceList = DevicesFullQuery["instanceList"];
 export type AppList = DevicesFullQuery["appList"];
+export type AgentMetadataList = DevicesFullQuery["agentMetadataList"];
 export type NetEntityMap = DevicesFullQuery["netEntityMap"];
 
 export type NetEntity = NetEntityMap[string];
@@ -21,3 +22,5 @@ export type DeviceAppSlug = DeviceApp["slug"];
 export type DeviceInstance = InstanceList[number];
 
 export type DeviceInstanceType = DeviceInstance["type"];
+
+export type AgentMetadata = AgentMetadataList[number];

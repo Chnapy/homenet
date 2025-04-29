@@ -1,6 +1,10 @@
-import { ThemeProvider as AppThemeProvider, createTheme, Theme } from '@mui/material/styles';
+import {
+  ThemeProvider as AppThemeProvider,
+  createTheme,
+  Theme,
+} from "@mui/material/styles";
 import React from "react";
-import { DeviceUserMetaTheme } from '../../data/types/get-devices-user-meta';
+import { DeviceUserMetaTheme } from "../../data/types/get-devices-user-meta";
 
 // const colorSchemes = {
 // dark: {
@@ -63,139 +67,136 @@ import { DeviceUserMetaTheme } from '../../data/types/get-devices-user-meta';
 // }
 
 const themeBase = createTheme({
-    palette: {
-        mode: 'dark',
-        primary: {
-            main: '#e1dab7',
-            contrastText: '#191816',
-        },
-        secondary: {
-            main: '#b0bda0',
-            contrastText: '#191816',
-        },
-        text: {
-            primary: 'rgb(228, 223, 216)',
-            secondary: 'rgba(228, 223, 216, 0.6)',
-            disabled: 'rgba(228, 223, 216, 0.38)',
-            // hint: 'rgb(87, 102, 71)',
-        },
-        background: {
-            default: '#191816',
-            paper: '#202020',
-        },
-        error: {
-            main: '#de6359',
-        },
-        warning: {
-            main: '#f1ac48',
-        },
-        info: {
-            main: '#61b6de',
-        },
-        success: {
-            main: '#7dcb7f',
-        },
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "rgb(228, 223, 216)",
+      //   contrastText: "#191816",
     },
-    typography: {
-        fontFamily: 'Geist, "Roboto", "Helvetica", "Arial", sans-serif',
+    secondary: {
+      main: "#b0bda0",
+      contrastText: "#191816",
     },
-    shape: {
-        borderRadius: 2,
+    text: {
+      primary: "rgb(228, 223, 216)",
+      secondary: "rgba(228, 223, 216, 0.6)",
+      disabled: "rgba(228, 223, 216, 0.38)",
+      // hint: 'rgb(87, 102, 71)',
     },
-    components: {
-        // MuiButtonBase: {
-        //     defaultProps: {
-        //         // disableRipple: true,
-        //         centerRipple: true,
-        //     },
-        // },
-        MuiListItemIcon: {
-            styleOverrides: {
-                root: {
-                    color: 'currentColor'
-                }
-            }
-        }
+    background: {
+      default: "#191816",
+      paper: "#202020",
     },
-    // colorSchemes,
+    error: {
+      main: "#de6359",
+    },
+    warning: {
+      main: "#f1ac48",
+    },
+    info: {
+      main: "#61b6de",
+    },
+    success: {
+      main: "#7dcb7f",
+    },
+  },
+  typography: {
+    fontFamily: 'Geist, "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  shape: {
+    borderRadius: 2,
+  },
+  components: {
+    // MuiButtonBase: {
+    //     defaultProps: {
+    //         // disableRipple: true,
+    //         centerRipple: true,
+    //     },
+    // },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          color: "currentColor",
+        },
+      },
+    },
+  },
+  // colorSchemes,
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
-    default: themeBase,
+  default: themeBase,
 
-    mauve: createTheme({
-        ...themeBase,
-        palette: {
-            ...themeBase.palette,
-            primary: {
-                ...themeBase.palette.primary,
-                main: '#5f4a5f',
-            },
-            background: {
-                default: '#220022',
-                paper: '#362236'
-            },
-        },
-    }),
+  mauve: createTheme({
+    ...themeBase,
+    palette: {
+      ...themeBase.palette,
+      primary: {
+        ...themeBase.palette.primary,
+        // main: "inherit",
+      },
+      background: {
+        default: "#220022",
+        paper: "#362236",
+      },
+    },
+  }),
 
-    blue: createTheme({
-        ...themeBase,
-        palette: {
-            ...themeBase.palette,
-            primary: {
-                ...themeBase.palette.primary,
-                main: '#5f4a5f',
-            },
-            background: {
-                default: '#000022',
-                paper: '#222236'
-            },
-        },
-    }),
+  blue: createTheme({
+    ...themeBase,
+    palette: {
+      ...themeBase.palette,
+      primary: {
+        ...themeBase.palette.primary,
+        main: "#5f4a5f",
+      },
+      background: {
+        default: "#000022",
+        paper: "#222236",
+      },
+    },
+  }),
 
-    green: createTheme({
-        ...themeBase,
-        palette: {
-            ...themeBase.palette,
-            primary: {
-                ...themeBase.palette.primary,
-                main: '#5f4a5f',
-            },
-            background: {
-                default: '#002200',
-                paper: '#223622'
-            },
-        },
-    }),
+  green: createTheme({
+    ...themeBase,
+    palette: {
+      ...themeBase.palette,
+      primary: {
+        ...themeBase.palette.primary,
+        main: "#5f4a5f",
+      },
+      background: {
+        default: "#002200",
+        paper: "#223622",
+      },
+    },
+  }),
 
-    yellow: createTheme({
-        ...themeBase,
-        palette: {
-            ...themeBase.palette,
-            primary: {
-                ...themeBase.palette.primary,
-                main: '#5f4a5f',
-            },
-            background: {
-                default: '#222200',
-                paper: '#363622'
-            },
-        },
-    }),
+  yellow: createTheme({
+    ...themeBase,
+    palette: {
+      ...themeBase.palette,
+      primary: {
+        ...themeBase.palette.primary,
+        main: "#5f4a5f",
+      },
+      background: {
+        default: "#222200",
+        paper: "#363622",
+      },
+    },
+  }),
 };
 
 type ThemeProviderProps = {
-    themeName?: DeviceUserMetaTheme;
-}
+  themeName?: DeviceUserMetaTheme;
+};
 
-export const ThemeProvider: React.FC<React.PropsWithChildren<ThemeProviderProps>> = ({
-    themeName = 'default',
-    children
-}) => {
-    return (
-        <AppThemeProvider theme={themeMap[ themeName ]}>
-            {children}
-        </AppThemeProvider>
-    )
+export const ThemeProvider: React.FC<
+  React.PropsWithChildren<ThemeProviderProps>
+> = ({ themeName = "default", children }) => {
+  return (
+    <AppThemeProvider theme={themeMap[themeName]}>{children}</AppThemeProvider>
+  );
 };

@@ -1,14 +1,15 @@
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import React from "react";
+import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 import { AppLine } from "../app/app-line";
+import { AppContext } from "../app/provider/app-provider";
 import { InstanceCard } from "../instance/instance-card";
 import { InstanceContext } from "../instance/provider/instance-provider";
 import { OSLine } from "../os/os-line";
 import { DeviceAccessLineList } from "./device-access-line-list";
 import { DeviceIcon } from "./device-icon";
+import { DeviceDialogBtn } from "./dialog/device-dialog-btn";
 import { DeviceContext } from "./provider/device-provider";
-import { AppContext } from "../app/provider/app-provider";
-import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 
 export const DeviceCard: React.FC = () => {
   const { device, deviceUserMeta } = DeviceContext.useValue();
@@ -49,8 +50,14 @@ export const DeviceCard: React.FC = () => {
       </Box>
 
       <Card variant="outlined">
-        <Typography variant="h6" sx={{ ml: "72px", px: 2, pl: 4 }}>
-          {deviceUserMeta.name}
+        <Typography
+          variant="h6"
+          display="flex"
+          justifyContent="space-between"
+          sx={{ ml: "72px", px: 2, pl: 4 }}
+        >
+          {deviceUserMeta.name ?? device.id}
+          <DeviceDialogBtn />
         </Typography>
 
         <OSLine />

@@ -23,6 +23,7 @@ func PrepareData(releaseTag string) *gen.AgentUpdateRequest {
 			ReleaseTag:       releaseTag,
 			ComputeStartTime: startTime,
 			ComputeDuration:  duration,
+			Env:              env.GetEnvMap(),
 		},
 		Device: &device,
 	}
