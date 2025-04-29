@@ -47,7 +47,7 @@ func (l *QMExecutor) Exec(command string) (string, error) {
 	}
 
 	var data string
-	if jsonOutput.OutData != nil {
+	if err == nil && jsonOutput.OutData != nil {
 		data = strings.TrimSpace(*jsonOutput.OutData)
 	}
 
