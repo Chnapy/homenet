@@ -103,7 +103,7 @@ func (e *DebianProvider) GetLan() string {
 		}
 	}
 
-	panic("No IP found")
+	return ""
 }
 
 func (e *DebianProvider) GetWan() *string {

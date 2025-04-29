@@ -2,10 +2,6 @@ import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { openDeviceDB } from "../../db/device";
 import {
-  DeviceUserMetadata,
-  openDeviceUserMetadataDB,
-} from "../../db/device-user-metadata";
-import {
   AgentMetadataFull,
   getAgentMetadataFullFromAgentMetadata,
 } from "../entities/agent-metadata";
@@ -16,7 +12,6 @@ import { getNetEntityMap, NetEntityMap } from "../utils/get-net-entity-map";
 
 export const getDevicesFull = publicProcedure.query(
   async (): Promise<{
-    deviceUserMetaMap: Record<string, DeviceUserMetadata>;
     deviceList: Instance[];
     instanceList: Instance[];
     appList: App[];
@@ -26,29 +21,18 @@ export const getDevicesFull = publicProcedure.query(
     const db = openRootDB();
 
     const deviceDB = openDeviceDB(db);
-    const deviceUserMetadataDB = openDeviceUserMetadataDB(db);
     const agentMetadataDB = openAgentMetadataDB(db);
 
-    const [agentDeviceList, deviceUserMetadataList, agentMetadataList] =
-      await Promise.all([
-        deviceDB
-          .getMany(deviceDB.getKeys().asArray)
-          .then((instances) =>
-            instances.filter((value) => value !== undefined)
-          ),
-        deviceUserMetadataDB
-          .getMany(deviceUserMetadataDB.getKeys().asArray)
-          .then((metadata) => metadata.filter((value) => value !== undefined)),
-        agentMetadataDB
-          .getRange()
-          .asArray.map(({ key, value }) =>
-            getAgentMetadataFullFromAgentMetadata(key, value)
-          ),
-      ]);
-
-    const deviceUserMetaMap = Object.fromEntries(
-      deviceUserMetadataList.map((data) => [data!.deviceId, data!])
-    );
+    const [agentDeviceList, agentMetadataList] = await Promise.all([
+      deviceDB
+        .getMany(deviceDB.getKeys().asArray)
+        .then((instances) => instances.filter((value) => value !== undefined)),
+      agentMetadataDB
+        .getRange()
+        .asArray.map(({ key, value }) =>
+          getAgentMetadataFullFromAgentMetadata(key, value)
+        ),
+    ]);
 
     const deviceList = agentDeviceList.map(getInstanceFromAgentInstance);
 
@@ -79,7 +63,6 @@ export const getDevicesFull = publicProcedure.query(
     }
 
     return {
-      deviceUserMetaMap,
       deviceList,
       instanceList,
       appList,

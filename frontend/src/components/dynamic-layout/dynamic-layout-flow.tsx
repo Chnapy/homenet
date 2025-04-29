@@ -18,6 +18,7 @@ import ViewportLogger from "./devtools/viewport-logger";
 import { PolylineEdge, PolylineEdgeType } from "./edge/polyline-edge";
 import { useLayoutAlgorithm } from "./hooks/use-layout-algorithm";
 import { DeviceNode, DeviceNodeType } from "./node/device-node";
+import { useDevicesUserMetadata } from "../../data/query/use-devices-user-metadata";
 
 import "@xyflow/react/dist/style.css";
 
@@ -33,6 +34,7 @@ const edgeTypes: EdgeTypes = {
 
 export const DynamicLayoutFlow: React.FC = () => {
   const devicesFullQuery = useDevicesFullQuery();
+  const devicesUserMetadata = useDevicesUserMetadata();
   const netEntityLinks = useNetEntityLinks();
 
   const getNodesState = () =>
@@ -158,8 +160,7 @@ export const DynamicLayoutFlow: React.FC = () => {
             }
           };
 
-          const deviceUserMetaMap =
-            devicesFullQuery.data?.deviceUserMetaMap ?? {};
+          const deviceUserMetaMap = devicesUserMetadata.data ?? {};
 
           const inMeta = deviceUserMetaMap[source];
           // const ouMeta = deviceUserMetaMap[ target ];
@@ -198,7 +199,13 @@ export const DynamicLayoutFlow: React.FC = () => {
 
       console.log({ layout, newNodes, newEdges, edgesSections });
     });
-  }, [devicesFullQuery.data, getLayoutAlgorithm, setEdges, setNodes]);
+  }, [
+    devicesFullQuery.data,
+    devicesUserMetadata.data,
+    getLayoutAlgorithm,
+    setEdges,
+    setNodes,
+  ]);
 
   return (
     <ContainerFluid>
@@ -214,7 +221,7 @@ export const DynamicLayoutFlow: React.FC = () => {
         draggable={false}
         proOptions={{ hideAttribution: true }}
         style={{
-          opacity: nodes.length === 1 || edges.length > 0 ? 1 : 0,
+          // opacity: nodes.length === 1 || edges.length > 0 ? 1 : 0,
           transition: "opacity .2s",
         }}
       >

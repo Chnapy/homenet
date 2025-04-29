@@ -21,13 +21,14 @@ import {
 import React from "react";
 import { useDeviceUserMetadataMutation } from "../../../data/query/use-device-user-metadata-mutation";
 import { useDevicesFullQuery } from "../../../data/query/use-devices-full-query";
+import { useRemoveDeviceMutation } from "../../../data/query/use-remove-device-mutation";
+import { AgentMetadata } from "../../../data/types/get-devices";
 import {
   DeviceUserMeta,
   DeviceUserMetaTheme,
   DeviceUserMetaType,
 } from "../../../data/types/get-devices-user-meta";
 import { DeviceContext } from "../provider/device-provider";
-import { AgentMetadata } from "../../../data/types/get-devices";
 
 interface FormElement extends HTMLFormElement {
   readonly elements: HTMLFormControlsCollection &
@@ -36,11 +37,13 @@ interface FormElement extends HTMLFormElement {
 
 export const DeviceDialogBtn: React.FC = () => {
   const [open, setOpen] = React.useState(false);
+  const [confirmRemove, setConfirmRemove] = React.useState(false);
 
   const { device, deviceUserMeta } = DeviceContext.useValue();
 
   const devicesFullQuery = useDevicesFullQuery();
-  const { mutateAsync, isPending } = useDeviceUserMetadataMutation();
+  const updateUserMetadataMutation = useDeviceUserMetadataMutation();
+  const removeDeviceMutation = useRemoveDeviceMutation();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -50,7 +53,7 @@ export const DeviceDialogBtn: React.FC = () => {
 
     const elements = event.currentTarget.elements;
 
-    await mutateAsync({
+    await updateUserMetadataMutation.mutateAsync({
       deviceId: deviceUserMeta.deviceId,
       name: elements.name.value,
       type: (elements.type.value as typeof deviceUserMeta.type) || undefined,
@@ -169,7 +172,7 @@ export const DeviceDialogBtn: React.FC = () => {
                 <Button
                   type="submit"
                   variant="outlined"
-                  loading={isPending}
+                  loading={updateUserMetadataMutation.isPending}
                   size="small"
                   fullWidth
                 >
@@ -263,6 +266,36 @@ export const DeviceDialogBtn: React.FC = () => {
                     </Typography>
                   </AccordionDetails>
                 </Accordion>
+              </Grid2>
+
+              <Grid2 size={12}>
+                {confirmRemove ? (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={async () => {
+                      await removeDeviceMutation.mutateAsync({
+                        deviceId: device.id,
+                      });
+                      handleClose();
+                    }}
+                    loading={removeDeviceMutation.isPending}
+                    size="small"
+                    fullWidth
+                  >
+                    Really ?
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => setConfirmRemove(true)}
+                    size="small"
+                    fullWidth
+                  >
+                    Remove
+                  </Button>
+                )}
               </Grid2>
             </Grid2>
           </DialogContent>

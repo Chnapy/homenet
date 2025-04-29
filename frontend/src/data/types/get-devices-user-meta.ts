@@ -1,8 +1,6 @@
-import { DevicesFullQuery } from "../query/use-devices-full-query";
+import { DevicesUserMetadata } from "../query/use-devices-user-metadata";
 
-export type DeviceUserMetaMap = DevicesFullQuery["deviceUserMetaMap"];
-
-export type DeviceUserMeta = DeviceUserMetaMap[string];
+export type DeviceUserMeta = DevicesUserMetadata[string];
 
 export type DeviceUserMetaType = DeviceUserMeta["type"];
 
