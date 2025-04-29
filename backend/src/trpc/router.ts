@@ -1,4 +1,4 @@
-import { getDB } from "./procedures/get-db";
+// import { getDB } from "./procedures/get-db";
 import { getDevicesFull } from "./procedures/get-devices-full";
 import { getDevicesUserMetadata } from "./procedures/get-devices-user-metadata";
 import { removeDevice } from "./procedures/remove-device";
@@ -11,7 +11,7 @@ export const appRouter = router({
   updateDeviceUserMetadata,
   removeDevice,
 
-  getDB,
+  // getDB,
 });
 
 // Export type router type signature,

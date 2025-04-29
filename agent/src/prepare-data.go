@@ -1,6 +1,7 @@
 package main
 
 import (
+	env "agent/src/env"
 	ex "agent/src/executor"
 	gen "agent/src/grpc/generated"
 	p "agent/src/provider"
