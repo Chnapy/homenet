@@ -305,7 +305,10 @@ func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
 		var containerItem DockerPS
 		var _ = json.Unmarshal([]byte(line), &containerItem)
 
-		containerId := containerItem.ID
+		containerId := strings.TrimSpace(containerItem.ID)
+		if containerId == "" {
+			continue
+		}
 
 		dockerExec := ex.NewDockerExecutor(e.executor, containerId)
 
