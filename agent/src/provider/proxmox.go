@@ -17,7 +17,8 @@ func NewProxmoxProvider(executor ex.Executor) *ProxmoxProvider {
 }
 
 func (e *ProxmoxProvider) Check() bool {
-	return e.executor.IsDir("/etc/pve")
+	_, err := e.executor.Exec("qm help")
+	return err == nil
 }
 
 func (l *ProxmoxProvider) GetInstance() gen.AgentInstance {

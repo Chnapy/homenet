@@ -33,10 +33,6 @@ func (l *QMExecutor) Exec(command string) (string, error) {
 	var jsonOutput QMOutput
 	var _ = json.Unmarshal([]byte(output), &jsonOutput)
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	if jsonOutput.exitcode != 0 {
 		err = fmt.Errorf("%d", jsonOutput.exitcode)
 	}
@@ -44,6 +40,10 @@ func (l *QMExecutor) Exec(command string) (string, error) {
 	if jsonOutput.ErrData != nil {
 		err = fmt.Errorf("%s", *jsonOutput.ErrData)
 		fmt.Println(*jsonOutput.ErrData)
+	}
+
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	var data string

@@ -22,8 +22,8 @@ func NewHAOSProvider(executor ex.Executor) *HAOSProvider {
 }
 
 func (e *HAOSProvider) Check() bool {
-	uname, _ := e.executor.Exec("uname -a")
-	return strings.Contains(uname, "-haos")
+	_, err := e.executor.Exec("ha --help")
+	return err == nil
 }
 
 func (l *HAOSProvider) GetInstance() gen.AgentInstance {

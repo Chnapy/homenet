@@ -24,10 +24,6 @@ func (l *DockerExecutor) Exec(command string) (string, error) {
 		return "", fmt.Errorf("docker command not usable from docker executable: %s", command)
 	}
 
-	if strings.HasPrefix(command, "ha ") {
-		return "", fmt.Errorf("ha command not usable from docker executable: %s", command)
-	}
-
 	return l.parentExecutor.Exec("docker exec " + l.id + " " + command)
 }
 
