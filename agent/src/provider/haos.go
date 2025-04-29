@@ -257,5 +257,5 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 }
 
 func (e *HAOSProvider) GetInstanceList() []*gen.AgentInstance {
-	return NewDebianProvider(e.executor).GetInstanceList()
+	return []*gen.AgentInstance{}
 }

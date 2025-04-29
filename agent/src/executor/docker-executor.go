@@ -1,10 +1,5 @@
 package executor
 
-import (
-	"fmt"
-	"strings"
-)
-
 type DockerExecutor struct {
 	*BaseExecutor
 	parentExecutor Executor
@@ -20,10 +15,6 @@ func NewDockerExecutor(parentExecutor Executor, id string) *DockerExecutor {
 }
 
 func (l *DockerExecutor) Exec(command string) (string, error) {
-	if strings.HasPrefix(command, "docker ") {
-		return "", fmt.Errorf("docker command not usable from docker executable: %s", command)
-	}
-
 	return l.parentExecutor.Exec("docker exec " + l.id + " " + command)
 }
 
