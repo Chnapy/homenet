@@ -37,6 +37,8 @@ export const DynamicLayoutFlow: React.FC = () => {
   const devicesUserMetadata = useDevicesUserMetadata();
   const netEntityLinks = useNetEntityLinks();
 
+  const processingRef = React.useRef(false);
+
   const getNodesState = () =>
     (devicesFullQuery.data?.deviceList ?? []).map(
       ({ id }): AnyNode => ({
@@ -62,11 +64,20 @@ export const DynamicLayoutFlow: React.FC = () => {
   }, [devicesFullQuery.data, netEntityLinks.data]);
 
   React.useEffect(() => {
-    if (!getLayoutAlgorithm) {
+    if (
+      processingRef.current ||
+      !getLayoutAlgorithm ||
+      !devicesFullQuery.data ||
+      !devicesUserMetadata.data
+    ) {
       return;
     }
 
-    getLayoutAlgorithm().then((layout) => {
+    processingRef.current = true;
+
+    const getNodesFromLayout = (
+      layout: Awaited<ReturnType<typeof getLayoutAlgorithm>>
+    ) => {
       const edgesSections = (layout.edges ?? []).flatMap(
         (edge) => edge.sections ?? []
       );
@@ -133,72 +144,95 @@ export const DynamicLayoutFlow: React.FC = () => {
         }
       );
 
-      const newEdges = (layout.edges ?? []).map(
-        ({ id, sources, targets, sections, labels }): PolylineEdgeType => {
-          // const link = netEntityLinks.data!.find(link => link.id === id)!;
+      return {
+        everyChildren,
+        newNodes,
+      };
+    };
 
-          const source = sources[0];
-          const target = targets[0];
+    // 1st process for nodes only
+    getLayoutAlgorithm()
+      .then((layout) => {
+        const { newNodes } = getNodesFromLayout(layout);
 
-          // get source/target offset handling group/no-group cases
-          const getOffset = (): ElkPoint | undefined => {
-            const sourceNode = everyChildren.find(
-              (child) => child.id === source
-            );
-            const targetNode = everyChildren.find(
-              (child) => child.id === target
-            );
+        setNodes(newNodes);
 
-            if (
-              sourceNode?.parent &&
-              sourceNode.parent.id === targetNode?.parent?.id
-            ) {
-              return {
-                x: sourceNode.parent.x ?? 0,
-                y: sourceNode.parent.y ?? 0,
-              };
-            }
-          };
+        console.log("1st process layout", { layout, newNodes });
+      })
+      // 2nd process for group nodes & edges
+      .then(getLayoutAlgorithm)
+      .then((layout) => {
+        const { everyChildren, newNodes } = getNodesFromLayout(layout);
 
-          const deviceUserMetaMap = devicesUserMetadata.data ?? {};
+        const newEdges = (layout.edges ?? []).map(
+          ({ id, sources, targets, sections, labels }): PolylineEdgeType => {
+            // const link = netEntityLinks.data!.find(link => link.id === id)!;
 
-          const inMeta = deviceUserMetaMap[source];
-          // const ouMeta = deviceUserMetaMap[ target ];
+            const source = sources[0];
+            const target = targets[0];
 
-          const inTheme = themeMap[inMeta.theme];
-          // const ouTheme = themeMap[ ouMeta.theme ];
+            // get source/target offset handling group/no-group cases
+            const getOffset = (): ElkPoint | undefined => {
+              const sourceNode = everyChildren.find(
+                (child) => child.id === source
+              );
+              const targetNode = everyChildren.find(
+                (child) => child.id === target
+              );
 
-          const pathColor = `color-mix(in HSL, ${inTheme.palette.background.paper} 88%, #FFF)`;
+              if (
+                sourceNode?.parent &&
+                sourceNode.parent.id === targetNode?.parent?.id
+              ) {
+                return {
+                  x: sourceNode.parent.x ?? 0,
+                  y: sourceNode.parent.y ?? 0,
+                };
+              }
+            };
 
-          return {
-            type: "polyline",
-            id,
-            source,
-            sourceHandle: id,
-            target,
-            targetHandle: id,
-            selectable: false,
-            // animated: true,
-            data: {
-              offset: getOffset(),
-              section: sections![0],
-              labels,
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              strokeWidth: 1,
-              color: pathColor,
-              width: 8,
-            },
-          };
-        }
-      );
+            const deviceUserMetaMap = devicesUserMetadata.data ?? {};
 
-      setNodes(newNodes);
-      setEdges(newEdges);
+            const inMeta = deviceUserMetaMap[source];
+            // const ouMeta = deviceUserMetaMap[ target ];
 
-      console.log({ layout, newNodes, newEdges, edgesSections });
-    });
+            const inTheme = themeMap[inMeta.theme];
+            // const ouTheme = themeMap[ ouMeta.theme ];
+
+            const pathColor = `color-mix(in HSL, ${inTheme.palette.background.paper} 88%, #FFF)`;
+
+            return {
+              type: "polyline",
+              id,
+              source,
+              sourceHandle: id,
+              target,
+              targetHandle: id,
+              selectable: false,
+              // animated: true,
+              data: {
+                offset: getOffset(),
+                section: sections![0],
+                labels,
+              },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                strokeWidth: 1,
+                color: pathColor,
+                width: 8,
+              },
+            };
+          }
+        );
+
+        setNodes(newNodes);
+        setEdges(newEdges);
+
+        console.log("2nd process layout", { layout, newNodes, newEdges });
+      })
+      .finally(() => {
+        processingRef.current = false;
+      });
   }, [
     devicesFullQuery.data,
     devicesUserMetadata.data,
@@ -221,7 +255,7 @@ export const DynamicLayoutFlow: React.FC = () => {
         draggable={false}
         proOptions={{ hideAttribution: true }}
         style={{
-          // opacity: nodes.length === 1 || edges.length > 0 ? 1 : 0,
+          opacity: nodes.length === 1 || edges.length > 0 ? 1 : 0,
           transition: "opacity .2s",
         }}
       >

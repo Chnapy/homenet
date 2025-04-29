@@ -28,7 +28,7 @@ export const getDevicesFull = publicProcedure.query(
         .getMany(deviceDB.getKeys().asArray)
         .then((instances) => instances.filter((value) => value !== undefined)),
       agentMetadataDB
-        .getRange()
+        .getRange({ reverse: true })
         .asArray.map(({ key, value }) =>
           getAgentMetadataFullFromAgentMetadata(key, value)
         ),

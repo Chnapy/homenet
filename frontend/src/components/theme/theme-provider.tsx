@@ -149,7 +149,7 @@ export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
       ...themeBase.palette,
       primary: {
         ...themeBase.palette.primary,
-        main: "#5f4a5f",
+        // main: "#5f4a5f",
       },
       background: {
         default: "#000022",
@@ -164,7 +164,7 @@ export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
       ...themeBase.palette,
       primary: {
         ...themeBase.palette.primary,
-        main: "#5f4a5f",
+        // main: "#5f4a5f",
       },
       background: {
         default: "#002200",
@@ -179,7 +179,7 @@ export const themeMap: Record<DeviceUserMetaTheme, Theme> = {
       ...themeBase.palette,
       primary: {
         ...themeBase.palette.primary,
-        main: "#5f4a5f",
+        // main: "#5f4a5f",
       },
       background: {
         default: "#222200",

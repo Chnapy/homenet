@@ -4,6 +4,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
+  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -29,6 +31,7 @@ import {
   DeviceUserMetaType,
 } from "../../../data/types/get-devices-user-meta";
 import { DeviceContext } from "../provider/device-provider";
+import { useAgentHealth } from "./use-agent-health";
 
 interface FormElement extends HTMLFormElement {
   readonly elements: HTMLFormControlsCollection &
@@ -44,6 +47,8 @@ export const DeviceDialogBtn: React.FC = () => {
   const devicesFullQuery = useDevicesFullQuery();
   const updateUserMetadataMutation = useDeviceUserMetadataMutation();
   const removeDeviceMutation = useRemoveDeviceMutation();
+
+  const agentHealth = useAgentHealth();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -80,14 +85,28 @@ export const DeviceDialogBtn: React.FC = () => {
         instanceList.some((instance) => instance.id === app.parentId)
     ) ?? [];
 
-  const lastAgentMetadata = agentMetadataList[agentMetadataList.length - 1] as
-    | AgentMetadata
-    | undefined;
+  const lastAgentMetadata = agentMetadataList[0] as AgentMetadata | undefined;
 
   return (
     <>
-      <IconButton onClick={handleOpen} size="small" color="secondary">
-        <SettingsIcon fontSize="inherit" />
+      <IconButton
+        onClick={handleOpen}
+        size="small"
+        color="secondary"
+        title={agentHealth.description}
+      >
+        <Badge
+          color={
+            agentHealth.state === "error"
+              ? "error"
+              : agentHealth.state === "warning"
+              ? "warning"
+              : "success"
+          }
+          variant="dot"
+        >
+          <SettingsIcon fontSize="inherit" />
+        </Badge>
       </IconButton>
 
       <Dialog open={open} onClose={handleClose}>
@@ -182,6 +201,19 @@ export const DeviceDialogBtn: React.FC = () => {
 
               <Grid2 size={12}>
                 <Divider variant="middle" />
+              </Grid2>
+
+              <Grid2 size={12}>
+                {agentHealth.state === "error" && (
+                  <Alert severity="error" variant="outlined">
+                    {agentHealth.description}
+                  </Alert>
+                )}
+                {agentHealth.state === "warning" && (
+                  <Alert severity="warning" variant="outlined">
+                    {agentHealth.description}
+                  </Alert>
+                )}
               </Grid2>
 
               {lastAgentMetadata && (
