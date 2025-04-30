@@ -8,6 +8,7 @@ export type NetEntityMap = DevicesFullQuery["netEntityMap"];
 
 export type NetEntity = NetEntityMap[string];
 export type NetAccess = NetEntity["asList"][number];
+export type AppNetAccess = NetEntity["apps"][DeviceAppSlug][number];
 
 export type Device = DeviceList[number];
 

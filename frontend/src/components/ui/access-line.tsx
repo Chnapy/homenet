@@ -14,6 +14,7 @@ import { NetAccess } from "../../data/types/get-devices";
 
 type AccessLineProps = NetAccess & {
   link?: boolean;
+  onClick?: () => void;
   disablePadding?: boolean;
 };
 
@@ -31,6 +32,7 @@ export const AccessLine: React.FC<AccessLineProps> = ({
   port,
   ssl,
   link,
+  onClick,
   disablePadding,
 }) => {
   const Icon = type === "ssh" ? TerminalIcon : iconMap[scope];
@@ -58,7 +60,11 @@ export const AccessLine: React.FC<AccessLineProps> = ({
 
   if (link) {
     return (
-      <ListItemButton disableGutters={disablePadding} sx={{ gap: 1 }}>
+      <ListItemButton
+        onClick={onClick}
+        disableGutters={disablePadding}
+        sx={{ gap: 1 }}
+      >
         {content}
       </ListItemButton>
     );

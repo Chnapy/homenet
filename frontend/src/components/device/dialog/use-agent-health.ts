@@ -38,15 +38,18 @@ export const useAgentHealth = (): AgentHealth => {
   }
 
   const interval = CronExpressionParser.parse(updateCron, {
-    startDate: new Date(time),
+    currentDate: new Date(time),
     tz: "Europe/Paris",
   });
 
+  const nextUseTime = interval.next().getTime();
+  const afterNextUseTime = interval.next().getTime();
+  const diffTime = afterNextUseTime - nextUseTime;
+  const expectedNextTime = time + diffTime;
+
   const todayTime = new Date().getTime();
 
-  const nextUseDate = interval.next().toDate();
-  const nextUseTime = nextUseDate.getTime();
-  if (nextUseTime < todayTime) {
+  if (expectedNextTime < todayTime) {
     return {
       state: "error",
       description: "Cron unexpectedly did not run agent",
