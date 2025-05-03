@@ -10,7 +10,7 @@ import { open, RootDatabase } from "lmdb";
 
 export const openRootDB = () =>
   open({
-    path: `homenet.db`,
+    path: `db/homenet.db`,
     compression: true,
   });
 

@@ -8,9 +8,6 @@ COPY . .
 
 RUN npm run build
 
-# RUN npm prune --omit=dev
-# RUN rm -R src public
-
 FROM nginx:alpine
 
 COPY --from=build /app/dist/ /usr/share/nginx/html

@@ -9,7 +9,7 @@ services:
       - "8081:8081"
       - "50051:50051"
     volumes:
-      - ./backend:/app
+      - ./backend/db:/app/db
     environment:
       - NODE_ENV=production
 
@@ -21,8 +21,8 @@ services:
     container_name: frontend
     ports:
       - "5174:80"
-    volumes:
-      - ./frontend:/app
+    # volumes:
+    #   - ./frontend:/app
     environment:
       - NODE_ENV=production
     depends_on:
