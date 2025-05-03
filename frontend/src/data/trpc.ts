@@ -3,15 +3,17 @@ import { createTRPCClient, httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { type AppRouter } from "../../../backend/src/trpc/router";
 
+console.log("env", import.meta.env.VITE_BACKEND_API);
+
 export const generateTrpc = (queryClient: QueryClient) => {
-  if (!process.env.BACKEND_API) {
+  if (!import.meta.env.VITE_BACKEND_API) {
     throw new Error("Env BACKEND_API missing");
   }
 
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
-        url: process.env.BACKEND_API,
+        url: import.meta.env.VITE_BACKEND_API,
         fetch: async (input, init) => {
           const response = await fetch(input, init);
 

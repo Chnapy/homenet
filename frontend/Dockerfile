@@ -6,6 +6,10 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
+ENV NODE_ENV=production
+ENV VITE_BACKEND_API=http://backend:8081/api
+# http://vps-0c88ff97.vps.ovh.net:8081
+
 RUN npm run build
 
 FROM nginx:alpine
