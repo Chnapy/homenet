@@ -127,5 +127,5 @@ jobs:
       - name: Update remote containers ⬆️
         run: |
           ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'cd homenet \
-            && docker-compose pull \
+            && docker compose pull \
             && docker compose up -d --force-recreate --remove-orphans'
