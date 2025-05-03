@@ -8,7 +8,7 @@
     "type": "tsc -b",
     "lint": "eslint .",
     "check": "npm run type && npm run lint",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {

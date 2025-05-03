@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  build-release:
+  create-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -69,7 +69,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT_TOKEN }}
         run: |
-          gh release create ${{ steps.tag.outputs.tag }} --draft --title "${{ steps.tag.outputs.tag }}" --notes "Release ${{ steps.tag.outputs.tag }}"
+          gh release create ${{ steps.tag.outputs.tag }} --draft --title "Homenet Agent ${{ steps.tag.outputs.tag }}" --notes "Release ${{ steps.tag.outputs.tag }}"
 
       - name: Build for ARM 32bits
         working-directory: agent
@@ -95,3 +95,37 @@ jobs:
         run: |
           gh release upload ${{ steps.tag.outputs.tag }} agent/dist/agent-linux-arm agent/dist/agent-linux-amd64 agent/dist/agent-windows-amd64.exe
           gh release edit ${{ steps.tag.outputs.tag }} --draft=false
+
+  deploy-front-back:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # - name: Format commit tag
+      #   id: tag
+      #   run: |
+      #     formatted_date=$(date -d "${{ github.event.head_commit.timestamp }}" +'0.0.%Y%m%d%H%M')
+      #     echo "tag=$formatted_date" >> $GITHUB_OUTPUT
+
+      - name: Docker build
+        run: docker compose build
+
+      - name: Docker push
+        run: docker compose push
+
+      - name: Set up SCP & upload to server 🔑
+        run: |
+          mkdir -vm 700 $HOME/.ssh
+          ssh-keyscan -H vps-0c88ff97.vps.ovh.net > $HOME/.ssh/known_hosts
+          echo "${{ secrets.SSH_KEY }}" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          sudo chown 1000:1000 docker-compose.yml
+          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'sudo chown 1000:1000 homenet -R'
+          scp -r docker-compose.yml ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net:~/homenet/
+
+      - name: Update remote containers ⬆️
+        run: |
+          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'cd homenet \
+            && docker-compose pull \
+            && docker compose up -d --force-recreate --remove-orphans'
