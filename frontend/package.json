@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_BACKEND_API=http://192.168.8.217:8081/api vite",
     "type": "tsc -b",
     "lint": "eslint .",
     "check": "npm run type && npm run lint",

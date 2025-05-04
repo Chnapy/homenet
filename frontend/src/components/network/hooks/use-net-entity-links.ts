@@ -1,6 +1,6 @@
 import React from "react";
 import { useDevicesFullQuery } from "../../../data/query/use-devices-full-query";
-import { DeviceAppSlug } from "../../../data/types/get-devices";
+import { Device, DeviceAppSlug } from "../../../data/types/get-devices";
 import { useNetEntityMap } from "./use-net-entity-map";
 
 type NetDeviceLink = {
@@ -14,7 +14,7 @@ type NetDeviceLink = {
     device: string;
     relatedApp?: DeviceAppSlug;
   };
-  label?: string;
+  label: string[];
 };
 
 export type NetEntityLinks = {
@@ -81,7 +81,7 @@ export const useNetEntityLinks = () => {
                 to: {
                   device: entity.id,
                 },
-                label: entity.lan,
+                label: [entity.lan],
               });
             })
         );
@@ -116,7 +116,7 @@ export const useNetEntityLinks = () => {
                   device: entity.id,
                   relatedApp: "WIREGUARD",
                 },
-                label: entity.vpn,
+                label: entity.vpn ? [entity.vpn] : [],
               });
             })
         );
@@ -157,7 +157,7 @@ export const useNetEntityLinks = () => {
                   to: {
                     device: entity!.id,
                   },
-                  label: proxy.fromDomain!.domain,
+                  label: [proxy.fromDomain!.domain],
                 })
             )
         );
@@ -180,12 +180,40 @@ export const useNetEntityLinks = () => {
                     device: sunshineApp.parentId,
                     relatedApp: "SUNSHINE",
                   },
+                  label: [],
                 })
             )
         );
       }
 
-      return links;
+      const getDevice = (deviceId: string): Device => {
+        const fromDevice = entityMap[deviceId];
+        if (fromDevice.type !== "DEVICE" && fromDevice.parentId) {
+          return getDevice(fromDevice.parentId);
+        }
+        return fromDevice;
+      };
+
+      const deduplicatedLinks: NetDeviceLink[] = links.reduce((list, link) => {
+        const foundLink = list.find(({ type, from, to }) => {
+          return (
+            link.type === type &&
+            getDevice(link.from.device) === getDevice(from.device) &&
+            link.from.relatedApp === from.relatedApp &&
+            getDevice(link.to.device) === getDevice(to.device) &&
+            link.to.relatedApp === to.relatedApp
+          );
+        });
+
+        if (foundLink) {
+          foundLink.label.push(...link.label);
+          return list;
+        }
+
+        return [...list, link];
+      }, [] as NetDeviceLink[]);
+
+      return deduplicatedLinks;
     });
 
     return {

@@ -157,10 +157,10 @@ export const useLayoutAlgorithm = () => {
                   "elk.edgeLabels.placement": "TAIL",
                 },
               },
-              link.label && {
-                id: link.id + "-label-center",
-                text: link.label,
-                width: link.label.length * 5,
+              ...link.label.map((label, i) => ({
+                id: link.id + "-label-center-" + i,
+                text: label,
+                width: label.length * 5,
                 height: 18,
                 layoutOptions: {
                   // 'elk.edgeLabels.placement': 'HEAD',
@@ -171,7 +171,7 @@ export const useLayoutAlgorithm = () => {
                   // 'elk.spacing.labelNode': '0',
                   // 'elk.layered.edgeLabels.sideSelection': 'ALWAYS_UP',
                 },
-              },
+              })),
               link.to.relatedApp && {
                 id: link.id + "-label-head",
                 text: link.to.relatedApp,

@@ -7,7 +7,7 @@ console.log("env", import.meta.env.VITE_BACKEND_API);
 
 export const generateTrpc = (queryClient: QueryClient) => {
   if (!import.meta.env.VITE_BACKEND_API) {
-    throw new Error("Env BACKEND_API missing");
+    throw new Error("Env VITE_BACKEND_API missing");
   }
 
   return createTRPCClient<AppRouter>({
