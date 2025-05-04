@@ -1,5 +1,7 @@
 **/generated/*
 !**/generated/.gitkeep
 
+protos
+
 *.db
 *.db-lock
