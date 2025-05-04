@@ -13,6 +13,11 @@ export const getAppMeta = (
         name: "Unknown", // TODO
         description: "Unknown app",
       };
+    case "HOMENET":
+      return {
+        name: "Homenet",
+        description: "Home network centralizer",
+      };
     case "WIREGUARD":
       return {
         name: `Wireguard`,
@@ -42,6 +47,11 @@ export const getAppMeta = (
       return {
         name: "Docker",
         description: "Containers",
+      };
+    case "DOCKER_REGISTRY":
+      return {
+        name: "Docker registry",
+        description: "Images registry",
       };
     case "PLEX":
       return {

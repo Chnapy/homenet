@@ -264,6 +264,7 @@ func (e *DebianProvider) GetApps() []*gen.AgentApp {
 	return slices.DeleteFunc(
 		[]*gen.AgentApp{
 			e.GetDocker(),
+			e.GetDockerRegistry(),
 			e.GetWireguard(),
 			e.GetCaddy(),
 			e.GetNtfy(),
@@ -357,6 +358,17 @@ func (a *DebianProvider) GetDocker() *gen.AgentApp {
 
 	return &gen.AgentApp{
 		Slug: gen.AgentApp_DOCKER,
+	}
+}
+
+func (a *DebianProvider) GetDockerRegistry() *gen.AgentApp {
+	isDir := a.executor.IsDir("/var/lib/registry")
+	if !isDir {
+		return nil
+	}
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_DOCKER_REGISTRY,
 	}
 }
 

@@ -38,6 +38,7 @@ message AgentApp {
 
   enum AgentAppSlug {
     UNKNOWN_APP = 0;
+    HOMENET = 1;
     WIREGUARD = 2;
     NGINX = 3;
     CADDY = 4;
@@ -62,6 +63,7 @@ message AgentApp {
     DOCKER = 12;
     MOONLIGHT = 13;
     CODE_SERVER = 14;
+    DOCKER_REGISTRY = 15;
   }
 
   enum AgentVpnMode {
