@@ -36,7 +36,7 @@ WORKDIR /app
 RUN apk add --no-cache nginx
 
 # Frontend
-COPY frontend/nginx/ /etc/nginx/
+COPY nginx/ /etc/nginx/
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
 # Backend
