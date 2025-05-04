@@ -109,23 +109,23 @@ jobs:
       #     echo "tag=$formatted_date" >> $GITHUB_OUTPUT
 
       - name: Docker build
-        run: docker compose build
+        run: docker build . -t registry.richardhaddad.fr/homenet
 
       - name: Docker push
-        run: docker compose push
+        run: docker push registry.richardhaddad.fr/homenet
 
-      - name: Set up SCP & upload to server 🔑
+      - name: Set up SSH 🔑
         run: |
           mkdir -vm 700 $HOME/.ssh
           ssh-keyscan -H vps-0c88ff97.vps.ovh.net > $HOME/.ssh/known_hosts
           echo "${{ secrets.SSH_KEY }}" > $HOME/.ssh/id_rsa
           chmod 600 $HOME/.ssh/id_rsa
-          sudo chown 1000:1000 docker-compose.yml
-          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'sudo chown 1000:1000 homenet -R'
-          scp -r docker-compose.yml ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net:~/homenet/
 
       - name: Update remote containers ⬆️
         run: |
-          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'cd homenet \
-            && docker compose pull \
-            && docker compose up -d --force-recreate --remove-orphans'
+          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'docker pull registry.richardhaddad.fr/homenet \
+            && docker stop homenet 2> /dev/null || true
+            && docker rm homenet 2> /dev/null || true
+            && docker run --name homenet -d -p 5174:80 registry.richardhaddad.fr/homenet \
+            && docker container prune -f \
+            && docker image prune -af'
