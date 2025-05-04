@@ -9,41 +9,55 @@ export const updateService: handleUnaryCall<
   AgentUpdateRequest,
   AgentUpdateResponse
 > = async (call, callback) => {
-  const { device, agentMetadata } = call.request;
+  try {
+    console.log("AgentUpdateRequest received:", call.request);
 
-  if (!device || !agentMetadata) {
-    throw new Error("Device not defined");
-  }
+    const { device, agentMetadata } = call.request;
 
-  const now = Date.now();
-
-  const deviceId = call.getPeer().split(":")[0];
-
-  const cleanDevice = getDeviceWithId(device, deviceId);
-
-  const db = openRootDB();
-
-  const deviceDB = openDeviceDB(db);
-  const agentMetadataDB = openAgentMetadataDB(db);
-  const deviceUserMetadataDB = openDeviceUserMetadataDB(db);
-
-  await db.transaction(() => {
-    deviceDB.put(deviceId, cleanDevice);
-
-    agentMetadataDB.put(`${deviceId}:${now}`, agentMetadata);
-
-    const userMetadata = deviceUserMetadataDB.get(deviceId);
-    if (!userMetadata) {
-      deviceUserMetadataDB.put(deviceId, {
-        deviceId,
-        theme: "default",
-      });
+    if (!device || !agentMetadata) {
+      throw new Error("Device not defined");
     }
-  });
 
-  callback(null, {
-    foo: "bar",
-  });
+    const now = Date.now();
 
-  console.log(deviceDB.getKeys().asArray, deviceDB.get(deviceId));
+    const deviceId = device.lan; //call.getPeer().split(":")[0];
+
+    const cleanDevice = getDeviceWithId(device, deviceId);
+
+    const db = openRootDB();
+
+    const deviceDB = openDeviceDB(db);
+    const agentMetadataDB = openAgentMetadataDB(db);
+    const deviceUserMetadataDB = openDeviceUserMetadataDB(db);
+
+    await db.transaction(() =>
+      Promise.all([
+        deviceDB.put(deviceId, cleanDevice),
+        agentMetadataDB.put(`${deviceId}:${now}`, agentMetadata),
+        async () => {
+          const userMetadata = deviceUserMetadataDB.get(deviceId);
+          if (!userMetadata) {
+            await deviceUserMetadataDB.put(deviceId, {
+              deviceId,
+              theme: "default",
+            });
+          }
+        },
+      ])
+    );
+
+    callback(null, {
+      foo: "bar",
+    });
+
+    console.log(deviceDB.getKeys().asArray, deviceDB.get(deviceId));
+  } catch (err) {
+    console.error(err);
+
+    const error = err instanceof Error ? err : new Error(String(err));
+
+    callback(error, {
+      foo: "bar",
+    });
+  }
 };

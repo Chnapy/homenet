@@ -27,6 +27,8 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
+	log.Println("gRPC connection state:", conn.GetState().String())
+
 	startTime := time.Now().UnixMilli()
 	r, err := c.Update(ctx, data)
 	log.Println("gRPC duration:", time.Now().UnixMilli()-startTime)
