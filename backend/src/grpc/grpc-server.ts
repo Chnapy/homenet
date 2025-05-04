@@ -11,7 +11,6 @@ export const setupGRPCServer = () => {
   const protoPath = path.resolve("./protos/agent.proto");
   const packageDefinition = protoLoader.loadSync(protoPath);
   const reflection = new ReflectionService(packageDefinition);
-
   reflection.addToServer(gRPCServer);
 
   gRPCServer.addService(AgentService, gRPCRouter);
@@ -21,7 +20,7 @@ export const setupGRPCServer = () => {
     grpc.ServerCredentials.createInsecure(),
     (error, port) => {
       if (error) {
-        console.error(error);
+        console.error("gRPC server error:", error);
       } else {
         console.log("gRPC server listening on port", port);
       }

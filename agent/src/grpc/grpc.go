@@ -24,7 +24,7 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	c := gen.NewAgentClient(conn)
 
 	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	log.Println("gRPC connection state:", conn.GetState().String())

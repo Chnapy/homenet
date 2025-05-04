@@ -3,7 +3,10 @@ import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { getDeviceWithId, openDeviceDB } from "../../db/device";
 import { AgentUpdateRequest, AgentUpdateResponse } from "../generated/agent";
-import { openDeviceUserMetadataDB } from "../../db/device-user-metadata";
+import {
+  DeviceUserMetadata,
+  openDeviceUserMetadataDB,
+} from "../../db/device-user-metadata";
 
 export const updateService: handleUnaryCall<
   AgentUpdateRequest,
@@ -32,31 +35,47 @@ export const updateService: handleUnaryCall<
 
     const userMetadata = deviceUserMetadataDB.get(deviceId);
 
+    const agentMetadataId = `${deviceId}:${now}`;
+
+    const userMetadataDefaultValues: DeviceUserMetadata = {
+      deviceId,
+      theme: "default",
+    };
+
     db.transactionSync(() => {
       deviceDB.putSync(deviceId, cleanDevice);
 
-      agentMetadataDB.putSync(`${deviceId}:${now}`, agentMetadata);
+      agentMetadataDB.putSync(agentMetadataId, agentMetadata);
 
       if (!userMetadata) {
-        deviceUserMetadataDB.putSync(deviceId, {
-          deviceId,
-          theme: "default",
-        });
+        deviceUserMetadataDB.putSync(deviceId, userMetadataDefaultValues);
       }
     });
+
+    console.log("DB - Stored in deviceDB:", deviceId, cleanDevice);
+    console.log(
+      "DB - Stored in agentMetadataDB:",
+      agentMetadataId,
+      agentMetadata
+    );
+    if (!userMetadata) {
+      console.log(
+        "DB - Stored in deviceUserMetadataDB:",
+        deviceId,
+        userMetadataDefaultValues
+      );
+    }
 
     callback(null, {
       foo: "bar",
     });
-
-    console.log(deviceDB.getKeys().asArray, deviceDB.get(deviceId));
   } catch (err) {
-    console.error(err);
+    console.error("AgentUpdateRequest error:", err);
 
     const error = err instanceof Error ? err : new Error(String(err));
 
     callback(error, {
-      foo: "bar",
+      foo: "bar-error",
     });
   }
 };

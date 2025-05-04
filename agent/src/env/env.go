@@ -19,7 +19,7 @@ const (
 
 var defaultEnv = EnvType{
 	LogLevel:     LogLevelDebug, //LogLevelDebug,
-	BackendRoute: "vps-0c88ff97.vps.ovh.net:50051",
+	BackendRoute: "141.94.221.48:50051",
 	UpdateCron:   "0 */6 * * *",
 	Path:         "",
 }
