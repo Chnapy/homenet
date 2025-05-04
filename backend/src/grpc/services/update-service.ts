@@ -30,21 +30,20 @@ export const updateService: handleUnaryCall<
     const agentMetadataDB = openAgentMetadataDB(db);
     const deviceUserMetadataDB = openDeviceUserMetadataDB(db);
 
-    await db.transaction(() =>
-      Promise.all([
-        deviceDB.put(deviceId, cleanDevice),
-        agentMetadataDB.put(`${deviceId}:${now}`, agentMetadata),
-        async () => {
-          const userMetadata = deviceUserMetadataDB.get(deviceId);
-          if (!userMetadata) {
-            await deviceUserMetadataDB.put(deviceId, {
-              deviceId,
-              theme: "default",
-            });
-          }
-        },
-      ])
-    );
+    const userMetadata = deviceUserMetadataDB.get(deviceId);
+
+    db.transactionSync(() => {
+      deviceDB.putSync(deviceId, cleanDevice);
+
+      agentMetadataDB.putSync(`${deviceId}:${now}`, agentMetadata);
+
+      if (!userMetadata) {
+        deviceUserMetadataDB.putSync(deviceId, {
+          deviceId,
+          theme: "default",
+        });
+      }
+    });
 
     callback(null, {
       foo: "bar",
