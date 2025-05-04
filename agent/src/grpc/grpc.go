@@ -18,17 +18,20 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	// Set up a connection to the server.
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("gRPC did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := gen.NewAgentClient(conn)
 
 	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
+
+	startTime := time.Now().UnixMilli()
 	r, err := c.Update(ctx, data)
+	log.Println("gRPC duration:", time.Now().UnixMilli()-startTime)
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("gRPC could not greet: %v", err)
 	}
 	log.Printf("gRPC response: %s", r.Foo)
 }
