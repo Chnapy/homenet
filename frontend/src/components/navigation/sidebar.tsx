@@ -42,6 +42,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
 
               const osHref = getAccessWebHref(osWeb[0]);
 
+              if (osHref === window.location.origin) {
+                return null;
+              }
+
               return (
                 <SidebarItem
                   slug={osSlug}
@@ -60,6 +64,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                 }
 
                 const appHref = getAccessWebHref(web[0]);
+
+                if (appHref === window.location.origin) {
+                  return null;
+                }
 
                 return (
                   <SidebarItem

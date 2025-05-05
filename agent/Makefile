@@ -3,7 +3,7 @@ install-deps:
 	go get ./src
 
 dev:
-	go run -ldflags "-X main.releaseTag=${RELEASE_TAG}" ./src
+	BACKEND_ROUTE=code.lan:50051 go run -ldflags "-X main.releaseTag=${RELEASE_TAG}" ./src
 
 build-arm-32:
 	GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -ldflags "-X main.releaseTag=${RELEASE_TAG}" -o dist/agent-linux-arm ./src

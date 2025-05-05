@@ -63,11 +63,6 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
   return aValue < bValue ? -1 : 1;
 };
 
-const isAppReverseProxy = (
-  app: App
-): app is Extract<App, { slug: "CADDY" | "CADDY" }> =>
-  app.slug === "NGINX" || app.slug === "CADDY";
-
 export const getNetEntityMap = (
   deviceList: Instance[],
   instanceList: Instance[],
@@ -164,7 +159,7 @@ export const getNetEntityMap = (
                 ({ toAddress }) =>
                   toAddress?.address === net.address &&
                   !!toAddress.ssl === !!web.ssl &&
-                  toAddress.port === web.port
+                  (toAddress.port || 80) === (web.port || 80)
               )
             )
             .map(

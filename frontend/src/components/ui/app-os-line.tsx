@@ -41,6 +41,11 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
     setExpanded(!expanded);
   };
 
+  const origin = window.location.origin;
+
+  const mainAccessHref = mainAccess && getAccessWebHref(mainAccess);
+  const sameOrigin = mainAccessHref === origin;
+
   const content = (
     <Box
       sx={{
@@ -86,10 +91,10 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
   return (
     <Paper
       data-slug={slug}
-      elevation={mainAccess ? 2 : 1}
+      elevation={mainAccess && !sameOrigin ? 2 : 1}
       sx={{
         position: "relative",
-        ...(mainAccess
+        ...(mainAccess && !sameOrigin
           ? {}
           : {
               boxShadow: "none",
@@ -109,6 +114,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
                 window.open(href, "_blank");
               }
             }}
+            disabled={sameOrigin}
           >
             {content}
           </CardActionArea>
@@ -141,7 +147,11 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
         <Collapse in={expanded} timeout="auto">
           <List disablePadding>
             {accessList.map((access, i) => (
-              <AccessLine key={i} {...access} link />
+              <AccessLine
+                key={i}
+                {...access}
+                link={getAccessWebHref(access) !== origin}
+              />
             ))}
           </List>
         </Collapse>

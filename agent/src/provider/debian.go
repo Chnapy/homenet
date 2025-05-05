@@ -359,6 +359,9 @@ func (a *DebianProvider) GetHomenet() *gen.AgentApp {
 
 	return &gen.AgentApp{
 		Slug: gen.AgentApp_HOMENET,
+		Web: []*gen.AgentWebItem{
+			{},
+		},
 	}
 }
 
