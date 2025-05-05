@@ -263,6 +263,7 @@ func (e *DebianProvider) GetSSH() *gen.AgentSSH {
 func (e *DebianProvider) GetApps() []*gen.AgentApp {
 	return slices.DeleteFunc(
 		[]*gen.AgentApp{
+			e.GetHomenet(),
 			e.GetDocker(),
 			e.GetDockerRegistry(),
 			e.GetWireguard(),
@@ -348,6 +349,17 @@ func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
 	}
 
 	return instances
+}
+
+func (a *DebianProvider) GetHomenet() *gen.AgentApp {
+	out, _ := a.executor.Exec("sh -c 'echo $HOMENET'")
+	if out == "" {
+		return nil
+	}
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_HOMENET,
+	}
 }
 
 func (a *DebianProvider) GetDocker() *gen.AgentApp {
