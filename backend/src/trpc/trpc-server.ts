@@ -30,7 +30,7 @@ export const setupTRPCServer = () => {
     },
   });
 
-  tRPCServer.get("/agent/:os", getAgentByOSRoute);
+  tRPCServer.get("/api/agent/:os", getAgentByOSRoute);
 
   tRPCServer.listen(
     {

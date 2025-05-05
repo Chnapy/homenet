@@ -126,6 +126,6 @@ jobs:
           ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'docker pull registry.richardhaddad.fr/homenet \
             && docker stop homenet 2> /dev/null || true \
             && docker rm homenet 2> /dev/null || true \
-            && docker run --name homenet -d -p 5174:80 registry.richardhaddad.fr/homenet \
+            && docker run --name homenet -d -p 5174:80 -p 50051:50051 registry.richardhaddad.fr/homenet \
             && docker container prune -f \
             && docker image prune -af'
