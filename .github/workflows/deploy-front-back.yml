@@ -1,0 +1,49 @@
+name: Deploy Frontend & Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**"
+      - "!.github/workflows/deploy-agent.yml"
+      - "!agent/**"
+      - "!.vscode/**"
+      - "!**/*.md"
+      - "!**/.gitignore"
+  pull_request:
+
+jobs:
+  deploy-front-back:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # - name: Format commit tag
+      #   id: tag
+      #   run: |
+      #     formatted_date=$(date -d "${{ github.event.head_commit.timestamp }}" +'0.0.%Y%m%d%H%M')
+      #     echo "tag=$formatted_date" >> $GITHUB_OUTPUT
+
+      - name: Docker build
+        run: docker build . -t registry.richardhaddad.fr/homenet
+
+      - name: Docker push
+        run: docker push registry.richardhaddad.fr/homenet
+
+      - name: Set up SSH 🔑
+        run: |
+          mkdir -vm 700 $HOME/.ssh
+          ssh-keyscan -H vps-0c88ff97.vps.ovh.net > $HOME/.ssh/known_hosts
+          echo "${{ secrets.SSH_KEY }}" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+
+      - name: Update remote containers ⬆️
+        run: |
+          ssh ${{ secrets.SSH_USERNAME }}@vps-0c88ff97.vps.ovh.net 'docker pull registry.richardhaddad.fr/homenet \
+            && docker stop homenet 2> /dev/null || true \
+            && docker rm homenet 2> /dev/null || true \
+            && docker run --name homenet -d -v ~/homenet/db:/app/db -p 50051:50051 --network main_default registry.richardhaddad.fr/homenet \
+            && docker container prune -f \
+            && docker image prune -af'

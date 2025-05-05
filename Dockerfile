@@ -40,12 +40,13 @@ COPY nginx/ /etc/nginx/
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
 # Backend
-# COPY --from=backend-builder /app/dist /usr/share/nginx/api
 COPY --from=backend-builder /app/dist/ ./dist
 COPY --from=backend-builder /app/protos/ ./protos
 COPY --from=backend-builder /app/node_modules/ ./node_modules
 
 COPY --chmod=755 start.sh /start.sh
+
+ENV HOMENET=1
 
 EXPOSE 80 8081 50051
 

@@ -15,6 +15,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   loaded,
 }) => {
   const currentPage = useCurrentPage();
+  const isHttp = href.startsWith("http://");
   const selected = currentPage === href;
   //   const anchorRef = React.useRef<HTMLDivElement>(null);
   //   const [open, setOpen] = React.useState(false);
@@ -26,14 +27,19 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   //   window.open(href, "_blank");
   // };
 
+  const btnHref = isHttp ? href : `#${href}`;
+  const target = isHttp ? "_blank" : undefined;
+  const title = isHttp ? `${href} - Iframe not possible for http` : href;
+
   return (
     <ListItem disablePadding>
       <ListItemButton
-        href={"#" + href}
+        href={btnHref}
+        target={target}
         selected={selected}
         // onClick={handleClick}
         // onAuxClick={handleMiddleClick}
-        title={href}
+        title={title}
         sx={{
           opacity: loaded ? 1 : 0.5,
           borderLeft: "4px solid transparent",
