@@ -1,5 +1,6 @@
-import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
+import { Badge, ListItem, ListItemButton, ListItemIcon } from "@mui/material";
 import React from "react";
+import { useListenUptime } from "../../data/query/use-listen-uptime";
 import { AppOSIcon, AppOSIconProps } from "../ui/app-os-icon/app-icon";
 import { useCurrentPage } from "./hooks/use-current-page";
 
@@ -17,6 +18,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const currentPage = useCurrentPage();
   const isHttp = href.startsWith("http://");
   const selected = currentPage === href;
+
+  const uptimeMap = useListenUptime().data ?? {};
+  const uptime = uptimeMap[href];
   //   const anchorRef = React.useRef<HTMLDivElement>(null);
   //   const [open, setOpen] = React.useState(false);
 
@@ -48,9 +52,15 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           paddingLeft: "12px",
         }}
       >
-        <ListItemIcon sx={{ minWidth: 24, maxWidth: 24 }}>
-          <AppOSIcon slug={slug} sx={{ maxWidth: "100%" }} />
-        </ListItemIcon>
+        <Badge
+          variant="dot"
+          color={uptime === "on" ? "success" : "error"}
+          invisible={!uptime}
+        >
+          <ListItemIcon sx={{ minWidth: 24, maxWidth: 24 }}>
+            <AppOSIcon slug={slug} sx={{ maxWidth: "100%" }} />
+          </ListItemIcon>
+        </Badge>
       </ListItemButton>
 
       {/* <Menu anchorEl={anchorRef.current} open={open} onClose={handleClose}>

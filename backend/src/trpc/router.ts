@@ -1,6 +1,7 @@
 // import { getDB } from "./procedures/get-db";
 import { getDevicesFull } from "./procedures/get-devices-full";
 import { getDevicesUserMetadata } from "./procedures/get-devices-user-metadata";
+import { listenUptime } from "./procedures/listen-uptime";
 import { removeDevice } from "./procedures/remove-device";
 import { updateDeviceUserMetadata } from "./procedures/update-device-user-metadata";
 import { router } from "./trpc";
@@ -10,6 +11,7 @@ export const appRouter = router({
   getDevicesUserMetadata,
   updateDeviceUserMetadata,
   removeDevice,
+  listenUptime,
 
   // getDB,
 });

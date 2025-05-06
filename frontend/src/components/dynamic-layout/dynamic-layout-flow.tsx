@@ -32,7 +32,8 @@ const edgeTypes: EdgeTypes = {
   polyline: PolylineEdge,
 };
 
-export const DynamicLayoutFlow: React.FC = () => {
+// memo required for layout algorithm concerns
+export const DynamicLayoutFlow: React.FC = React.memo(() => {
   const devicesFullQuery = useDevicesFullQuery();
   const devicesUserMetadata = useDevicesUserMetadata();
   const netEntityLinks = useNetEntityLinks();
@@ -269,4 +270,4 @@ export const DynamicLayoutFlow: React.FC = () => {
       {/* <CursorPosition /> */}
     </ContainerFluid>
   );
-};
+});

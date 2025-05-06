@@ -1,8 +1,9 @@
 import { Box } from "@mui/material";
 import React from "react";
 import { DynamicLayoutFlow } from "./components/dynamic-layout/dynamic-layout-flow";
-import { Sidebar } from "./components/navigation/sidebar";
 import { useCurrentPage } from "./components/navigation/hooks/use-current-page";
+import { Sidebar } from "./components/navigation/sidebar";
+import { useListenUptimeSubscribe } from "./data/query/use-listen-uptime";
 
 export const App: React.FC = () => {
   const currentPage = useCurrentPage((page) => addCurrentPage(page));
@@ -13,6 +14,8 @@ export const App: React.FC = () => {
 
     return state;
   }, [currentPage].filter(Boolean));
+
+  useListenUptimeSubscribe();
 
   return (
     <Box display="flex" height="100%">

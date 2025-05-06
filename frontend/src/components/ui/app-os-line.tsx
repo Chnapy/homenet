@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+import { useListenUptime } from "../../data/query/use-listen-uptime";
 import {
   DeviceAppSlug,
   DeviceOSSlug,
@@ -17,7 +18,7 @@ import {
 } from "../../data/types/get-devices";
 import { AccessLine } from "./access-line";
 import { AppOSIcon } from "./app-os-icon/app-icon";
-import { getAccessWebHref } from "./utils/get-web-href";
+import { getPageOrigin } from "../navigation/utils/get-page-origin";
 
 type AppOSLineProps = {
   slug: DeviceAppSlug | DeviceOSSlug;
@@ -35,15 +36,17 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
   accessList = [],
   children,
 }) => {
+  const uptimeMap = useListenUptime().data ?? {};
+
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
 
-  const origin = window.location.origin;
+  const origin = getPageOrigin();
 
-  const mainAccessHref = mainAccess && getAccessWebHref(mainAccess);
+  const mainAccessHref = mainAccess?.href;
   const sameOrigin = mainAccessHref === origin;
 
   const content = (
@@ -82,7 +85,11 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
         <>
           <Divider variant="fullWidth" />
 
-          <AccessLine {...mainAccess} disablePadding />
+          <AccessLine
+            {...mainAccess}
+            disablePadding
+            uptime={uptimeMap[mainAccess.href]}
+          />
         </>
       )}
     </Box>
@@ -110,8 +117,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
           <CardActionArea
             onClick={() => {
               if (mainAccess.type !== "ssh") {
-                const href = getAccessWebHref(mainAccess);
-                window.open(href, "_blank");
+                window.open(mainAccess.href, "_blank");
               }
             }}
             disabled={sameOrigin}
@@ -150,7 +156,8 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
               <AccessLine
                 key={i}
                 {...access}
-                link={getAccessWebHref(access) !== origin}
+                link={access.href !== origin}
+                uptime={uptimeMap[access.href]}
               />
             ))}
           </List>

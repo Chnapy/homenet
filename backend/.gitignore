@@ -4,4 +4,4 @@
 protos
 
 *.db
-*.db-lock
+*.db-*

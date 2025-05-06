@@ -2,9 +2,9 @@ import { Divider, Drawer, List } from "@mui/material";
 import React from "react";
 import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 import { DeviceAppSlug } from "../../data/types/get-devices";
-import { getAccessWebHref } from "../ui/utils/get-web-href";
 import { SidebarItem } from "./sidebar-item";
 import { SidebarItemHome } from "./sidebar-item-home";
+import { getPageOrigin } from "./utils/get-page-origin";
 
 type SidebarProps = {
   pageList: string[];
@@ -40,9 +40,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                 return null;
               }
 
-              const osHref = getAccessWebHref(osWeb[0]);
+              const osHref = osWeb[0].href;
 
-              if (osHref === window.location.origin) {
+              if (osHref === getPageOrigin()) {
                 return null;
               }
 
@@ -63,9 +63,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                   return null;
                 }
 
-                const appHref = getAccessWebHref(web[0]);
+                const appHref = web[0].href;
 
-                if (appHref === window.location.origin) {
+                if (appHref === getPageOrigin()) {
                   return null;
                 }
 

@@ -24,7 +24,6 @@ COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
 
-ENV NODE_ENV=production
 ENV VITE_BACKEND_API=/api
 
 RUN npm run build

@@ -4,18 +4,20 @@ import LinkIcon from "@mui/icons-material/Link";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import {
+  Badge,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { getAccessWebHref } from "./utils/get-web-href";
+import { UptimeMap } from "../../data/query/use-listen-uptime";
 import { NetAccess } from "../../data/types/get-devices";
 
-type AccessLineProps = NetAccess & {
+type AccessLineProps = Pick<NetAccess, "type" | "scope" | "href"> & {
   link?: boolean;
   onClick?: () => void;
   disablePadding?: boolean;
+  uptime?: UptimeMap[string];
 };
 
 const iconMap: Record<NetAccess["scope"], typeof CloudIcon> = {
@@ -28,19 +30,13 @@ const iconMap: Record<NetAccess["scope"], typeof CloudIcon> = {
 export const AccessLine: React.FC<AccessLineProps> = ({
   type,
   scope,
-  address,
-  port,
-  ssl,
+  href,
   link,
   onClick,
   disablePadding,
+  uptime,
 }) => {
   const Icon = type === "ssh" ? TerminalIcon : iconMap[scope];
-
-  const value =
-    type === "ssh"
-      ? `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`
-      : getAccessWebHref({ address, port, ssl });
 
   const content = (
     <>
@@ -48,13 +44,20 @@ export const AccessLine: React.FC<AccessLineProps> = ({
         <Icon fontSize="small" />
       </ListItemIcon>
       <ListItemText
-        primary={value}
+        primary={href}
         slotProps={{
           primary: {
             variant: "caption",
           },
         }}
       />
+      <ListItemIcon sx={{ minWidth: 0, mb: "1px" }}>
+        <Badge
+          variant="dot"
+          color={uptime === "on" ? "success" : "error"}
+          invisible={!uptime}
+        />
+      </ListItemIcon>
     </>
   );
 

@@ -17,6 +17,7 @@
     "@trpc/server": "^11.0.0",
     "fastify": "^5.2.2",
     "lmdb": "^3.2.6",
+    "sqlite3": "^5.1.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {
