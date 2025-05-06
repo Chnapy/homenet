@@ -1,6 +1,13 @@
 import crypto from "crypto";
 import sqlite3raw, { Database } from "sqlite3";
-import { Heartbeat, Monitor, MonitorTag, Tag } from "./uptime-kuma-db-types";
+import {
+  Heartbeat,
+  Monitor,
+  MonitorNotification,
+  MonitorTag,
+  Notification,
+  Tag,
+} from "./uptime-kuma-db-types";
 
 const sqlite3 = sqlite3raw.verbose();
 
@@ -96,10 +103,17 @@ export class UptimeKumaDB {
     }
   }
 
-  async createMonitorNotificationAssositation(params: {
-    monitor_id: number;
-    notification_id: number;
-  }) {
+  async getNotifications() {
+    try {
+      return await this.all<Notification>(`SELECT * FROM notification`);
+    } finally {
+      //   this.db.close();
+    }
+  }
+
+  async createMonitorNotificationAssositation(
+    params: Omit<MonitorNotification, "id">
+  ) {
     const { names, valuesPlaceholder, values } =
       this.getInsertIntoParams(params);
     try {

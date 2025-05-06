@@ -191,7 +191,7 @@ export type MonitorTag = {
   id: number;
   monitor_id: number;
   tag_id: number;
-  value?: string;
+  value: string;
 };
 
 // monitor_tls_info

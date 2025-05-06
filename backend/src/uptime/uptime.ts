@@ -113,6 +113,8 @@ export const setupUptime = async (): Promise<UptimeMap> => {
 
   const tag = await getTag();
 
+  const notificationList = await db.getNotifications();
+
   const monitors = await db.getHomenetMonitors();
 
   await Promise.all(
@@ -127,12 +129,22 @@ export const setupUptime = async (): Promise<UptimeMap> => {
         url: net.href,
         type: "http",
         method: "GET",
+        expiry_notification: net.href.startsWith("https://"),
+        maxretries: 2,
       });
 
       await db.createMonitorTagAssositation({
         monitor_id: createdMonitorId,
         tag_id: tag.id,
+        value: "",
       });
+
+      if (notificationList.length > 0) {
+        await db.createMonitorNotificationAssositation({
+          monitor_id: createdMonitorId,
+          notification_id: notificationList[0].id,
+        });
+      }
 
       console.log("Monitor created for href", net.href);
     })
