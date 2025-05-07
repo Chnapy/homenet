@@ -1,23 +1,29 @@
-import IterableEventEmitter, { on } from "events";
-import { startUptimeRoutine, UptimeMap } from "../../uptime/uptime";
+import { EventEmitter, on } from "events";
+import { uptimeRoutine, UptimeMap } from "../../uptime/uptime";
 import { publicProcedure } from "../trpc";
 
-export const uptimeEventEmitter = new IterableEventEmitter<{
+export const uptimeEventEmitter = new EventEmitter<{
   add: [uptimeMap: UptimeMap];
 }>();
 
 export const listenUptime = publicProcedure.subscription(async function* (
   opts
 ): AsyncGenerator<UptimeMap> {
-  // console.log("SUBSCRIBE");
-
-  yield await startUptimeRoutine();
-
-  for await (const [data] of on(uptimeEventEmitter, "add", {
+  const eventIterator = on(uptimeEventEmitter, "add", {
     signal: opts.signal,
-  })) {
-    //   console.log("event-data", data);
-    const post = data as Parameters<typeof uptimeEventEmitter.emit<"add">>[1];
-    yield post;
+  });
+
+  await uptimeRoutine.start();
+
+  try {
+    for await (const [data] of eventIterator) {
+      console.log("uptime", data);
+      const uptimeMap = data as Parameters<
+        typeof uptimeEventEmitter.emit<"add">
+      >[1];
+      yield uptimeMap;
+    }
+  } finally {
+    uptimeRoutine.stop();
   }
 });

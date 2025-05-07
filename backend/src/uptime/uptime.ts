@@ -1,325 +1,368 @@
 import { App } from "../trpc/entities/app";
-import { Instance } from "../trpc/entities/instance";
-import { getDevicesFull } from "../trpc/procedures/get-devices-full";
+import { Meta } from "../trpc/entities/utils/meta";
+import { GetDeviceFull } from "../trpc/procedures/get-devices-full";
 import { uptimeEventEmitter } from "../trpc/procedures/listen-uptime";
 import { NetAccess } from "../trpc/utils/get-net-entity-map";
-import { UptimeKumaDB } from "./uptime-kuma-db";
+import { createSocket } from "./create-socket";
+import { Heartbeat, Monitor, Notification, Tag } from "./uptime-kuma-io-types";
 
 export type UptimeMap = Record<string, "on" | "off" | undefined>;
 
-let currentTimeout: NodeJS.Timeout | null = null;
+type PersistantEntities = {
+  started: boolean;
+  deviceFull?: Omit<GetDeviceFull, "agentMetadataList">;
+  netList?: (NetAccess & Meta)[];
+  socket?: ReturnType<typeof createSocket>;
 
-export const startUptimeRoutine = () => {
-  if (!currentTimeout) {
-    currentTimeout = setInterval(async () => {
-      console.log(
-        "listeners 'add' count",
-        uptimeEventEmitter.listenerCount("add")
-      );
-
-      if (uptimeEventEmitter.listenerCount("add") === 0 && currentTimeout) {
-        clearInterval(currentTimeout);
-        currentTimeout = null;
-      }
-
-      const data = await setupUptime();
-      uptimeEventEmitter.emit("add", data);
-    }, 30_000);
-  }
-
-  return setupUptime();
+  tag?: Tag;
+  monitorMap?: Record<number, Monitor | undefined>;
+  notificationList?: Notification[];
+  lastHeartbeatMap?: Record<number, Heartbeat | undefined>;
+  hearbeatReady: boolean;
 };
 
-export const setupUptime = async (): Promise<UptimeMap> => {
-  const { netEntityMap, deviceList, instanceList, appList } =
-    await getDevicesFull({
-      ctx: {},
-      getRawInput: async () => null,
-      path: "",
-      signal: undefined,
-      type: "query",
-    });
+const pe: PersistantEntities = {
+  started: false,
+  hearbeatReady: false,
+};
 
-  const filter = ({ type, scope, address }: NetAccess) => {
-    return (
-      type === "web" && scope === "dns-domain" // && address !== "home.assistant"
-    );
-  };
-
-  const mapOS = (net: NetAccess, slug: Instance["os"]) => {
-    return {
-      ...net,
-      ...getOSMeta(slug),
-    };
-  };
-
-  const mapApp = (net: NetAccess, app: App) => {
-    return {
-      ...net,
-      ...getAppMeta(app),
-    };
-  };
-
-  const hrefMap = Object.fromEntries(
-    Object.entries(netEntityMap)
-      .map(([key, entity]) => {
-        const osSlug = [...deviceList, ...instanceList].find(
-          (instance) => instance.id === entity.id
-        )?.os!;
-
-        return [
-          key,
-          {
-            os: entity.os.filter(filter).map((net) => mapOS(net, osSlug)),
-            apps: Object.fromEntries(
-              Object.entries(entity.apps)
-                .map(([key, app]) => {
-                  const appp = appList.find(
-                    (ap) => ap.parentId === entity.id && ap.slug === key
-                  )!;
-
-                  return [
-                    key,
-                    app.filter(filter).map((net) => mapApp(net, appp)),
-                  ] as const;
-                })
-                .filter((v) => v[1].length > 0)
-            ),
-          },
-        ] as const;
-      })
-      .filter((v) => v[1].os.length > 0 || Object.keys(v[1].apps).length > 0)
-  );
-
-  const hrefList = Object.values(hrefMap).flatMap((value) =>
-    value.os.concat(...Object.values(value.apps).flatMap((app) => app))
-  );
-
-  const db = new UptimeKumaDB("uptime-data/kuma.db");
-
-  const getTag = async () => {
-    const foundTag = await db.getTagByName("homenet");
+const getTagOrAdd = () =>
+  pe.socket!.emit.getTags().then(async ({ tags }) => {
+    const foundTag = tags.find((t) => t.name === "homenet");
     if (foundTag) {
+      pe.tag = foundTag;
       return foundTag;
     }
 
-    await db.createTag({
+    const { tag } = await pe.socket!.emit.addTag({
       name: "homenet",
-      color: "#059669",
+      color: "#362236",
     });
 
-    return (await db.getTagByName("homenet"))!;
-  };
+    pe.tag = tag;
+    return tag;
+  });
 
-  const tag = await getTag();
+const sendToClient = async () => {
+  if (
+    !pe.hearbeatReady ||
+    !pe.tag ||
+    !pe.monitorMap ||
+    !pe.notificationList ||
+    !pe.lastHeartbeatMap
+  ) {
+    return;
+  }
 
-  const notificationList = await db.getNotifications();
-
-  const monitors = await db.getHomenetMonitors();
-
-  await Promise.all(
-    hrefList.map(async (net) => {
-      const monitor = monitors.find((m) => m.url === net.href);
-      if (monitor) {
-        return monitor;
-      }
-
-      const createdMonitorId = await db.createMonitor({
-        name: net.name,
-        url: net.href,
-        type: "http",
-        method: "GET",
-        expiry_notification: net.href.startsWith("https://"),
-        maxretries: 2,
-      });
-
-      await db.createMonitorTagAssositation({
-        monitor_id: createdMonitorId,
-        tag_id: tag.id,
-        value: "",
-      });
-
-      if (notificationList.length > 0) {
-        await db.createMonitorNotificationAssositation({
-          monitor_id: createdMonitorId,
-          notification_id: notificationList[0].id,
-        });
-      }
-
-      console.log("Monitor created for href", net.href);
-    })
+  const monitorsAfterUpdate = Object.fromEntries(
+    Object.values(pe.monitorMap)
+      .filter((monitor): monitor is Monitor =>
+        Boolean(
+          monitor?.url &&
+            monitor.tags?.some(({ tag_id }) => tag_id === pe.tag!.id)
+        )
+      )
+      .map(
+        (monitor) =>
+          [
+            monitor.url!,
+            monitor.active &&
+            typeof pe.lastHeartbeatMap?.[monitor.id]?.status === "number"
+              ? pe.lastHeartbeatMap[monitor.id]!.status === 1
+                ? "on"
+                : "off"
+              : undefined,
+          ] satisfies [keyof UptimeMap, UptimeMap[keyof UptimeMap]]
+      )
   );
 
-  const monitorsAfterUpdate = await db.getHomenetMonitors();
-
-  await db.close();
-
-  console.log(
-    "DB infos",
-    monitorsAfterUpdate.map((m) => ({
-      id: m.id,
-      name: m.name,
-      type: m.type,
-      url: m.url,
-      method: m.method,
-
-      status: m.status,
-      duration: m.duration,
-      msg: m.msg,
-    }))
-    // JSON.stringify(hrefList, undefined, 2)
-    // await db.temp()
-    // await db.mapTables()
-  );
-
-  return Object.fromEntries(
-    monitorsAfterUpdate.map(
-      (monitor) =>
-        [
-          monitor.url!,
-          typeof monitor.status === "number"
-            ? monitor.status === 1
-              ? "on"
-              : "off"
-            : undefined,
-        ] satisfies [keyof UptimeMap, UptimeMap[keyof UptimeMap]]
-    )
-  );
+  uptimeEventEmitter.emit("add", monitorsAfterUpdate);
 };
 
-const getOSMeta = (
-  slug: Instance["os"]
-): {
-  name: string;
-  description: string;
-} => {
-  switch (slug) {
-    case "UNRECOGNIZED":
-    case "UNKNOWN_OS":
-      return {
-        name: "Unknown", // TODO
-        description: "Unknown",
-      };
-    case "OPENWRT_GLINET":
-      return {
-        name: "OpenWRT & Gl.inet",
-        description: "OS as router",
-      };
-    case "PROXMOX":
-      return {
-        name: "Proxmox",
-        description: "OS as VE",
-      };
-    case "HAOS":
-      return {
-        name: "Home Assistant",
-        description: "OS",
-      };
-    case "ANDROID_TV":
-      return {
-        name: "Android TV",
-        description: "OS",
-      };
-    case "WINDOWS":
-      return {
-        name: "Windows",
-        description: "OS",
-      };
-    case "DEBIAN":
-      return {
-        name: "Debian",
-        description: "OS",
-      };
-  }
-};
+export const uptimeRoutine = {
+  updateDeviceFull: ({
+    netEntityMap,
+    deviceList,
+    instanceList,
+    appList,
+  }: Omit<GetDeviceFull, "agentMetadataList">) => {
+    console.log("update");
+    let uptimeNetAccess = null as NetAccess | null;
 
-const getAppMeta = (
-  app: App
-): {
-  name: string;
-  description: string;
-} => {
-  switch (app.slug) {
-    case "UNRECOGNIZED":
-    case "UNKNOWN_APP":
+    const mapApp = (net: NetAccess, app: Pick<App, "slug" | "meta">) => {
+      if (app.slug === "UPTIME_KUMA") {
+        uptimeNetAccess = net;
+      }
+
       return {
-        name: "Unknown", // TODO
-        description: "Unknown app",
+        ...net,
+        ...app.meta,
       };
-    case "HOMENET":
-      return {
-        name: "Homenet",
-        description: "Home network centralizer",
+    };
+
+    const filter = ({ type, scope, address }: NetAccess) => {
+      return (
+        type === "web" && scope === "dns-domain" // && address !== "home.assistant"
+      );
+    };
+
+    const hrefMap = Object.fromEntries(
+      Object.entries(netEntityMap)
+        .map(([key, entity]) => {
+          const osMeta = [...deviceList, ...instanceList].find(
+            (instance) => instance.id === entity.id
+          )?.meta!;
+
+          return [
+            key,
+            {
+              os: entity.os
+                .filter(filter)
+                .map((net) => ({ ...net, ...osMeta })),
+              apps: Object.fromEntries(
+                Object.entries(entity.apps)
+                  .map(([key, app]) => {
+                    const foundApp = appList.find(
+                      (ap) => ap.parentId === entity.id && ap.slug === key
+                    )!;
+
+                    return [
+                      key,
+                      app.filter(filter).map((net) => mapApp(net, foundApp)),
+                    ] as const;
+                  })
+                  .filter((v) => v[1].length > 0)
+              ),
+            },
+          ] as const;
+        })
+        .filter((v) => v[1].os.length > 0 || Object.keys(v[1].apps).length > 0)
+    );
+
+    pe.netList = Object.values(hrefMap).flatMap((value) =>
+      value.os.concat(...Object.values(value.apps).flatMap((app) => app))
+    );
+
+    if (!uptimeNetAccess) {
+      console.log("Uptime Kuma net-access not found");
+      pe.socket?.disconnect();
+      return;
+    }
+
+    if (pe.socket?.isConnected()) {
+      return;
+    }
+
+    const socketAddress = `wss://${uptimeNetAccess.address}`;
+
+    pe.socket = createSocket(socketAddress);
+
+    if (pe.started) {
+      return uptimeRoutine.start();
+    }
+  },
+  start: async () => {
+    pe.started = true;
+    console.log("start", !!pe.socket);
+    if (!pe.socket || !pe.netList) {
+      return;
+    }
+
+    if (pe.socket.isConnected()) {
+      console.log("connected");
+      await sendToClient();
+      return;
+    }
+
+    pe.socket.on.disconnect((reason) => {
+      console.log("io: disconnect", reason);
+      pe.socket?.disconnect();
+      pe.started = false;
+      delete pe.socket;
+    });
+
+    const process = async (
+      monitorMap: Record<string, Monitor | undefined>,
+      notificationList: Notification[]
+    ) => {
+      console.log("process");
+
+      const monitorList = Object.values(monitorMap);
+
+      const tag = await getTagOrAdd();
+
+      const monitorAddFns = pe
+        .netList!.map((net) => {
+          const monitor = monitorList.find(
+            (monitor) =>
+              monitor?.url === net.href &&
+              monitor.tags?.some(({ tag_id }) => tag_id === tag?.id)
+          );
+          if (monitor) {
+            return null;
+          }
+
+          return async () => {
+            console.log("Add monitor", net.name, net.href);
+            const notificationIDList = notificationList?.length
+              ? {
+                  [String(notificationList[0].id)]: true,
+                }
+              : {};
+
+            const { monitorID } = await pe.socket!.emit.addMonitor({
+              active: true,
+              name: net.name,
+              description: "Created by Homenet",
+              url: net.href,
+              type: "http",
+              method: "GET",
+              expiryNotification: net.href.startsWith("https://"),
+              maxretries: 2,
+              notificationIDList,
+
+              interval: 60,
+              retryInterval: 60,
+              resendInterval: 0,
+              timeout: 48,
+              ignoreTls: false,
+              upsideDown: false,
+              packetSize: 56,
+              maxredirects: 10,
+              accepted_statuscodes: ["200-299"],
+              dns_resolve_type: "A",
+              dns_resolve_server: "1.1.1.1",
+              oauth_auth_method: "client_secret_basic",
+              httpBodyEncoding: "json",
+              kafkaProducerBrokers: [],
+              kafkaProducerSaslOptions: {
+                mechanism: "None",
+              },
+              kafkaProducerSsl: false,
+              kafkaProducerAllowAutoTopicCreation: false,
+              gamedigGivenPortOnly: true,
+            });
+
+            await pe.socket!.emit.addMonitorTag(tag.id, monitorID, "");
+          };
+        })
+        .filter((fn) => fn !== null);
+
+      console.log("monitor-fns", monitorAddFns.length);
+
+      if (monitorAddFns.length > 0) {
+        onMonitorList.turnOff();
+        for (const fn of monitorAddFns) {
+          await fn();
+        }
+        pe.monitorMap = await pe.socket!.emit.getMonitorList();
+        onMonitorList.turnOn();
+      } else {
+        pe.monitorMap = monitorMap;
+      }
+      pe.monitorMap = Object.fromEntries(
+        Object.entries(pe.monitorMap).filter(([id, monitor]) =>
+          monitor?.tags?.some(({ tag_id }) => tag_id === tag.id)
+        )
+      );
+    };
+
+    /**
+     * First call after login (1)
+     */
+    const onMonitorList = pe.socket.on.monitorList(async (monitorMap) => {
+      console.log("on.monitorList");
+      if (pe.notificationList) {
+        await process(monitorMap, pe.notificationList);
+        await sendToClient();
+      }
+    }, false);
+
+    /**
+     * First call after login (2)
+     */
+    const onNotificationList = pe.socket.on.notificationList(
+      async (notificationList) => {
+        console.log("on.notificationList");
+        pe.notificationList = notificationList;
+
+        if (!pe.monitorMap) {
+          onMonitorList.turnOff();
+          const monitorMap = await pe.socket!.emit.getMonitorList();
+          onMonitorList.turnOn();
+
+          await process(monitorMap, notificationList);
+        } else {
+          await sendToClient();
+        }
+      },
+      false
+    );
+
+    /**
+     * First call after login (3)
+     */
+    const onHeartbeatList = pe.socket.on.heartbeatList((monitorIdStr, data) => {
+      const monitorId = Number(monitorIdStr);
+
+      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
+        return;
+      }
+
+      const previousHeartbeat = pe.lastHeartbeatMap?.[monitorId];
+
+      const lastHeartbeat = data[data.length - 1] as Heartbeat | undefined;
+      pe.lastHeartbeatMap = {
+        ...pe.lastHeartbeatMap,
+        [monitorId]: lastHeartbeat,
       };
-    case "WIREGUARD":
-      return {
-        name: `Wireguard`,
-        description: app.vpnMode === "SERVER" ? "VPN Server" : "VPN Client",
+
+      if (
+        !pe.hearbeatReady &&
+        monitorId === Math.max(...Object.keys(pe.monitorMap).map(Number))
+      ) {
+        pe.hearbeatReady = true;
+        sendToClient();
+      } else if (
+        lastHeartbeat &&
+        lastHeartbeat.status !== previousHeartbeat?.status
+      ) {
+        sendToClient();
+      }
+    }, false);
+
+    /**
+     * First call after login (4)
+     */
+    const onHeartbeat = pe.socket.on.heartbeat((data) => {
+      const monitorId = data.monitorID;
+
+      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
+        return;
+      }
+
+      const previousHeartbeat = pe.lastHeartbeatMap?.[monitorId];
+
+      const lastHeartbeat = data;
+      pe.lastHeartbeatMap = {
+        ...pe.lastHeartbeatMap,
+        [monitorId]: lastHeartbeat,
       };
-    case "NGINX":
-      return {
-        name: `Nginx`,
-        description: "Web server",
-      };
-    case "ADGUARD_HOME":
-      return {
-        name: `AdGuard Home`,
-        description: "Ad blocker",
-      };
-    case "NODE_RED":
-      return {
-        name: "Node RED",
-        description: "Low code flows",
-      };
-    case "ZIGBEE2MQTT":
-      return {
-        name: "Zigbee2MQTT",
-        description: "Zigbee IoT bridge",
-      };
-    case "DOCKER":
-      return {
-        name: "Docker",
-        description: "Containers",
-      };
-    case "DOCKER_REGISTRY":
-      return {
-        name: "Docker registry",
-        description: "Images registry",
-      };
-    case "PLEX":
-      return {
-        name: "Plex",
-        description: "Media server",
-      };
-    case "MOONLIGHT":
-      return {
-        name: "Moonlight",
-        description: "Game streaming client",
-      };
-    case "SUNSHINE":
-      return {
-        name: "Sunshine",
-        description: "Game streaming host",
-      };
-    case "CADDY":
-      return {
-        name: "Caddy",
-        description: "Web server with auto https",
-      };
-    case "UPTIME_KUMA":
-      return {
-        name: "Uptime Kuma",
-        description: "Monitoring services uptime",
-      };
-    case "NTFY":
-      return {
-        name: "Ntfy",
-        description: "Notification service",
-      };
-    case "CODE_SERVER":
-      return {
-        name: "VS Code",
-        description: "code-server",
-      };
-  }
+
+      if (lastHeartbeat.status !== previousHeartbeat?.status) {
+        sendToClient();
+      }
+    }, false);
+
+    onMonitorList.turnOn();
+    onNotificationList.turnOn();
+    onHeartbeatList.turnOn();
+    onHeartbeat.turnOn();
+
+    await pe.socket.connect();
+    await pe.socket.emit.login();
+  },
+  stop: () => {
+    pe.socket?.disconnect();
+  },
 };

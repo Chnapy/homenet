@@ -1,11 +1,7 @@
-import { DeviceApp } from "../../../data/types/get-devices";
+import { App } from "../app";
+import { Meta } from "./meta";
 
-export const getAppMeta = (
-  app: DeviceApp
-): {
-  name: string;
-  description: string;
-} => {
+export const getAppMeta = (app: Omit<App, "meta">): Meta => {
   switch (app.slug) {
     case "UNRECOGNIZED":
     case "UNKNOWN_APP":

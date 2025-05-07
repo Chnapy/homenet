@@ -3,7 +3,6 @@ import { DeviceContext } from "../device/provider/device-provider";
 import { InstanceContext } from "../instance/provider/instance-provider";
 import { useNetEntityMap } from "../network/hooks/use-net-entity-map";
 import { AppOSLine } from "../ui/app-os-line";
-import { getOSMeta } from "./utils/get-os-meta";
 
 export const OSLine: React.FC = () => {
   const { device } = DeviceContext.useValue();
@@ -23,7 +22,7 @@ export const OSLine: React.FC = () => {
 
   const netEntityAccess = data[entity.id].os;
 
-  const { name, description } = getOSMeta(entity.os);
+  const { name, description } = entity.meta;
 
   const osMainAccess = netEntityAccess[0];
   const osOthersAccessList = netEntityAccess.filter(

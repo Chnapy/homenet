@@ -1,11 +1,7 @@
-import { DeviceOSSlug } from "../../../data/types/get-devices";
+import { Instance } from "../instance";
+import { Meta } from "./meta";
 
-export const getOSMeta = (
-  slug: DeviceOSSlug
-): {
-  name: string;
-  description: string;
-} => {
+export const getOSMeta = (slug: Instance["os"]): Meta => {
   switch (slug) {
     case "UNRECOGNIZED":
     case "UNKNOWN_OS":

@@ -1,6 +1,7 @@
 import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { openDeviceDB } from "../../db/device";
+import { uptimeRoutine } from "../../uptime/uptime";
 import {
   AgentMetadataFull,
   getAgentMetadataFullFromAgentMetadata,
@@ -10,14 +11,16 @@ import { getInstanceFromAgentInstance, Instance } from "../entities/instance";
 import { publicProcedure } from "../trpc";
 import { getNetEntityMap, NetEntityMap } from "../utils/get-net-entity-map";
 
+export type GetDeviceFull = {
+  deviceList: Instance[];
+  instanceList: Instance[];
+  appList: App[];
+  agentMetadataList: AgentMetadataFull[];
+  netEntityMap: NetEntityMap;
+};
+
 export const getDevicesFull = publicProcedure.query(
-  async (): Promise<{
-    deviceList: Instance[];
-    instanceList: Instance[];
-    appList: App[];
-    agentMetadataList: AgentMetadataFull[];
-    netEntityMap: NetEntityMap;
-  }> => {
+  async (): Promise<GetDeviceFull> => {
     const db = openRootDB();
 
     const deviceDB = openDeviceDB(db);
@@ -61,6 +64,13 @@ export const getDevicesFull = publicProcedure.query(
     if (duplicatedLans.length > 0) {
       console.error("Duplicated Lans", duplicatedLans);
     }
+
+    uptimeRoutine.updateDeviceFull({
+      deviceList,
+      instanceList,
+      appList,
+      netEntityMap,
+    });
 
     return {
       deviceList,
