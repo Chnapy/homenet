@@ -353,7 +353,7 @@ func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
 
 func (a *DebianProvider) GetHomenet() *gen.AgentApp {
 	out, _ := a.executor.Exec("sh -c 'echo $HOMENET'")
-	if out == "" {
+	if strings.TrimSpace(out) == "" {
 		return nil
 	}
 
@@ -429,7 +429,7 @@ func (a *DebianProvider) GetWireguard() *gen.AgentApp {
 
 func (a *DebianProvider) GetNtfy() *gen.AgentApp {
 	out, _ := a.executor.Exec("sh -c 'echo $NTFY_LISTEN_HTTP'")
-	if out == "" {
+	if strings.TrimSpace(out) == "" {
 		return nil
 	}
 

@@ -287,6 +287,7 @@ export const uptimeRoutine = {
                     name: [net.name, namePart].filter(Boolean).join(" "),
                     method: "GET",
                     expiryNotification: net.href.startsWith("https://"),
+                    ignoreTls: net.href.startsWith("https://"),
                   }
                 : {
                     type: "port",
