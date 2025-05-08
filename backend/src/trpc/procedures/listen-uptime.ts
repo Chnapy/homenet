@@ -17,7 +17,7 @@ export const listenUptime = publicProcedure.subscription(async function* (
 
   try {
     for await (const [data] of eventIterator) {
-      console.log("uptime", data);
+      console.log("trpc: listenUptime - event", data);
       const uptimeMap = data as Parameters<
         typeof uptimeEventEmitter.emit<"add">
       >[1];

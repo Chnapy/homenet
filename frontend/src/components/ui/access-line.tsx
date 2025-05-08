@@ -4,7 +4,6 @@ import LinkIcon from "@mui/icons-material/Link";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import {
-  Badge,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -12,6 +11,7 @@ import {
 } from "@mui/material";
 import { UptimeMap } from "../../data/query/use-listen-uptime";
 import { NetAccess } from "../../data/types/get-devices";
+import { BadgeUptime } from "./badge-uptime";
 
 type AccessLineProps = Pick<NetAccess, "type" | "scope" | "href"> & {
   link?: boolean;
@@ -51,12 +51,8 @@ export const AccessLine: React.FC<AccessLineProps> = ({
           },
         }}
       />
-      <ListItemIcon sx={{ minWidth: 0, mb: "1px" }}>
-        <Badge
-          variant="dot"
-          color={uptime === "on" ? "success" : "error"}
-          invisible={!uptime}
-        />
+      <ListItemIcon sx={{ minWidth: 0, mb: "2px" }}>
+        <BadgeUptime uptime={uptime} />
       </ListItemIcon>
     </>
   );

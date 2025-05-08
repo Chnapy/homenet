@@ -158,7 +158,7 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
 
         setNodes(newNodes);
 
-        console.log("1st process layout", { layout, newNodes });
+        console.log("layout: 1st process", { layout, newNodes });
       })
       // 2nd process for group nodes & edges
       .then(getLayoutAlgorithm)
@@ -229,7 +229,7 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
         setNodes(newNodes);
         setEdges(newEdges);
 
-        console.log("2nd process layout", { layout, newNodes, newEdges });
+        console.log("layout: 2nd process", { layout, newNodes, newEdges });
       })
       .finally(() => {
         processingRef.current = false;

@@ -20,9 +20,9 @@ export const setupGRPCServer = () => {
     grpc.ServerCredentials.createInsecure(),
     (error, port) => {
       if (error) {
-        console.error("gRPC server error:", error);
+        console.error("grpc: server error", error);
       } else {
-        console.log("gRPC server listening on port", port);
+        console.log("grpc: server listening on port", port);
       }
     }
   );

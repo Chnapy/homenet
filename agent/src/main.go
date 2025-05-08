@@ -12,12 +12,12 @@ import (
 var releaseTag string
 
 func main() {
-	log.Println("Homenet agent")
+	log.Println("Homenet agent: start")
 
 	updated, err := AutoUpdate(releaseTag)
 
 	if err != nil {
-		fmt.Printf("Auto-update failed: %v", err)
+		fmt.Printf("Main: AutoUpdate failed %v", err)
 	}
 
 	if updated {
@@ -26,21 +26,23 @@ func main() {
 
 	CheckCron()
 
-	data := PrepareData(releaseTag)
+	preparedData := PrepareData(releaseTag)
 
 	marshaler := protojson.MarshalOptions{
 		Indent:          "  ",
 		UseEnumNumbers:  false, // Use enum string names
 		EmitUnpopulated: true,
 	}
-	out, err := marshaler.Marshal(data)
+	out, err := marshaler.Marshal(preparedData)
 	if err != nil {
-		fmt.Println("Error marshaling:", err)
+		fmt.Println("Main: error preparedData marshaling -", err)
 		return
 	}
 
 	fmt.Println()
-	fmt.Println(string(out))
+	fmt.Println("Main: preparedData -", string(out))
 
-	grpc.Grpc(data)
+	grpc.Grpc(preparedData)
+
+	log.Println("Homenet agent: end")
 }

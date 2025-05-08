@@ -86,7 +86,7 @@ export const uptimeRoutine = {
     instanceList,
     appList,
   }: Omit<GetDeviceFull, "agentMetadataList">) => {
-    console.log("update");
+    console.log("io: update device-full");
     let uptimeNetAccess = null as NetAccess | null;
 
     const mapApp = (net: NetAccess, app: Pick<App, "slug" | "meta">) => {
@@ -144,7 +144,7 @@ export const uptimeRoutine = {
     );
 
     if (!uptimeNetAccess) {
-      console.log("Uptime Kuma net-access not found");
+      console.log("io: uptime-kuma net-access not found");
       pe.socket?.disconnect();
       return;
     }
@@ -163,19 +163,20 @@ export const uptimeRoutine = {
   },
   start: async () => {
     pe.started = true;
-    console.log("start", !!pe.socket);
+    console.log("io: start attempt");
     if (!pe.socket || !pe.netList) {
+      console.log("io: start cancelled - no socket or netList");
       return;
     }
 
     if (pe.socket.isConnected()) {
-      console.log("connected");
+      console.log("io: start cancelled - already started");
       await sendToClient();
       return;
     }
 
     pe.socket.on.disconnect((reason) => {
-      console.log("io: disconnect", reason);
+      console.log("io: disconnect -", reason);
       pe.socket?.disconnect();
       pe.started = false;
       delete pe.socket;
@@ -185,7 +186,7 @@ export const uptimeRoutine = {
       monitorMap: Record<string, Monitor | undefined>,
       notificationList: Notification[]
     ) => {
-      console.log("process");
+      console.log("io: main process");
 
       const monitorList = Object.values(monitorMap);
 
@@ -203,7 +204,7 @@ export const uptimeRoutine = {
           }
 
           return async () => {
-            console.log("Add monitor", net.name, net.href);
+            console.log("io: add monitor", net.name, net.href);
             const notificationIDList = notificationList?.length
               ? {
                   [String(notificationList[0].id)]: true,
@@ -248,7 +249,7 @@ export const uptimeRoutine = {
         })
         .filter((fn) => fn !== null);
 
-      console.log("monitor-fns", monitorAddFns.length);
+      console.log("io: monitors count to add", monitorAddFns.length);
 
       if (monitorAddFns.length > 0) {
         onMonitorList.turnOff();
@@ -271,7 +272,7 @@ export const uptimeRoutine = {
      * First call after login (1)
      */
     const onMonitorList = pe.socket.on.monitorList(async (monitorMap) => {
-      console.log("on.monitorList");
+      console.log("io: on.monitorList");
       if (pe.notificationList) {
         await process(monitorMap, pe.notificationList);
         await sendToClient();
@@ -283,7 +284,7 @@ export const uptimeRoutine = {
      */
     const onNotificationList = pe.socket.on.notificationList(
       async (notificationList) => {
-        console.log("on.notificationList");
+        console.log("io: on.notificationList");
         pe.notificationList = notificationList;
 
         if (!pe.monitorMap) {

@@ -58,11 +58,11 @@ export const getDevicesFull = publicProcedure.query(
     const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
 
     if (duplicatedIds.length > 0) {
-      console.error("Duplicated IDs", duplicatedIds);
+      console.error("trpc: getDevicesFull - duplicated IDs", duplicatedIds);
     }
 
     if (duplicatedLans.length > 0) {
-      console.error("Duplicated Lans", duplicatedLans);
+      console.error("trpc: getDevicesFull - duplicated Lans", duplicatedLans);
     }
 
     uptimeRoutine.updateDeviceFull({

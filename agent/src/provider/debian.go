@@ -73,7 +73,7 @@ func (e *DebianProvider) GetLan() string {
 	result, err := e.executor.Exec("ip addr")
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Debian: GetLan error -", err)
 		return ""
 	}
 
@@ -285,7 +285,7 @@ func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
 	containerListOut, err := e.executor.Exec("docker ps --format=json")
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Debian: GetInstanceList error -", err)
 		return instances
 	}
 
@@ -488,7 +488,7 @@ func (a *DebianProvider) GetCaddy() *gen.AgentApp {
 	matches := pattern.FindAllStringSubmatch(fileContent, -1)
 
 	for _, match := range matches {
-		fmt.Println(match[1], match[2])
+		// fmt.Println(match[1], match[2])
 		if len(match) < 3 {
 			continue
 		}
@@ -559,7 +559,7 @@ func (e *DebianProvider) GetCodeServer() *gen.AgentApp {
 	stream := e.executor.Open(configPath)
 	var config map[string]interface{}
 	if err := yaml.Unmarshal([]byte(stream), &config); err != nil {
-		fmt.Println(err)
+		fmt.Println("Debian: GetCodeServer error -", err)
 		return app
 	}
 

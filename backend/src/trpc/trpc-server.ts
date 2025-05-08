@@ -25,7 +25,7 @@ export const setupTRPCServer = () => {
       createContext,
       onError: (({ path, error }) => {
         // report to error monitoring
-        console.error(`tRPC Error in handler on path '${path}':`, error);
+        console.error(`trpc: error in handler on path '${path}'`, error);
       }) satisfies HTTPErrorHandler<any, FastifyRequest>,
     },
   });
@@ -43,7 +43,7 @@ export const setupTRPCServer = () => {
         process.exit(1);
       }
 
-      console.log(`tRPC server listening at ${address}`);
+      console.log(`trpc: server listening at ${address}`);
     }
   );
 

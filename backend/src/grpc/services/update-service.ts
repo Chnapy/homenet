@@ -13,12 +13,12 @@ export const updateService: handleUnaryCall<
   AgentUpdateResponse
 > = async (call, callback) => {
   try {
-    console.log("AgentUpdateRequest received:", call.request);
+    console.log("grpc: AgentUpdateRequest received", call.request);
 
     const { device, agentMetadata } = call.request;
 
     if (!device || !agentMetadata) {
-      throw new Error("Device not defined");
+      throw new Error("grpc: device not defined");
     }
 
     const now = Date.now();
@@ -52,30 +52,30 @@ export const updateService: handleUnaryCall<
       }
     });
 
-    console.log("DB - Stored in deviceDB:", deviceId, cleanDevice);
+    console.log("grpc: stored in deviceDB", deviceId, cleanDevice);
     console.log(
-      "DB - Stored in agentMetadataDB:",
+      "grpc: stored in agentMetadataDB",
       agentMetadataId,
       agentMetadata
     );
     if (!userMetadata) {
       console.log(
-        "DB - Stored in deviceUserMetadataDB:",
+        "grpc: stored in deviceUserMetadataDB",
         deviceId,
         userMetadataDefaultValues
       );
     }
 
     callback(null, {
-      foo: "bar",
+      message: "OK - everything's fine",
     });
   } catch (err) {
-    console.error("AgentUpdateRequest error:", err);
+    console.error("grpc: AgentUpdateRequest error", err);
 
     const error = err instanceof Error ? err : new Error(String(err));
 
     callback(error, {
-      foo: "bar-error",
+      message: "KO - error happened",
     });
   }
 };

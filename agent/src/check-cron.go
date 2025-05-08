@@ -14,10 +14,10 @@ import (
 func CheckCron() {
 	launcherPath, _ := os.Executable()
 	if strings.HasPrefix(launcherPath, "/tmp/") {
-		fmt.Println("Launcher in tmp dir, check-cron ignored")
+		fmt.Println("CheckCron: launcher in tmp dir, check-cron ignored")
 		return
 	}
-	fmt.Println("Check Cron jobs")
+	fmt.Println("CheckCron: check jobs")
 
 	var entries []string
 	var err error
@@ -29,7 +29,7 @@ func CheckCron() {
 	}
 
 	if err != nil {
-		log.Printf("Erreur de lecture du cron : %v\n", err)
+		log.Printf("CheckCron: error reading cron : %v\n", err)
 		return
 	}
 
@@ -43,7 +43,7 @@ func CheckCron() {
 	expectedJobTimed := fmt.Sprintf("%s %s # Homenet agent Cron Job (time)", timedCron, commandCron)
 	expectedJobReboot := fmt.Sprintf("@reboot %s # Homenet agent Cron Job (reboot)", commandCron)
 
-	log.Printf("Check cron : %s %s\n", timedCron, commandCron)
+	log.Printf("CheckCron: %s %s\n", timedCron, commandCron)
 
 	jobTimedExists := false
 	jobRebootExists := false
@@ -67,7 +67,7 @@ func CheckCron() {
 					if !strings.HasPrefix(command, commandCron) {
 						entries[index] = expectedJobReboot
 						updated = true
-						log.Println("Cron job (reboot) updated.")
+						log.Println("CheckCron: job (reboot) updated.")
 					}
 				}
 			}
@@ -91,7 +91,7 @@ func CheckCron() {
 						time != timedCron {
 						entries[index] = expectedJobTimed
 						updated = true
-						log.Println("Cron job (time) updated.")
+						log.Println("CheckCron: job (time) updated.")
 					}
 				}
 			}
@@ -101,13 +101,13 @@ func CheckCron() {
 	if !jobTimedExists {
 		entries = append(entries, expectedJobTimed)
 		updated = true
-		log.Println("Cron job (time) added.")
+		log.Println("CheckCron: job (time) added.")
 	}
 
 	if !jobRebootExists {
 		entries = append(entries, expectedJobReboot)
 		updated = true
-		log.Println("Cron job (reboot) added.")
+		log.Println("CheckCron: job (reboot) added.")
 	}
 
 	if updated {
@@ -118,12 +118,12 @@ func CheckCron() {
 			err = writeUnixCron(entries)
 		}
 		if err != nil {
-			log.Printf("Cron write error : %v", err)
+			log.Printf("CheckCron: write error : %v", err)
 			return
 		}
-		log.Println("Cron jobs updated.")
+		log.Println("CheckCron: jobs updated.")
 	} else {
-		log.Println("Cron jobs already clean, not update needed.")
+		log.Println("CheckCron: jobs already clean, no update needed.")
 	}
 }
 
@@ -174,7 +174,7 @@ func writeUnixCron(entries []string) error {
 	cmd := exec.Command("crontab", tmpFile.Name())
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("crontab install failed: %v, output: %s", err, output)
+		return fmt.Errorf("CheckCron: crontab install failed: %v, output: %s", err, output)
 	}
 	return nil
 }

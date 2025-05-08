@@ -1,7 +1,8 @@
-import { Badge, ListItem, ListItemButton, ListItemIcon } from "@mui/material";
+import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
 import React from "react";
 import { useListenUptime } from "../../data/query/use-listen-uptime";
 import { AppOSIcon, AppOSIconProps } from "../ui/app-os-icon/app-icon";
+import { BadgeUptime } from "../ui/badge-uptime";
 import { useCurrentPage } from "./hooks/use-current-page";
 
 type SidebarItemProps = {
@@ -52,15 +53,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           paddingLeft: "12px",
         }}
       >
-        <Badge
-          variant="dot"
-          color={uptime === "on" ? "success" : "error"}
-          invisible={!uptime}
-        >
+        <BadgeUptime uptime={uptime}>
           <ListItemIcon sx={{ minWidth: 24, maxWidth: 24 }}>
             <AppOSIcon slug={slug} sx={{ maxWidth: "100%" }} />
           </ListItemIcon>
-        </Badge>
+        </BadgeUptime>
       </ListItemButton>
 
       {/* <Menu anchorEl={anchorRef.current} open={open} onClose={handleClose}>

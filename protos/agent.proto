@@ -149,5 +149,5 @@ message AgentUpdateRequest {
 }
 
 message AgentUpdateResponse {
-  string foo = 1;
+  string message = 1;
 }

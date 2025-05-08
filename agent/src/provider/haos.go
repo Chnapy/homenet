@@ -56,12 +56,12 @@ func (a *HAOSProvider) GetWeb() []*gen.AgentWebItem {
 	// Partie Home Assistant Core
 	haInfo, err := a.executor.Exec("ha core info")
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetWeb error -", err)
 	}
 
 	var properties map[string]interface{}
 	if err := yaml.Unmarshal([]byte(haInfo), &properties); err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetWeb error -", err)
 	}
 
 	if port, ok := properties["port"].(int); ok {
@@ -76,7 +76,7 @@ func (a *HAOSProvider) GetWeb() []*gen.AgentWebItem {
 	// Partie Docker Observer
 	haObserver, err := a.executor.Exec("docker inspect hassio_observer")
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetWeb error -", err)
 	}
 
 	var observerConfig []struct {
@@ -88,7 +88,7 @@ func (a *HAOSProvider) GetWeb() []*gen.AgentWebItem {
 	}
 
 	if err := json.Unmarshal([]byte(haObserver), &observerConfig); err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetWeb error -", err)
 	}
 
 	if len(observerConfig) > 0 {
@@ -108,7 +108,7 @@ func (a *HAOSProvider) GetSSH() *gen.AgentSSH {
 
 	addonListOutput, err := a.executor.Exec("ha addons --raw-json")
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetSSH error -", err)
 	}
 
 	var addonListRaw struct {
@@ -120,7 +120,7 @@ func (a *HAOSProvider) GetSSH() *gen.AgentSSH {
 	}
 
 	if err := json.Unmarshal([]byte(addonListOutput), &addonListRaw); err != nil {
-		fmt.Println(err)
+		fmt.Println("HAOS: GetSSH error -", err)
 	}
 
 	addonList := addonListRaw.Data.Addons
@@ -128,7 +128,7 @@ func (a *HAOSProvider) GetSSH() *gen.AgentSSH {
 	for _, addon := range addonList {
 		addonInfoOutput, err := a.executor.Exec(fmt.Sprintf("ha addons info %s --raw-json", addon.Slug))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("HAOS: GetSSH error -", err)
 			continue
 		}
 
@@ -139,7 +139,7 @@ func (a *HAOSProvider) GetSSH() *gen.AgentSSH {
 		}
 
 		if err := json.Unmarshal([]byte(addonInfoOutput), &addonInfoRaw); err != nil {
-			fmt.Println(err)
+			fmt.Println("HAOS: GetSSH error -", err)
 			continue
 		}
 
@@ -172,7 +172,7 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 
 	addonListOutput, err := a.executor.Exec("ha addons --raw-json")
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetApps error -", err)
 	}
 
 	var addonListObj struct {
@@ -184,7 +184,7 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 	}
 
 	if err := json.Unmarshal([]byte(addonListOutput), &addonListObj); err != nil {
-		fmt.Print(err)
+		fmt.Print("HAOS: GetApps error -", err)
 	}
 
 	addonList := addonListObj.Data.Addons
@@ -192,7 +192,7 @@ func (a *HAOSProvider) GetApps() []*gen.AgentApp {
 	for _, addon := range addonList {
 		addonInfoOutput, err := a.executor.Exec(fmt.Sprintf("ha addons info %s --raw-json", addon.Slug))
 		if err != nil {
-			fmt.Print(err)
+			fmt.Print("HAOS: GetApps error -", err)
 			continue
 		}
 

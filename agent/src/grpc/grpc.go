@@ -18,7 +18,7 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	// Set up a connection to the server.
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("gRPC did not connect: %v", err)
+		log.Fatalf("Grpc: did not connect - %v", err)
 	}
 	defer conn.Close()
 	c := gen.NewAgentClient(conn)
@@ -27,13 +27,13 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	log.Println("gRPC connection state:", conn.GetState().String())
+	log.Println("Grpc: connection state -", conn.GetState().String())
 
 	startTime := time.Now().UnixMilli()
 	r, err := c.Update(ctx, data)
-	log.Println("gRPC duration:", time.Now().UnixMilli()-startTime)
+	log.Println("Grpc: duration", time.Now().UnixMilli()-startTime)
 	if err != nil {
-		log.Fatalf("gRPC could not greet: %v", err)
+		log.Fatalf("Grpc: could not greet - %v", err)
 	}
-	log.Printf("gRPC response: %s", r.Foo)
+	log.Printf("Grpc: response - %s", r.Message)
 }

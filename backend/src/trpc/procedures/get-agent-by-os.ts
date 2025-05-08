@@ -9,7 +9,7 @@ export const getAgentByOSRoute: RouteHandlerMethod = async (request, reply) => {
   };
   const assetName = "agent-" + (request.params as Record<string, string>).os;
 
-  console.log(request.params, request.headers);
+  console.log("trpc: getAgentByOS", request.params, request.headers);
 
   try {
     const latestRelease = await fetch(urls.latestRelease, {
@@ -48,7 +48,7 @@ export const getAgentByOSRoute: RouteHandlerMethod = async (request, reply) => {
 
     return reply.send(assetResponse.body);
   } catch (err) {
-    console.error(err);
+    console.error("trpc: getAgentByOS error", err);
     request.log.error(err);
     reply.code(500).send();
   }

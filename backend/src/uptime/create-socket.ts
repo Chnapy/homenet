@@ -14,7 +14,7 @@ import {
 } from "./uptime-kuma-io-types";
 
 export const createSocket = (socketAddress: string) => {
-  console.log("Socket created with address", socketAddress);
+  console.log("io: socket created with address", socketAddress);
   const sio = io(socketAddress, {
     autoConnect: false,
   });

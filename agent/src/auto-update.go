@@ -13,14 +13,14 @@ import (
 
 func AutoUpdate(releaseTag string) (bool, error) {
 	if releaseTag == "" {
-		fmt.Println("Release tag is empty, auto-update ignored")
+		fmt.Println("AutoUpdate: release tag is empty, auto-update ignored")
 		return false, nil
 	}
-	fmt.Println("Release tag:", releaseTag)
+	fmt.Println("AutoUpdate: release tag:", releaseTag)
 
 	exe, err := os.Executable()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("AutoUpdate: error", err)
 		return false, err
 	}
 	args := os.Args
@@ -36,19 +36,19 @@ func AutoUpdate(releaseTag string) (bool, error) {
 
 	v := semver.MustParse(releaseTag)
 	latestRelease, err := updater.UpdateSelf(v, "chnapy/homenet")
-	fmt.Println("Last release", latestRelease)
+	fmt.Println("AutoUpdate: last release", latestRelease)
 
 	if err != nil {
-		return false, fmt.Errorf("échec récupération release: %w", err)
+		return false, fmt.Errorf("AutoUpdate: error fetching release: %w", err)
 	}
 
 	if latestRelease.Version.Equals(v) {
-		fmt.Printf("Agent already up-to-date %s\n", latestRelease.Version.String())
+		fmt.Printf("AutoUpdate: agent already up-to-date %s\n", latestRelease.Version.String())
 
 		return false, nil
 	}
 
-	fmt.Printf("Agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
+	fmt.Printf("AutoUpdate: agent up-to-date from %s to %s\n", v.String(), latestRelease.Version.String())
 	Restart(exe, args)
 
 	return true, nil
@@ -56,15 +56,15 @@ func AutoUpdate(releaseTag string) (bool, error) {
 
 func Restart(exe string, args []string) {
 
-	fmt.Printf("App restarting [%s]...\n", runtime.GOOS)
-	fmt.Println("Current exe:", exe)
+	fmt.Printf("AutoUpdate: app restarting [%s]...\n", runtime.GOOS)
+	fmt.Println("AutoUpdate: current exe:", exe)
 
 	// Unix
 	if runtime.GOOS == "linux" {
 		env := os.Environ()
 		err := syscall.Exec(exe, args, env)
 		if err != nil {
-			fmt.Println(err, exe, args)
+			fmt.Println("AutoUpdate: exec error", err, exe, args)
 		}
 		return
 	}
@@ -76,6 +76,6 @@ func Restart(exe string, args []string) {
 	cmd.Stdin = os.Stdin
 	err := cmd.Start()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("AutoUpdate: fallback exec error", err)
 	}
 }
