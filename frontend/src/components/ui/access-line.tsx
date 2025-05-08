@@ -15,7 +15,6 @@ import { BadgeUptime } from "./badge-uptime";
 
 type AccessLineProps = Pick<NetAccess, "type" | "scope" | "href"> & {
   link?: boolean;
-  onClick?: () => void;
   disablePadding?: boolean;
   uptime?: UptimeMap[string];
 };
@@ -32,7 +31,6 @@ export const AccessLine: React.FC<AccessLineProps> = ({
   scope,
   href,
   link,
-  onClick,
   disablePadding,
   uptime,
 }) => {
@@ -60,7 +58,11 @@ export const AccessLine: React.FC<AccessLineProps> = ({
   if (link) {
     return (
       <ListItemButton
-        onClick={onClick}
+        onClick={() => {
+          if (type !== "ssh") {
+            window.open(href, "_blank");
+          }
+        }}
         disableGutters={disablePadding}
         sx={{ gap: 1 }}
       >

@@ -64,7 +64,7 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
   return aValue < bValue ? -1 : 1;
 };
 
-const withAccessWebHref = (net: Omit<NetAccess, "href">): NetAccess => {
+export const getAccessHref = (net: Omit<NetAccess, "scope" | "href">) => {
   const { address, ssl, port, type } = net;
 
   const getWebPort = () => {
@@ -75,16 +75,15 @@ const withAccessWebHref = (net: Omit<NetAccess, "href">): NetAccess => {
     return ":" + port;
   };
 
-  const href =
-    type === "ssh"
-      ? `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`
-      : `${ssl ? "https" : "http"}://${address}${getWebPort()}`;
-
-  return {
-    ...net,
-    href,
-  };
+  return type === "ssh"
+    ? `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`
+    : `${ssl ? "https" : "http"}://${address}${getWebPort()}`;
 };
+
+const withAccessHref = (net: Omit<NetAccess, "href">): NetAccess => ({
+  ...net,
+  href: getAccessHref(net),
+});
 
 export const getNetEntityMap = (
   deviceList: Instance[],
@@ -120,14 +119,14 @@ export const getNetEntityMap = (
     const vpn = entityApps?.find((app) => app.slug === "WIREGUARD")?.vpnAddress;
 
     const asList: NetAccess[] = [
-      withAccessWebHref({
+      withAccessHref({
         type: "address-only",
         scope: "lan",
         address: lan,
       }),
       ...(lanAliases ?? []).map(
         (alias): NetAccess =>
-          withAccessWebHref({
+          withAccessHref({
             type: "address-only",
             scope: "lan",
             address: alias,
@@ -135,7 +134,7 @@ export const getNetEntityMap = (
       ),
       ...(wan
         ? [
-            withAccessWebHref({
+            withAccessHref({
               type: "address-only",
               scope: "wan" as const,
               address: wan,
@@ -144,7 +143,7 @@ export const getNetEntityMap = (
         : []),
       ...(ddns
         ? [
-            withAccessWebHref({
+            withAccessHref({
               type: "address-only",
               scope: "dns-domain" as const,
               address: ddns,
@@ -153,7 +152,7 @@ export const getNetEntityMap = (
         : []),
       ...(vpn
         ? [
-            withAccessWebHref({
+            withAccessHref({
               type: "address-only",
               scope: "vpn" as const,
               address: vpn,
@@ -188,7 +187,7 @@ export const getNetEntityMap = (
             )
             .map(
               (proxy): NetAccess =>
-                withAccessWebHref({
+                withAccessHref({
                   type: "web",
                   scope: "dns-domain",
                   address: proxy.fromDomain!.domain,
@@ -201,7 +200,7 @@ export const getNetEntityMap = (
         ...webList.flatMap((web) =>
           asList.map(
             (net): NetAccess =>
-              withAccessWebHref({
+              withAccessHref({
                 ...net,
                 type: "web",
                 port: web.port,
@@ -220,7 +219,7 @@ export const getNetEntityMap = (
         ? asList.flatMap((net) =>
             entity.ssh!.ports.map(
               (port): NetAccess =>
-                withAccessWebHref({
+                withAccessHref({
                   ...net,
                   type: "ssh",
                   port,

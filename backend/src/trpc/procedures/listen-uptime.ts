@@ -9,11 +9,21 @@ export const uptimeEventEmitter = new EventEmitter<{
 export const listenUptime = publicProcedure.subscription(async function* (
   opts
 ): AsyncGenerator<UptimeMap> {
+  console.log("listenUptime: subscription");
+
   const eventIterator = on(uptimeEventEmitter, "add", {
     signal: opts.signal,
   });
 
-  await uptimeRoutine.start();
+  try {
+    const initialData = await uptimeRoutine.start();
+    if (initialData) {
+      yield initialData;
+    }
+  } catch (err) {
+    console.error("listenUptime: uptimeRoutine start error", err);
+    uptimeRoutine.stop();
+  }
 
   try {
     for await (const [data] of eventIterator) {

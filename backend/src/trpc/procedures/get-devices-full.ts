@@ -65,12 +65,20 @@ export const getDevicesFull = publicProcedure.query(
       console.error("trpc: getDevicesFull - duplicated Lans", duplicatedLans);
     }
 
-    uptimeRoutine.updateDeviceFull({
-      deviceList,
-      instanceList,
-      appList,
-      netEntityMap,
-    });
+    uptimeRoutine
+      .updateDeviceFull({
+        deviceList,
+        instanceList,
+        appList,
+        netEntityMap,
+      })
+      .catch((err) => {
+        console.error(
+          "getDevicesFull: uptimeRoutine update device-full error",
+          err
+        );
+        uptimeRoutine.stop();
+      });
 
     return {
       deviceList,

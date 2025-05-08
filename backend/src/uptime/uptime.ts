@@ -2,7 +2,7 @@ import { App } from "../trpc/entities/app";
 import { Meta } from "../trpc/entities/utils/meta";
 import { GetDeviceFull } from "../trpc/procedures/get-devices-full";
 import { uptimeEventEmitter } from "../trpc/procedures/listen-uptime";
-import { NetAccess } from "../trpc/utils/get-net-entity-map";
+import { getAccessHref, NetAccess } from "../trpc/utils/get-net-entity-map";
 import { createSocket } from "./create-socket";
 import { Heartbeat, Monitor, Notification, Tag } from "./uptime-kuma-io-types";
 
@@ -19,11 +19,13 @@ type PersistantEntities = {
   notificationList?: Notification[];
   lastHeartbeatMap?: Record<number, Heartbeat | undefined>;
   hearbeatReady: boolean;
+  processLock: boolean;
 };
 
 const pe: PersistantEntities = {
   started: false,
   hearbeatReady: false,
+  processLock: false,
 };
 
 const getTagOrAdd = () =>
@@ -43,44 +45,69 @@ const getTagOrAdd = () =>
     return tag;
   });
 
-const sendToClient = async () => {
-  if (
-    !pe.hearbeatReady ||
-    !pe.tag ||
-    !pe.monitorMap ||
-    !pe.notificationList ||
-    !pe.lastHeartbeatMap
-  ) {
+const prepareData = () => {
+  const requiredPeKeys: (keyof PersistantEntities)[] = [
+    "hearbeatReady",
+    "tag",
+    "monitorMap",
+    "notificationList",
+    "lastHeartbeatMap",
+  ];
+  const missingPeValues = requiredPeKeys.filter((key) => !pe[key]);
+  if (missingPeValues.length > 0) {
+    // console.log(
+    //   "io: send from",
+    //   origin,
+    //   "aborted, required values missing:",
+    //   missingPeValues,
+    //   Object.keys(pe.monitorMap ?? {}),
+    //   Object.keys(pe.lastHeartbeatMap ?? {})
+    // );
     return;
   }
 
-  const monitorsAfterUpdate = Object.fromEntries(
-    Object.values(pe.monitorMap)
+  return Object.fromEntries(
+    Object.values(pe.monitorMap!)
       .filter((monitor): monitor is Monitor =>
-        Boolean(
-          monitor?.url &&
-            monitor.tags?.some(({ tag_id }) => tag_id === pe.tag!.id)
-        )
+        Boolean(monitor?.tags?.some(({ tag_id }) => tag_id === pe.tag!.id))
       )
-      .map(
-        (monitor) =>
-          [
-            monitor.url!,
-            monitor.active &&
-            typeof pe.lastHeartbeatMap?.[monitor.id]?.status === "number"
-              ? pe.lastHeartbeatMap[monitor.id]!.status === 1
-                ? "on"
-                : "off"
-              : undefined,
-          ] satisfies [keyof UptimeMap, UptimeMap[keyof UptimeMap]]
-      )
-  );
+      .map((monitor) => {
+        const key =
+          monitor.type === "http"
+            ? monitor.url!
+            : getAccessHref({
+                type: "ssh",
+                address: monitor.hostname!,
+                port: monitor.port!,
+              });
 
-  uptimeEventEmitter.emit("add", monitorsAfterUpdate);
+        const value =
+          monitor.active &&
+          typeof pe.lastHeartbeatMap?.[monitor.id]?.status === "number"
+            ? pe.lastHeartbeatMap[monitor.id]!.status === 1
+              ? "on"
+              : "off"
+            : undefined;
+
+        return [key, value] satisfies [
+          keyof UptimeMap,
+          UptimeMap[keyof UptimeMap]
+        ];
+      })
+  );
+};
+
+const sendToClient = (origin: string) => {
+  const preparedData = prepareData();
+
+  if (preparedData) {
+    console.log("io: send from", origin);
+    uptimeEventEmitter.emit("add", preparedData);
+  }
 };
 
 export const uptimeRoutine = {
-  updateDeviceFull: ({
+  updateDeviceFull: async ({
     netEntityMap,
     deviceList,
     instanceList,
@@ -90,7 +117,11 @@ export const uptimeRoutine = {
     let uptimeNetAccess = null as NetAccess | null;
 
     const mapApp = (net: NetAccess, app: Pick<App, "slug" | "meta">) => {
-      if (app.slug === "UPTIME_KUMA") {
+      if (
+        app.slug === "UPTIME_KUMA" &&
+        net.type === "web" &&
+        net.scope !== "lan"
+      ) {
         uptimeNetAccess = net;
       }
 
@@ -101,9 +132,10 @@ export const uptimeRoutine = {
     };
 
     const filter = ({ type, scope, address }: NetAccess) => {
-      return (
-        type === "web" && scope === "dns-domain" // && address !== "home.assistant"
-      );
+      return type !== "address-only";
+      // return (
+      //   type === "web" // && scope === "dns-domain" // && address !== "home.assistant"
+      // );
     };
 
     const hrefMap = Object.fromEntries(
@@ -153,26 +185,33 @@ export const uptimeRoutine = {
       return;
     }
 
-    const socketAddress = `wss://${uptimeNetAccess.address}`;
+    const socketAddress = `${uptimeNetAccess.ssl ? "wss" : "ws"}://${
+      uptimeNetAccess.address
+    }${
+      uptimeNetAccess.port &&
+      uptimeNetAccess.port !== 80 &&
+      uptimeNetAccess.port !== 443
+        ? ":" + uptimeNetAccess.port
+        : ""
+    }`;
 
     pe.socket = createSocket(socketAddress);
 
     if (pe.started) {
-      return uptimeRoutine.start();
+      await uptimeRoutine.start();
     }
   },
   start: async () => {
     pe.started = true;
     console.log("io: start attempt");
-    if (!pe.socket || !pe.netList) {
+    if (!pe.socket || !pe.netList?.length) {
       console.log("io: start cancelled - no socket or netList");
       return;
     }
 
     if (pe.socket.isConnected()) {
       console.log("io: start cancelled - already started");
-      await sendToClient();
-      return;
+      return prepareData();
     }
 
     pe.socket.on.disconnect((reason) => {
@@ -186,62 +225,84 @@ export const uptimeRoutine = {
       monitorMap: Record<string, Monitor | undefined>,
       notificationList: Notification[]
     ) => {
+      if (pe.processLock) {
+        // console.log("io: main process already running");
+        return;
+      }
       console.log("io: main process");
+      pe.processLock = true;
 
-      const monitorList = Object.values(monitorMap);
+      onMonitorList.turnOff();
 
       const tag = await getTagOrAdd();
 
+      const monitorListWithTag = (
+        Object.values(monitorMap) as Monitor[]
+      ).filter(
+        (monitor) =>
+          monitor.type === "group" ||
+          monitor.tags?.some(({ tag_id }) => tag_id === tag?.id)
+      );
+
+      const notificationIDList = notificationList?.length
+        ? {
+            [String(notificationList[0].id)]: true,
+          }
+        : {};
+
       const monitorAddFns = pe
         .netList!.map((net) => {
-          const monitor = monitorList.find(
-            (monitor) =>
-              monitor?.url === net.href &&
-              monitor.tags?.some(({ tag_id }) => tag_id === tag?.id)
-          );
+          const monitor = monitorListWithTag.find((monitor) => {
+            if (net.type === "web") {
+              return monitor.type === "http" && monitor.url === net.href;
+            } else {
+              return (
+                monitor.type === "port" &&
+                monitor.hostname === net.address &&
+                monitor.port === net.port
+              );
+            }
+          });
           if (monitor) {
             return null;
           }
 
-          return async () => {
+          return async (parent: number) => {
             console.log("io: add monitor", net.name, net.href);
-            const notificationIDList = notificationList?.length
-              ? {
-                  [String(notificationList[0].id)]: true,
-                }
-              : {};
+
+            const namePart =
+              net.scope === "lan"
+                ? "by lan"
+                : net.scope === "vpn"
+                ? "by vpn"
+                : net.scope === "wan"
+                ? "by IP"
+                : "";
+
+            const monitorCommonProps = (
+              net.type === "web"
+                ? {
+                    type: "http",
+                    url: net.href,
+                    name: [net.name, namePart].filter(Boolean).join(" "),
+                    method: "GET",
+                    expiryNotification: net.href.startsWith("https://"),
+                  }
+                : {
+                    type: "port",
+                    port: net.port,
+                    hostname: net.address,
+                    name: [net.name, "SSH", namePart].filter(Boolean).join(" "),
+                    method: "GET",
+                  }
+            ) satisfies Partial<Monitor>;
 
             const { monitorID } = await pe.socket!.emit.addMonitor({
               active: true,
-              name: net.name,
-              description: "Created by Homenet",
-              url: net.href,
-              type: "http",
-              method: "GET",
-              expiryNotification: net.href.startsWith("https://"),
-              maxretries: 2,
+              parent,
+              ...monitorCommonProps,
+              description: net.description,
               notificationIDList,
-
-              interval: 60,
-              retryInterval: 60,
-              resendInterval: 0,
-              timeout: 48,
-              ignoreTls: false,
-              upsideDown: false,
-              packetSize: 56,
-              maxredirects: 10,
-              accepted_statuscodes: ["200-299"],
-              dns_resolve_type: "A",
-              dns_resolve_server: "1.1.1.1",
-              oauth_auth_method: "client_secret_basic",
-              httpBodyEncoding: "json",
-              kafkaProducerBrokers: [],
-              kafkaProducerSaslOptions: {
-                mechanism: "None",
-              },
-              kafkaProducerSsl: false,
-              kafkaProducerAllowAutoTopicCreation: false,
-              gamedigGivenPortOnly: true,
             });
 
             await pe.socket!.emit.addMonitorTag(tag.id, monitorID, "");
@@ -252,20 +313,50 @@ export const uptimeRoutine = {
       console.log("io: monitors count to add", monitorAddFns.length);
 
       if (monitorAddFns.length > 0) {
-        onMonitorList.turnOff();
+        const groupMonitorId =
+          monitorListWithTag.find(
+            (monitor) => monitor.type === "group" && monitor.name === "Homenet"
+          )?.id ??
+          (
+            await pe.socket!.emit.addMonitor({
+              active: true,
+              type: "group",
+              name: "Homenet",
+              description: "Monitors created by Homenet",
+              method: "GET",
+              notificationIDList,
+            })
+          ).monitorID;
+
         for (const fn of monitorAddFns) {
-          await fn();
+          await fn(groupMonitorId);
         }
-        pe.monitorMap = await pe.socket!.emit.getMonitorList();
         onMonitorList.turnOn();
+        console.log("io: monitors add end -", monitorAddFns.length);
+        pe.monitorMap = await pe.socket!.emit.getMonitorList();
       } else {
+        onMonitorList.turnOn();
         pe.monitorMap = monitorMap;
       }
+
       pe.monitorMap = Object.fromEntries(
         Object.entries(pe.monitorMap).filter(([id, monitor]) =>
           monitor?.tags?.some(({ tag_id }) => tag_id === tag.id)
         )
       );
+
+      if (pe.lastHeartbeatMap) {
+        pe.lastHeartbeatMap = Object.fromEntries(
+          Object.entries(pe.lastHeartbeatMap).filter(
+            ([id, _]) => id in pe.monitorMap!
+          )
+        );
+        pe.hearbeatReady = true;
+      }
+
+      pe.processLock = false;
+
+      await sendToClient("process");
     };
 
     /**
@@ -275,7 +366,6 @@ export const uptimeRoutine = {
       console.log("io: on.monitorList");
       if (pe.notificationList) {
         await process(monitorMap, pe.notificationList);
-        await sendToClient();
       }
     }, false);
 
@@ -293,9 +383,10 @@ export const uptimeRoutine = {
           onMonitorList.turnOn();
 
           await process(monitorMap, notificationList);
-        } else {
-          await sendToClient();
         }
+        // else {
+        //   await sendToClient("on.notificationList");
+        // }
       },
       false
     );
@@ -306,10 +397,6 @@ export const uptimeRoutine = {
     const onHeartbeatList = pe.socket.on.heartbeatList((monitorIdStr, data) => {
       const monitorId = Number(monitorIdStr);
 
-      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
-        return;
-      }
-
       const previousHeartbeat = pe.lastHeartbeatMap?.[monitorId];
 
       const lastHeartbeat = data[data.length - 1] as Heartbeat | undefined;
@@ -318,17 +405,21 @@ export const uptimeRoutine = {
         [monitorId]: lastHeartbeat,
       };
 
+      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
+        return;
+      }
+
       if (
         !pe.hearbeatReady &&
         monitorId === Math.max(...Object.keys(pe.monitorMap).map(Number))
       ) {
         pe.hearbeatReady = true;
-        sendToClient();
+        sendToClient("on.heartbeatList.1");
       } else if (
         lastHeartbeat &&
         lastHeartbeat.status !== previousHeartbeat?.status
       ) {
-        sendToClient();
+        sendToClient("on.heartbeatList.2");
       }
     }, false);
 
@@ -338,10 +429,6 @@ export const uptimeRoutine = {
     const onHeartbeat = pe.socket.on.heartbeat((data) => {
       const monitorId = data.monitorID;
 
-      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
-        return;
-      }
-
       const previousHeartbeat = pe.lastHeartbeatMap?.[monitorId];
 
       const lastHeartbeat = data;
@@ -350,8 +437,12 @@ export const uptimeRoutine = {
         [monitorId]: lastHeartbeat,
       };
 
+      if (!pe.monitorMap || !(monitorId in pe.monitorMap)) {
+        return;
+      }
+
       if (lastHeartbeat.status !== previousHeartbeat?.status) {
-        sendToClient();
+        sendToClient("on.heartbeat");
       }
     }, false);
 

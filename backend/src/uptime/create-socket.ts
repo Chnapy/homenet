@@ -131,8 +131,32 @@ export const createSocket = (socketAddress: string) => {
       }
     });
 
-  const addMonitor = (monitor: Omit<Monitor, "id" | "tags">) =>
-    emitFn<AddMonitor>("add", monitor);
+  const addMonitor = (monitor: Partial<Omit<Monitor, "id" | "tags">>) =>
+    emitFn<AddMonitor>("add", {
+      maxretries: 2,
+      interval: 60,
+      retryInterval: 60,
+      resendInterval: 0,
+      timeout: 48,
+      ignoreTls: false,
+      upsideDown: false,
+      packetSize: 56,
+      maxredirects: 10,
+      accepted_statuscodes: ["200-299"],
+      dns_resolve_type: "A",
+      dns_resolve_server: "1.1.1.1",
+      oauth_auth_method: "client_secret_basic",
+      httpBodyEncoding: "json",
+      kafkaProducerBrokers: [],
+      kafkaProducerSaslOptions: {
+        mechanism: "None",
+      },
+      kafkaProducerSsl: false,
+      kafkaProducerAllowAutoTopicCreation: false,
+      gamedigGivenPortOnly: true,
+
+      ...monitor,
+    });
 
   const addTag = (tag: Omit<Tag, "id">) => emitFn<AddTag>("addTag", tag);
 
