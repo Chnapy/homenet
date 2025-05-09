@@ -80,7 +80,7 @@ const prepareData = () => {
           switch (monitor.type) {
             case "http":
               return monitor.url!;
-            case "ssh":
+            case "port":
               return getAccessHref({
                 type: "ssh",
                 address: monitor.hostname!,
