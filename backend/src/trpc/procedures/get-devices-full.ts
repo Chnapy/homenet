@@ -19,73 +19,79 @@ export type GetDeviceFull = {
   netEntityMap: NetEntityMap;
 };
 
+export const getDevicesFullData = async (): Promise<
+  Omit<GetDeviceFull, "agentMetadataList">
+> => {
+  const db = openRootDB();
+
+  const deviceDB = openDeviceDB(db);
+
+  const agentDeviceList = await deviceDB
+    .getMany(deviceDB.getKeys().asArray)
+    .then((instances) => instances.filter((value) => value !== undefined));
+
+  const deviceList = agentDeviceList.map(getInstanceFromAgentInstance);
+
+  const instanceList = agentDeviceList
+    .flatMap((agentDevice) => agentDevice.instances)
+    .map(getInstanceFromAgentInstance);
+
+  const appList = agentDeviceList
+    .flatMap((agentDevice) => [agentDevice, ...agentDevice.instances])
+    .flatMap((agentInstance) => agentInstance.apps)
+    .map(getAppFromAgentApp);
+
+  const netEntityMap = getNetEntityMap(deviceList, instanceList, appList);
+
+  const duplicatedIds = checkIDDuplicates([
+    ...deviceList,
+    ...instanceList,
+    ...appList,
+  ]);
+  const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
+
+  if (duplicatedIds.length > 0) {
+    console.error("trpc: getDevicesFull - duplicated IDs", duplicatedIds);
+  }
+
+  if (duplicatedLans.length > 0) {
+    console.error("trpc: getDevicesFull - duplicated Lans", duplicatedLans);
+  }
+
+  return {
+    deviceList,
+    instanceList,
+    appList,
+    netEntityMap,
+  };
+};
+
 export const getDevicesFull = publicProcedure.query(
   async (): Promise<GetDeviceFull> => {
     const db = openRootDB();
 
-    const deviceDB = openDeviceDB(db);
     const agentMetadataDB = openAgentMetadataDB(db);
 
-    const [agentDeviceList, agentMetadataList] = await Promise.all([
-      deviceDB
-        .getMany(deviceDB.getKeys().asArray)
-        .then((instances) => instances.filter((value) => value !== undefined)),
+    const [agentMetadataList, devicesFull] = await Promise.all([
       agentMetadataDB
         .getRange({ reverse: true })
         .asArray.map(({ key, value }) =>
           getAgentMetadataFullFromAgentMetadata(key, value)
         ),
+      getDevicesFullData(),
     ]);
 
-    const deviceList = agentDeviceList.map(getInstanceFromAgentInstance);
-
-    const instanceList = agentDeviceList
-      .flatMap((agentDevice) => agentDevice.instances)
-      .map(getInstanceFromAgentInstance);
-
-    const appList = agentDeviceList
-      .flatMap((agentDevice) => [agentDevice, ...agentDevice.instances])
-      .flatMap((agentInstance) => agentInstance.apps)
-      .map(getAppFromAgentApp);
-
-    const netEntityMap = getNetEntityMap(deviceList, instanceList, appList);
-
-    const duplicatedIds = checkIDDuplicates([
-      ...deviceList,
-      ...instanceList,
-      ...appList,
-    ]);
-    const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
-
-    if (duplicatedIds.length > 0) {
-      console.error("trpc: getDevicesFull - duplicated IDs", duplicatedIds);
-    }
-
-    if (duplicatedLans.length > 0) {
-      console.error("trpc: getDevicesFull - duplicated Lans", duplicatedLans);
-    }
-
-    uptimeRoutine
-      .updateDeviceFull({
-        deviceList,
-        instanceList,
-        appList,
-        netEntityMap,
-      })
-      .catch((err) => {
-        console.error(
-          "getDevicesFull: uptimeRoutine update device-full error",
-          err
-        );
-        uptimeRoutine.stop();
-      });
+    uptimeRoutine.updateDeviceFull(devicesFull).catch((err) => {
+      console.error(
+        "getDevicesFull: uptimeRoutine update device-full error",
+        err
+      );
+      uptimeRoutine.stop();
+    });
 
     return {
-      deviceList,
-      instanceList,
-      appList,
       agentMetadataList,
-      netEntityMap,
+      ...devicesFull,
     };
   }
 );

@@ -1,7 +1,10 @@
 import { grpcHealthcheckData } from "../grpc/grpc-healthcheck";
 import { App } from "../trpc/entities/app";
 import { Meta } from "../trpc/entities/utils/meta";
-import { GetDeviceFull } from "../trpc/procedures/get-devices-full";
+import {
+  GetDeviceFull,
+  getDevicesFullData,
+} from "../trpc/procedures/get-devices-full";
 import { uptimeEventEmitter } from "../trpc/procedures/listen-uptime";
 import { getAccessHref, NetAccess } from "../trpc/utils/get-net-entity-map";
 import { createSocket } from "./create-socket";
@@ -108,6 +111,13 @@ const sendToClient = (origin: string) => {
 };
 
 export const uptimeRoutine = {
+  setup: async () => {
+    console.log("io: setup uptime process");
+
+    const devicesFull = await getDevicesFullData();
+
+    await uptimeRoutine.updateDeviceFull(devicesFull);
+  },
   updateDeviceFull: async ({
     netEntityMap,
     deviceList,

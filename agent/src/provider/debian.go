@@ -10,11 +10,11 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"gopkg.in/yaml.v3"
 )
 
@@ -487,47 +487,66 @@ func (a *DebianProvider) GetCaddy() *gen.AgentApp {
 	}
 
 	fileContent := a.executor.Open(configPath)
+	blocks, err := caddyfile.Parse(configPath, []byte(fileContent))
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	pattern := regexp.MustCompile(`(?ms)^(https?://[^\s{]+)[^{]*\{[^}]*?reverse_proxy\s+([^\s}]+)`)
+	// var blocksJson, _ = json.Marshal(blocks)
+	// fmt.Println(blocks)
 
-	matches := pattern.FindAllStringSubmatch(fileContent, -1)
-
-	for _, match := range matches {
-		// fmt.Println(match[1], match[2])
-		if len(match) < 3 {
-			continue
+	for _, block := range blocks {
+		addresses := []string{}
+		for _, key := range block.Keys {
+			addresses = append(addresses, key.Text)
 		}
 
-		// fromPort := match[1]
-		domainParts := strings.Split(match[1], "://")
-		domain := domainParts[1]
-		domainSsl := domainParts[0] == "https"
-
-		toAddress := match[2]
-		if !strings.Contains(toAddress, "://") {
-			toAddress = "http://" + toAddress
-		}
-		addressParts := strings.Split(toAddress, "://")
-		ssl := addressParts[0] == "https"
-		toParts := strings.Split(addressParts[1], ":")
-
-		var port32 int32
-		if len(toParts) > 1 {
-			port, _ := strconv.Atoi(toParts[1])
-			port32 = int32(port)
+		reverseProxies := []string{}
+		for _, segment := range block.Segments {
+			tagIndex := -1
+			for index, token := range segment {
+				if index == tagIndex {
+					reverseProxies = append(reverseProxies, token.Text)
+					tagIndex = -1
+				} else if token.Text == "reverse_proxy" {
+					tagIndex = index + 1
+				}
+			}
 		}
 
-		reverseProxy = append(reverseProxy, &gen.AgentApp_AgentReverseProxy{
-			FromDomain: &gen.AgentApp_AgentReverseProxy_From{
-				Domain: domain,
-				Ssl:    domainSsl,
-			},
-			ToAddress: &gen.AgentApp_AgentReverseProxy_To{
-				Address: toParts[0],
-				Ssl:     ssl,
-				Port:    &port32,
-			},
-		})
+		for _, address := range addresses {
+			for _, proxy := range reverseProxies {
+				domainParts := strings.Split(address, "://")
+				domain := domainParts[1]
+				domainSsl := domainParts[0] == "https"
+
+				toAddress := proxy
+				if !strings.Contains(toAddress, "://") {
+					toAddress = "http://" + toAddress
+				}
+				addressParts := strings.Split(toAddress, "://")
+				ssl := addressParts[0] == "https"
+				toParts := strings.Split(addressParts[1], ":")
+
+				var port32 int32
+				if len(toParts) > 1 {
+					port, _ := strconv.Atoi(toParts[1])
+					port32 = int32(port)
+				}
+
+				reverseProxy = append(reverseProxy, &gen.AgentApp_AgentReverseProxy{
+					FromDomain: &gen.AgentApp_AgentReverseProxy_From{
+						Domain: domain,
+						Ssl:    domainSsl,
+					},
+					ToAddress: &gen.AgentApp_AgentReverseProxy_To{
+						Address: toParts[0],
+						Ssl:     ssl,
+						Port:    &port32,
+					},
+				})
+			}
+		}
 	}
 
 	return &gen.AgentApp{
