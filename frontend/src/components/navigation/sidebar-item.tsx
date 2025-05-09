@@ -7,12 +7,14 @@ import { useCurrentPage } from "./hooks/use-current-page";
 
 type SidebarItemProps = {
   slug: AppOSIconProps["slug"];
+  name: string;
   href: string;
   loaded: boolean;
 };
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
   slug,
+  name,
   href,
   loaded,
 }) => {
@@ -34,7 +36,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 
   const btnHref = isHttp ? href : `#${href}`;
   const target = isHttp ? "_blank" : undefined;
-  const title = isHttp ? `${href} - Iframe not possible for http` : href;
+  const title = `${name} ${href}${
+    isHttp ? " - Iframe not possible for http" : ""
+  }`;
 
   return (
     <ListItem disablePadding>

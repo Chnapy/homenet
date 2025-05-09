@@ -2,7 +2,7 @@ import { App } from "../entities/app";
 import { Instance } from "../entities/instance";
 
 export type NetAccess = {
-  type: "address-only" | "web" | "ssh";
+  type: "address-only" | "web" | "ssh" | "grpc";
   scope: "lan" | "wan" | "dns-domain" | "vpn";
   address: string;
   port?: number;
@@ -38,6 +38,8 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
         return 100;
       case "ssh":
         return 200;
+      case "grpc":
+        return 300;
     }
   };
 
@@ -67,17 +69,23 @@ const accessSortFn = (a: NetAccess, b: NetAccess): number => {
 export const getAccessHref = (net: Omit<NetAccess, "scope" | "href">) => {
   const { address, ssl, port, type } = net;
 
-  const getWebPort = () => {
-    if (!port || (port === 80 && !ssl) || (port === 443 && ssl)) {
-      return "";
-    }
+  switch (type) {
+    case "address-only":
+    case "web":
+      const getWebPort = () => {
+        if (!port || (port === 80 && !ssl) || (port === 443 && ssl)) {
+          return "";
+        }
 
-    return ":" + port;
-  };
+        return ":" + port;
+      };
 
-  return type === "ssh"
-    ? `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`
-    : `${ssl ? "https" : "http"}://${address}${getWebPort()}`;
+      return `${ssl ? "https" : "http"}://${address}${getWebPort()}`;
+    case "ssh":
+      return `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`;
+    case "grpc":
+      return `grpc://${address}${port ? ":" + port : ""}`;
+  }
 };
 
 const withAccessHref = (net: Omit<NetAccess, "href">): NetAccess => ({
@@ -232,7 +240,20 @@ export const getNetEntityMap = (
     const apps = entityApps.reduce((acc, app) => {
       const web = ("web" in app && app.web) || [];
 
-      const accessList: AppNetAccess[] = getWebAccessList(web).map(
+      const accessList: AppNetAccess[] = [
+        ...getWebAccessList(web),
+
+        // gRPC
+        ...(app.gRPC
+          ? asList.map((net) =>
+              withAccessHref({
+                ...net,
+                type: "grpc",
+                port: app.gRPC!.port,
+              })
+            )
+          : []),
+      ].map(
         (access): AppNetAccess => ({
           appSlug: app.slug,
           ...access,

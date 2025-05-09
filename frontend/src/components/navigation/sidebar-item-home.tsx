@@ -8,7 +8,7 @@ export const SidebarItemHome: React.FC = () => {
 
   return (
     <ListItem disablePadding>
-      <ListItemButton href="#" selected={selected}>
+      <ListItemButton href="#" selected={selected} title="Homenet">
         <ListItemIcon sx={{ minWidth: 24, maxWidth: 24 }}>
           <Box component="img" src={hnLogoPath} sx={{ maxWidth: "100%" }} />
         </ListItemIcon>

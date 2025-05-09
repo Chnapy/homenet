@@ -19,6 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
   ];
 
   const netEntityMap = devicesFullQuery.data?.netEntityMap;
+  const appList = devicesFullQuery.data?.appList;
 
   return (
     <Drawer variant="permanent" anchor="left" sx={{ width: 56 }}>
@@ -32,11 +33,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
             const getOSItem = () => {
               const osWeb = netEntity.os.filter((web) => web.type === "web");
 
-              const osSlug = allInstances.find(
+              const instance = allInstances.find(
                 (instance) => instance.id === instanceId
-              )?.os;
+              );
 
-              if (osWeb.length === 0 || !osSlug) {
+              if (osWeb.length === 0 || !instance) {
                 return null;
               }
 
@@ -48,7 +49,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
 
               return (
                 <SidebarItem
-                  slug={osSlug}
+                  slug={instance.os}
+                  name={instance.meta.name}
                   href={osHref}
                   loaded={pageList.includes(osHref)}
                 />
@@ -69,10 +71,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                   return null;
                 }
 
+                const name = appList?.find((app) => app.slug === slug)?.meta
+                  .name;
+                if (!name) {
+                  return null;
+                }
+
                 return (
                   <SidebarItem
                     key={slug}
                     slug={slug as DeviceAppSlug}
+                    name={name}
                     href={appHref}
                     loaded={pageList.includes(appHref)}
                   />

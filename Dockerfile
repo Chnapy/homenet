@@ -45,7 +45,7 @@ COPY --from=backend-builder /app/node_modules/ ./node_modules
 
 COPY --chmod=755 start.sh /start.sh
 
-ENV HOMENET=1
+ENV HOMENET_GRPC_PORT=50051
 
 EXPOSE 80 8081 50051
 

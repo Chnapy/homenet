@@ -116,7 +116,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
         >
           <CardActionArea
             onClick={() => {
-              if (mainAccess.type !== "ssh") {
+              if (mainAccess.type === "web") {
                 window.open(mainAccess.href, "_blank");
               }
             }}

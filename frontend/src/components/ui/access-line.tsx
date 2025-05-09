@@ -1,6 +1,7 @@
 import CloudIcon from "@mui/icons-material/Cloud";
 import LanIcon from "@mui/icons-material/Lan";
 import LinkIcon from "@mui/icons-material/Link";
+import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import {
@@ -34,7 +35,12 @@ export const AccessLine: React.FC<AccessLineProps> = ({
   disablePadding,
   uptime,
 }) => {
-  const Icon = type === "ssh" ? TerminalIcon : iconMap[scope];
+  const Icon =
+    type === "ssh"
+      ? TerminalIcon
+      : type === "grpc"
+      ? SettingsEthernetIcon
+      : iconMap[scope];
 
   const content = (
     <>
@@ -59,7 +65,7 @@ export const AccessLine: React.FC<AccessLineProps> = ({
     return (
       <ListItemButton
         onClick={() => {
-          if (type !== "ssh") {
+          if (type === "web") {
             window.open(href, "_blank");
           }
         }}

@@ -1,3 +1,4 @@
+import { grpcHealthcheckData } from "../grpc/grpc-healthcheck";
 import { App } from "../trpc/entities/app";
 import { Meta } from "../trpc/entities/utils/meta";
 import { GetDeviceFull } from "../trpc/procedures/get-devices-full";
@@ -253,14 +254,24 @@ export const uptimeRoutine = {
       const monitorAddFns = pe
         .netList!.map((net) => {
           const monitor = monitorListWithTag.find((monitor) => {
-            if (net.type === "web") {
-              return monitor.type === "http" && monitor.url === net.href;
-            } else {
-              return (
-                monitor.type === "port" &&
-                monitor.hostname === net.address &&
-                monitor.port === net.port
-              );
+            switch (net.type) {
+              case "web":
+                return monitor.type === "http" && monitor.url === net.href;
+              case "ssh":
+                return (
+                  monitor.type === "port" &&
+                  monitor.hostname === net.address &&
+                  monitor.port === net.port
+                );
+              case "grpc":
+                return (
+                  monitor.type === "grpc-keyword" &&
+                  monitor.grpcUrl === net.href &&
+                  monitor.grpcServiceName === grpcHealthcheckData.service &&
+                  monitor.grpcMethod === grpcHealthcheckData.method
+                );
+              case "address-only":
+                return false;
             }
           });
           if (monitor) {
@@ -270,38 +281,57 @@ export const uptimeRoutine = {
           return async (parent: number) => {
             console.log("io: add monitor", net.name, net.href);
 
-            const namePart =
-              net.scope === "lan"
-                ? "by lan"
-                : net.scope === "vpn"
-                ? "by vpn"
-                : net.scope === "wan"
-                ? "by IP"
-                : "";
+            const getMonitorCommonProps = (): Partial<Monitor> => {
+              const namePart =
+                net.scope === "lan"
+                  ? "by lan"
+                  : net.scope === "vpn"
+                  ? "by vpn"
+                  : net.scope === "wan"
+                  ? "by IP"
+                  : "";
 
-            const monitorCommonProps = (
-              net.type === "web"
-                ? {
+              switch (net.type) {
+                case "web":
+                  return {
                     type: "http",
-                    url: net.href,
                     name: [net.name, namePart].filter(Boolean).join(" "),
+                    url: net.href,
                     method: "GET",
                     expiryNotification: net.href.startsWith("https://"),
                     ignoreTls: net.href.startsWith("https://"),
-                  }
-                : {
+                  };
+                case "ssh":
+                  return {
                     type: "port",
+                    name: [net.name, "SSH", namePart].filter(Boolean).join(" "),
                     port: net.port,
                     hostname: net.address,
-                    name: [net.name, "SSH", namePart].filter(Boolean).join(" "),
                     method: "GET",
-                  }
-            ) satisfies Partial<Monitor>;
+                  };
+                case "grpc":
+                  return {
+                    type: "grpc-keyword",
+                    name: [net.name, "gRPC", namePart]
+                      .filter(Boolean)
+                      .join(" "),
+                    grpcUrl: net.href,
+                    grpcProtobuf: grpcHealthcheckData.protobuf,
+                    grpcServiceName: grpcHealthcheckData.service,
+                    grpcMethod: grpcHealthcheckData.method,
+                    grpcEnableTls: grpcHealthcheckData.tls,
+                    grpcBody: grpcHealthcheckData.expectedRequestBody,
+                    keyword: grpcHealthcheckData.expectedResponseValue,
+                  };
+                case "address-only":
+                  throw new Error("Case unexpected");
+              }
+            };
 
             const { monitorID } = await pe.socket!.emit.addMonitor({
               active: true,
               parent,
-              ...monitorCommonProps,
+              ...getMonitorCommonProps(),
               description: net.description,
               notificationIDList,
             });

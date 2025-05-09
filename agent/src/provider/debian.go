@@ -352,15 +352,20 @@ func (e *DebianProvider) GetInstanceList() []*gen.AgentInstance {
 }
 
 func (a *DebianProvider) GetHomenet() *gen.AgentApp {
-	out, _ := a.executor.Exec("sh -c 'echo $HOMENET'")
-	if strings.TrimSpace(out) == "" {
+	grpcPortOut, _ := a.executor.Exec("sh -c 'echo $HOMENET_GRPC_PORT'")
+	if strings.TrimSpace(grpcPortOut) == "" {
 		return nil
 	}
+
+	grpcPort, _ := strconv.Atoi(grpcPortOut)
 
 	return &gen.AgentApp{
 		Slug: gen.AgentApp_HOMENET,
 		Web: []*gen.AgentWebItem{
 			{},
+		},
+		GRPC: &gen.AgentGRPC{
+			Port: int32(grpcPort),
 		},
 	}
 }

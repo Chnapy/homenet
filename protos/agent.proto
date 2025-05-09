@@ -34,6 +34,10 @@ message AgentSSH {
   repeated int32 ports = 1;
 }
 
+message AgentGRPC {
+  int32 port = 1;
+}
+
 message AgentApp {
 
   enum AgentAppSlug {
@@ -103,6 +107,8 @@ message AgentApp {
   repeated AgentReverseProxy reverseProxy = 6;
 
   repeated AgentWebItem web = 7;
+
+  optional AgentGRPC gRPC = 8;
 }
 
 message AgentInstance {
