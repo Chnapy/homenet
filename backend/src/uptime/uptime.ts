@@ -331,7 +331,7 @@ export const uptimeRoutine = {
                     grpcMethod: grpcHealthcheckData.method,
                     grpcEnableTls: grpcHealthcheckData.tls,
                     grpcBody: grpcHealthcheckData.expectedRequestBody,
-                    keyword: grpcHealthcheckData.expectedResponseValue,
+                    keyword: `"${grpcHealthcheckData.expectedResponseValue}"`,
                   };
                 case "address-only":
                   throw new Error("Case unexpected");

@@ -84,7 +84,7 @@ export const getAccessHref = (net: Omit<NetAccess, "scope" | "href">) => {
     case "ssh":
       return `ssh ${address}${port && port !== 22 ? " -p " + port : ""}`;
     case "grpc":
-      return `grpc://${address}${port ? ":" + port : ""}`;
+      return `${address}${port ? ":" + port : ""}`;
   }
 };
 
