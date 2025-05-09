@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	grpc "agent/src/grpc"
 
@@ -13,6 +14,8 @@ var releaseTag string
 
 func main() {
 	log.Println("Homenet agent: start")
+	startTime := time.Now()
+	log.Println("Start time:", startTime.Format("02-01-2006 15:04:05"))
 
 	updated, err := AutoUpdate(releaseTag)
 
@@ -45,4 +48,6 @@ func main() {
 	grpc.Grpc(preparedData)
 
 	log.Println("Homenet agent: end")
+	endTime := time.Now()
+	log.Println("End time:", endTime.Format("02-01-2006 15:04:05"))
 }
