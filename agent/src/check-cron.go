@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
@@ -18,6 +19,9 @@ func CheckCron() {
 		return
 	}
 	fmt.Println("CheckCron: check jobs")
+
+	launcherDir := filepath.Dir(launcherPath)
+	logFilePath := launcherDir + "/cron.log"
 
 	var entries []string
 	var err error
@@ -38,7 +42,7 @@ func CheckCron() {
 	pathEnv := strings.Join(slices.Compact(pathParts), ":")
 
 	timedCron := env.Env.UpdateCron
-	commandCron := fmt.Sprintf("PATH=%s %s", pathEnv, launcherPath)
+	commandCron := fmt.Sprintf("PATH=%s %s >> %s 2>&1", pathEnv, launcherPath, logFilePath)
 
 	expectedJobTimed := fmt.Sprintf("%s %s # Homenet agent Cron Job (time)", timedCron, commandCron)
 	expectedJobReboot := fmt.Sprintf("@reboot %s # Homenet agent Cron Job (reboot)", commandCron)
