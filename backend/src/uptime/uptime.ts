@@ -76,14 +76,22 @@ const prepareData = () => {
         Boolean(monitor?.tags?.some(({ tag_id }) => tag_id === pe.tag!.id))
       )
       .map((monitor) => {
-        const key =
-          monitor.type === "http"
-            ? monitor.url!
-            : getAccessHref({
+        const getKey = (): string => {
+          switch (monitor.type) {
+            case "http":
+              return monitor.url!;
+            case "ssh":
+              return getAccessHref({
                 type: "ssh",
                 address: monitor.hostname!,
                 port: monitor.port!,
               });
+            case "grpc-keyword":
+              return monitor.grpcUrl!;
+            default:
+              throw new Error("Switch case not handled");
+          }
+        };
 
         const value =
           monitor.active &&
@@ -93,7 +101,7 @@ const prepareData = () => {
               : "off"
             : undefined;
 
-        return [key, value] satisfies [
+        return [getKey(), value] satisfies [
           keyof UptimeMap,
           UptimeMap[keyof UptimeMap]
         ];
