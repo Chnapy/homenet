@@ -157,7 +157,7 @@ export const useLayoutAlgorithm = () => {
                   "elk.edgeLabels.placement": "TAIL",
                 },
               },
-              ...link.label.map((label, i) => ({
+              ...[...new Set(link.label)].map((label, i) => ({
                 id: link.id + "-label-center-" + i,
                 text: label,
                 width: label.length * 5,

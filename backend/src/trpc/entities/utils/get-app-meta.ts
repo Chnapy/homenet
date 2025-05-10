@@ -49,6 +49,11 @@ export const getAppMeta = (app: Omit<App, "meta">): Meta => {
         name: "Docker registry",
         description: "Images registry",
       };
+    case "DOCKER_REGISTRY_UI":
+      return {
+        name: "Docker registry UI",
+        description: "Images registry manager",
+      };
     case "PLEX":
       return {
         name: "Plex",

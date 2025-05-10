@@ -266,6 +266,7 @@ func (e *DebianProvider) GetApps() []*gen.AgentApp {
 			e.GetHomenet(),
 			e.GetDocker(),
 			e.GetDockerRegistry(),
+			e.GetDockerRegistryUI(),
 			e.GetWireguard(),
 			e.GetCaddy(),
 			e.GetNtfy(),
@@ -382,13 +383,47 @@ func (a *DebianProvider) GetDocker() *gen.AgentApp {
 }
 
 func (a *DebianProvider) GetDockerRegistry() *gen.AgentApp {
-	isDir := a.executor.IsDir("/var/lib/registry")
-	if !isDir {
+	isFile := a.executor.IsFile("/etc/docker/registry/config.yml")
+	if !isFile {
 		return nil
 	}
 
+	configOut := a.executor.Open("/etc/docker/registry/config.yml")
+	var config map[string]map[string]interface{}
+	yaml.Unmarshal([]byte(configOut), &config)
+
+	addr := config["http"]["addr"].(string)
+	port, _ := strconv.Atoi(strings.Split(addr, ":")[1])
+	port32 := int32(port)
+
 	return &gen.AgentApp{
 		Slug: gen.AgentApp_DOCKER_REGISTRY,
+		Web: []*gen.AgentWebItem{
+			{
+				Port:  &port32,
+				Paths: []string{"v2/_catalog"},
+			},
+		},
+	}
+}
+
+func (a *DebianProvider) GetDockerRegistryUI() *gen.AgentApp {
+	isFile := a.executor.IsFile("docker-registry-ui.js")
+	if !isFile {
+		return nil
+	}
+
+	portStr, _ := a.executor.Exec("sh -c 'echo $NGINX_LISTEN_PORT'")
+	port, _ := strconv.Atoi(portStr)
+	port32 := int32(port)
+
+	return &gen.AgentApp{
+		Slug: gen.AgentApp_DOCKER_REGISTRY_UI,
+		Web: []*gen.AgentWebItem{
+			{
+				Port: &port32,
+			},
+		},
 	}
 }
 

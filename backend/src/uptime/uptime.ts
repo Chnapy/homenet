@@ -151,7 +151,7 @@ export const uptimeRoutine = {
     };
 
     const filter = ({ type, scope, address }: NetAccess) => {
-      return type !== "address-only";
+      return true;
       // return (
       //   type === "web" // && scope === "dns-domain" // && address !== "home.assistant"
       // );
@@ -288,8 +288,6 @@ export const uptimeRoutine = {
                   monitor.grpcServiceName === grpcHealthcheckData.service &&
                   monitor.grpcMethod === grpcHealthcheckData.method
                 );
-              case "address-only":
-                return false;
             }
           });
           if (monitor) {
@@ -341,8 +339,6 @@ export const uptimeRoutine = {
                     grpcBody: grpcHealthcheckData.expectedRequestBody,
                     keyword: `"${grpcHealthcheckData.expectedResponseValue}"`,
                   };
-                case "address-only":
-                  throw new Error("Case unexpected");
               }
             };
 

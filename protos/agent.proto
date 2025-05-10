@@ -28,6 +28,7 @@ enum AgentOS {
 message AgentWebItem {
   optional int32 port = 1;
   bool ssl = 2;
+  repeated string paths = 3;
 }
 
 message AgentSSH {
@@ -68,6 +69,7 @@ message AgentApp {
     MOONLIGHT = 13;
     CODE_SERVER = 14;
     DOCKER_REGISTRY = 15;
+    DOCKER_REGISTRY_UI = 16;
   }
 
   enum AgentVpnMode {

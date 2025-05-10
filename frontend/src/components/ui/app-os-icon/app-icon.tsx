@@ -33,6 +33,7 @@ export const iconMap: Record<AppOSIconProps["slug"], string | undefined> = {
   ZIGBEE2MQTT: getDashboardIcon("svg", "zigbee2mqtt"),
   DOCKER: getDashboardIcon("svg", "docker"),
   DOCKER_REGISTRY: getDashboardIcon("svg", "docker-engine"),
+  DOCKER_REGISTRY_UI: getDashboardIcon("svg", "docker-engine"),
   PLEX: getDashboardIcon("svg", "plex"),
   MOONLIGHT: moonlightIcon,
   SUNSHINE: getDashboardIcon("svg", "sunshine"),

@@ -7,7 +7,8 @@ export type AgentMetadataList = DevicesFullQuery["agentMetadataList"];
 export type NetEntityMap = DevicesFullQuery["netEntityMap"];
 
 export type NetEntity = NetEntityMap[string];
-export type NetAccess = NetEntity["asList"][number];
+export type NetAccessAddressOnly = NetEntity["addressList"][number];
+export type NetAccess = NetEntity["os"][number];
 export type AppNetAccess = NetEntity["apps"][DeviceAppSlug][number];
 
 export type Device = DeviceList[number];

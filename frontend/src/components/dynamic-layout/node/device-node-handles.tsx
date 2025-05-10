@@ -38,8 +38,8 @@ export const DeviceNodeHandles: React.FC<NodeProps<DeviceNodeType>> = ({
     () => ({
       positionAbsoluteX: rest.positionAbsoluteX,
       positionAbsoluteY: rest.positionAbsoluteY,
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- memoize x/y for dragging case
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoize x/y for dragging case
     [width, height, data.sources, data.targets]
   );
 

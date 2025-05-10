@@ -11,10 +11,13 @@ import {
   ListItemText,
 } from "@mui/material";
 import { UptimeMap } from "../../data/query/use-listen-uptime";
-import { NetAccess } from "../../data/types/get-devices";
+import { NetAccess, NetAccessAddressOnly } from "../../data/types/get-devices";
 import { BadgeUptime } from "./badge-uptime";
 
-type AccessLineProps = Pick<NetAccess, "type" | "scope" | "href"> & {
+type AccessLineProps = {
+  type: NetAccess["type"] | NetAccessAddressOnly["type"];
+  scope: NetAccess["scope"];
+  href: string;
   link?: boolean;
   disablePadding?: boolean;
   uptime?: UptimeMap[string];
