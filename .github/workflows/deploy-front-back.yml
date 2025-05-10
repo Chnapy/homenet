@@ -35,6 +35,7 @@ jobs:
           sudo wg-quick up ./wg0.conf
 
           # debug DNS
+          echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
           sudo cat /etc/resolv.conf
           nslookup registry-1.docker.io
           curl https://registry-1.docker.io/v2/
