@@ -33,6 +33,10 @@ jobs:
         run: |
           echo "${{ secrets.WG_CONFIG }}" > wg0.conf
           sudo wg-quick up ./wg0.conf
+          echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+          sudo cat /etc/resolv.conf
+          nslookup registry-1.docker.io
+          curl https://registry-1.docker.io/v2/
 
       - name: Docker build
         run: docker build . -t registry.richardhaddad.fr/homenet
