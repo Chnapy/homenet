@@ -39,7 +39,7 @@ jobs:
 
           # debug DNS
           # echo "resolv.conf before changes"
-          # echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
+          echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
           # echo "resolv.conf after changes"
           sudo cat /etc/resolv.conf
           # nslookup registry-1.docker.io
