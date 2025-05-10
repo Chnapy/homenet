@@ -26,6 +26,14 @@ jobs:
       #     formatted_date=$(date -d "${{ github.event.head_commit.timestamp }}" +'0.0.%Y%m%d%H%M')
       #     echo "tag=$formatted_date" >> $GITHUB_OUTPUT
 
+      - name: Install WireGuard
+        run: sudo apt-get update && sudo apt-get install -y wireguard
+
+      - name: Open WireGuard tunnel
+        run: |
+          echo "${{ secrets.WG_CONFIG }}" > wg0.conf
+          sudo wg-quick up ./wg0.conf
+
       - name: Docker build
         run: docker build . -t registry.richardhaddad.fr/homenet
 
@@ -47,3 +55,7 @@ jobs:
             && docker run --name homenet -d -v ~/homenet/db:/app/db -p 50051:50051 --network main_default registry.richardhaddad.fr/homenet \
             && docker container prune -f \
             && docker image prune -af'
+
+      - name: Close WireGuard tunnel
+        if: always()
+        run: sudo wg-quick down ./wg0.conf
