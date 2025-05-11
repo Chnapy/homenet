@@ -34,18 +34,18 @@ jobs:
 
       - name: Open WireGuard tunnel
         run: |
-          echo "${{ secrets.WG_CONFIG }}" > wg0.conf
-          sudo wg-quick up ./wg0.conf
+          # echo "${{ secrets.WG_CONFIG }}" > wg0.conf
+          # sudo wg-quick up ./wg0.conf
 
-          # debug DNS
-          # echo "resolv.conf before changes"
-          # echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
-          # echo "resolv.conf after changes"
-          sudo cat /etc/resolv.conf 
-          # nslookup registry-1.docker.io
-          # curl https://registry-1.docker.io/v2/
-          nslookup registry.richardhaddad.fr
-          curl https://registry.richardhaddad.fr/v2/
+          # # debug DNS
+          # # echo "resolv.conf before changes"
+          # # echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
+          # # echo "resolv.conf after changes"
+          # sudo cat /etc/resolv.conf 
+          # # nslookup registry-1.docker.io
+          # # curl https://registry-1.docker.io/v2/
+          # nslookup registry.richardhaddad.fr
+          # curl https://registry.richardhaddad.fr/v2/
 
       - name: Docker push
         run: docker push registry.richardhaddad.fr/homenet
