@@ -27,7 +27,7 @@ jobs:
       #     echo "tag=$formatted_date" >> $GITHUB_OUTPUT
 
       - name: Install WireGuard
-        run: sudo apt-get update && sudo apt-get install -y wireguard
+        run: sudo apt-get update && sudo apt-get install -y resolvconf wireguard
 
       - name: Docker build
         run: docker build . -t registry.richardhaddad.fr/homenet
@@ -39,7 +39,7 @@ jobs:
 
           # debug DNS
           # echo "resolv.conf before changes"
-          echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
+          # echo -e "nameserver 10.0.0.1\nnameserver 8.8.8.8\nsearch ." | sudo tee /etc/resolv.conf
           # echo "resolv.conf after changes"
           sudo cat /etc/resolv.conf
           # nslookup registry-1.docker.io
