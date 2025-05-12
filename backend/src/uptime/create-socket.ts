@@ -92,10 +92,12 @@ export const createSocket = (socketAddress: string) => {
   const emitFn = <D extends DefaultResponse>(
     name: string,
     ...body: unknown[]
-  ) =>
-    new Promise<D>((resolve, reject) =>
+  ) => {
+    const startTime = Date.now();
+    return new Promise<D>((resolve, reject) =>
       sio!.emit(name, ...body, (data: D) => {
-        console.log("io:", name, data);
+        const duration = Date.now() - startTime;
+        console.log("io:", name, data, `duration=${duration}ms`);
         data.ok ? resolve(data) : reject(data);
       })
     ).catch(async (data: DefaultResponse): Promise<D> => {
@@ -107,6 +109,7 @@ export const createSocket = (socketAddress: string) => {
 
       return Promise.reject<D>(data);
     });
+  };
 
   const loginByToken = () =>
     emitFn<LoginByToken>("loginByToken", currentToken).catch(

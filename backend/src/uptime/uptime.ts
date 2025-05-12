@@ -13,9 +13,10 @@ import { Heartbeat, Monitor, Notification, Tag } from "./uptime-kuma-io-types";
 export type UptimeMap = Record<string, "on" | "off" | undefined>;
 
 type PersistantEntities = {
-  started: boolean;
   deviceFull?: Omit<GetDeviceFull, "agentMetadataList">;
   netList?: (NetAccess & Meta)[];
+
+  started: boolean;
   socket?: ReturnType<typeof createSocket>;
 
   tag?: Tag;
@@ -30,6 +31,13 @@ const pe: PersistantEntities = {
   started: false,
   hearbeatReady: false,
   processLock: false,
+};
+
+const resetPersistentEntities = () => {
+  delete pe.socket;
+  pe.started = false;
+  pe.hearbeatReady = false;
+  pe.processLock = false;
 };
 
 const getTagOrAdd = () =>
@@ -236,8 +244,8 @@ export const uptimeRoutine = {
     pe.socket.on.disconnect((reason) => {
       console.log("io: disconnect -", reason);
       pe.socket?.disconnect();
-      pe.started = false;
-      delete pe.socket;
+
+      resetPersistentEntities();
     });
 
     const process = async (
@@ -296,7 +304,7 @@ export const uptimeRoutine = {
             }
 
             return async (parent: number) => {
-              console.log("io: add monitor", net.name, net.href);
+              console.log("\nio: add monitor", net.name, net.href);
 
               const getMonitorCommonProps = (): Partial<Monitor> => {
                 const namePart =
