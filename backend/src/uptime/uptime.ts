@@ -253,153 +253,164 @@ export const uptimeRoutine = {
 
       onMonitorList.turnOff();
 
-      const tag = await getTagOrAdd();
+      try {
+        const tag = await getTagOrAdd();
 
-      const monitorListWithTag = (
-        Object.values(monitorMap) as Monitor[]
-      ).filter(
-        (monitor) =>
-          monitor.type === "group" ||
-          monitor.tags?.some(({ tag_id }) => tag_id === tag?.id)
-      );
+        const monitorListWithTag = (
+          Object.values(monitorMap) as Monitor[]
+        ).filter(
+          (monitor) =>
+            monitor.type === "group" ||
+            monitor.tags?.some(({ tag_id }) => tag_id === tag?.id)
+        );
 
-      const notificationIDList = notificationList?.length
-        ? {
-            [String(notificationList[0].id)]: true,
-          }
-        : {};
-
-      const monitorAddFns = pe
-        .netList!.map((net) => {
-          const monitor = monitorListWithTag.find((monitor) => {
-            switch (net.type) {
-              case "web":
-                return monitor.type === "http" && monitor.url === net.href;
-              case "ssh":
-                return (
-                  monitor.type === "port" &&
-                  monitor.hostname === net.address &&
-                  monitor.port === net.port
-                );
-              case "grpc":
-                return (
-                  monitor.type === "grpc-keyword" &&
-                  monitor.grpcUrl === net.href &&
-                  monitor.grpcServiceName === grpcHealthcheckData.service &&
-                  monitor.grpcMethod === grpcHealthcheckData.method
-                );
+        const notificationIDList = notificationList?.length
+          ? {
+              [String(notificationList[0].id)]: true,
             }
-          });
-          if (monitor) {
-            return null;
-          }
+          : {};
 
-          return async (parent: number) => {
-            console.log("io: add monitor", net.name, net.href);
-
-            const getMonitorCommonProps = (): Partial<Monitor> => {
-              const namePart =
-                net.scope === "lan"
-                  ? "by lan"
-                  : net.scope === "vpn"
-                  ? "by vpn"
-                  : net.scope === "wan"
-                  ? "by IP"
-                  : "";
-
+        const monitorAddFns = pe
+          .netList!.map((net) => {
+            const monitor = monitorListWithTag.find((monitor) => {
               switch (net.type) {
                 case "web":
-                  return {
-                    type: "http",
-                    name: [net.name, namePart].filter(Boolean).join(" "),
-                    url: net.href,
-                    method: "GET",
-                    expiryNotification: net.href.startsWith("https://"),
-                    ignoreTls: net.href.startsWith("https://"),
-                  };
+                  return monitor.type === "http" && monitor.url === net.href;
                 case "ssh":
-                  return {
-                    type: "port",
-                    name: [net.name, "SSH", namePart].filter(Boolean).join(" "),
-                    port: net.port,
-                    hostname: net.address,
-                    method: "GET",
-                  };
+                  return (
+                    monitor.type === "port" &&
+                    monitor.hostname === net.address &&
+                    monitor.port === net.port
+                  );
                 case "grpc":
-                  return {
-                    type: "grpc-keyword",
-                    name: [net.name, "gRPC", namePart]
-                      .filter(Boolean)
-                      .join(" "),
-                    grpcUrl: net.href,
-                    grpcProtobuf: grpcHealthcheckData.protobuf,
-                    grpcServiceName: grpcHealthcheckData.service,
-                    grpcMethod: grpcHealthcheckData.method,
-                    grpcEnableTls: grpcHealthcheckData.tls,
-                    grpcBody: grpcHealthcheckData.expectedRequestBody,
-                    keyword: `"${grpcHealthcheckData.expectedResponseValue}"`,
-                  };
+                  return (
+                    monitor.type === "grpc-keyword" &&
+                    monitor.grpcUrl === net.href &&
+                    monitor.grpcServiceName === grpcHealthcheckData.service &&
+                    monitor.grpcMethod === grpcHealthcheckData.method
+                  );
               }
-            };
-
-            const { monitorID } = await pe.socket!.emit.addMonitor({
-              active: true,
-              parent,
-              ...getMonitorCommonProps(),
-              description: net.description,
-              notificationIDList,
             });
+            if (monitor) {
+              return null;
+            }
 
-            await pe.socket!.emit.addMonitorTag(tag.id, monitorID, "");
-          };
-        })
-        .filter((fn) => fn !== null);
+            return async (parent: number) => {
+              console.log("io: add monitor", net.name, net.href);
 
-      console.log("io: monitors count to add", monitorAddFns.length);
+              const getMonitorCommonProps = (): Partial<Monitor> => {
+                const namePart =
+                  net.scope === "lan"
+                    ? "by lan"
+                    : net.scope === "vpn"
+                    ? "by vpn"
+                    : net.scope === "wan"
+                    ? "by IP"
+                    : "";
 
-      if (monitorAddFns.length > 0) {
-        const groupMonitorId =
-          monitorListWithTag.find(
-            (monitor) => monitor.type === "group" && monitor.name === "Homenet"
-          )?.id ??
-          (
-            await pe.socket!.emit.addMonitor({
-              active: true,
-              type: "group",
-              name: "Homenet",
-              description: "Monitors created by Homenet",
-              method: "GET",
-              notificationIDList,
-            })
-          ).monitorID;
+                switch (net.type) {
+                  case "web":
+                    return {
+                      type: "http",
+                      name: [net.name, namePart].filter(Boolean).join(" "),
+                      url: net.href,
+                      method: "GET",
+                      expiryNotification: net.href.startsWith("https://"),
+                      ignoreTls: net.href.startsWith("https://"),
+                    };
+                  case "ssh":
+                    return {
+                      type: "port",
+                      name: [net.name, "SSH", namePart]
+                        .filter(Boolean)
+                        .join(" "),
+                      port: net.port,
+                      hostname: net.address,
+                      method: "GET",
+                    };
+                  case "grpc":
+                    return {
+                      type: "grpc-keyword",
+                      name: [net.name, "gRPC", namePart]
+                        .filter(Boolean)
+                        .join(" "),
+                      grpcUrl: net.href,
+                      grpcProtobuf: grpcHealthcheckData.protobuf,
+                      grpcServiceName: grpcHealthcheckData.service,
+                      grpcMethod: grpcHealthcheckData.method,
+                      grpcEnableTls: grpcHealthcheckData.tls,
+                      grpcBody: grpcHealthcheckData.expectedRequestBody,
+                      keyword: `"${grpcHealthcheckData.expectedResponseValue}"`,
+                    };
+                }
+              };
 
-        for (const fn of monitorAddFns) {
-          await fn(groupMonitorId);
+              const { monitorID } = await pe.socket!.emit.addMonitor({
+                active: true,
+                parent,
+                ...getMonitorCommonProps(),
+                description: net.description,
+                notificationIDList,
+              });
+
+              await pe.socket!.emit.addMonitorTag(tag.id, monitorID, "");
+            };
+          })
+          .filter((fn) => fn !== null);
+
+        console.log("io: monitors count to add", monitorAddFns.length);
+
+        if (monitorAddFns.length > 0) {
+          const groupMonitorId =
+            monitorListWithTag.find(
+              (monitor) =>
+                monitor.type === "group" && monitor.name === "Homenet"
+            )?.id ??
+            (
+              await pe.socket!.emit.addMonitor({
+                active: true,
+                type: "group",
+                name: "Homenet",
+                description: "Monitors created by Homenet",
+                method: "GET",
+                notificationIDList,
+              })
+            ).monitorID;
+
+          for (const fn of monitorAddFns) {
+            try {
+              await fn(groupMonitorId);
+            } catch (error) {
+              console.error("io: process error (not breaking):", error);
+            }
+          }
+          onMonitorList.turnOn();
+          console.log("io: monitors add end -", monitorAddFns.length);
+          pe.monitorMap = await pe.socket!.emit.getMonitorList();
+        } else {
+          onMonitorList.turnOn();
+          pe.monitorMap = monitorMap;
         }
-        onMonitorList.turnOn();
-        console.log("io: monitors add end -", monitorAddFns.length);
-        pe.monitorMap = await pe.socket!.emit.getMonitorList();
-      } else {
-        onMonitorList.turnOn();
-        pe.monitorMap = monitorMap;
-      }
 
-      pe.monitorMap = Object.fromEntries(
-        Object.entries(pe.monitorMap).filter(([id, monitor]) =>
-          monitor?.tags?.some(({ tag_id }) => tag_id === tag.id)
-        )
-      );
-
-      if (pe.lastHeartbeatMap) {
-        pe.lastHeartbeatMap = Object.fromEntries(
-          Object.entries(pe.lastHeartbeatMap).filter(
-            ([id, _]) => id in pe.monitorMap!
+        pe.monitorMap = Object.fromEntries(
+          Object.entries(pe.monitorMap).filter(([id, monitor]) =>
+            monitor?.tags?.some(({ tag_id }) => tag_id === tag.id)
           )
         );
-        pe.hearbeatReady = true;
-      }
 
-      pe.processLock = false;
+        if (pe.lastHeartbeatMap) {
+          pe.lastHeartbeatMap = Object.fromEntries(
+            Object.entries(pe.lastHeartbeatMap).filter(
+              ([id, _]) => id in pe.monitorMap!
+            )
+          );
+          pe.hearbeatReady = true;
+        }
+      } catch (error) {
+        console.error("io: process error:", error);
+      } finally {
+        pe.processLock = false;
+      }
 
       await sendToClient("process");
     };
