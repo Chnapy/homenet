@@ -410,6 +410,7 @@ export const uptimeRoutine = {
         console.error("io: process error:", error);
       } finally {
         pe.processLock = false;
+        console.log("io: process ended");
       }
 
       await sendToClient("process");
@@ -433,7 +434,7 @@ export const uptimeRoutine = {
         console.log("io: on.notificationList");
         pe.notificationList = notificationList;
 
-        if (!pe.monitorMap) {
+        if (!pe.processLock && !pe.monitorMap) {
           onMonitorList.turnOff();
           const monitorMap = await pe.socket!.emit.getMonitorList();
           onMonitorList.turnOn();
