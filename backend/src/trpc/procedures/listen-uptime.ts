@@ -23,6 +23,7 @@ export const listenUptime = publicProcedure.subscription(async function* (
   } catch (err) {
     console.error("listenUptime: uptimeRoutine start error", err);
     uptimeRoutine.stop();
+    return;
   }
 
   try {

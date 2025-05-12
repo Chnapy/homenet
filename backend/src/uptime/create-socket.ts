@@ -1,3 +1,4 @@
+import { TransportError } from "engine.io-client";
 import { io, Socket } from "socket.io-client";
 import {
   AddMonitor,
@@ -17,6 +18,8 @@ export const createSocket = (socketAddress: string) => {
   console.log("io: socket created with address", socketAddress);
   const sio = io(socketAddress, {
     autoConnect: false,
+    retries: 3,
+    reconnectionAttempts: 3,
   });
 
   let currentToken = "";
@@ -33,9 +36,27 @@ export const createSocket = (socketAddress: string) => {
   //     console.log("io: *", event, data, ...extra);
   // });
 
-  sio.io.on("error", (error) => {
-    console.log("io: error", error);
-  });
+  const getErrorLogger = (eventName: string) => (error: Error) => {
+    if (error instanceof TransportError) {
+      console.warn(
+        `io [${sio.id}]: ${eventName} [TransportError]`,
+        error.name,
+        error.message,
+        "- description:",
+        error.description
+      );
+    } else {
+      console.warn(
+        `io [${sio.id}]: ${eventName}`,
+        error.name,
+        error.message,
+        error.cause,
+        error.stack
+      );
+    }
+  };
+
+  sio.io.on("error", getErrorLogger("error"));
 
   const createOn =
     <C extends (...data: any[]) => void>(name: string) =>
@@ -183,8 +204,10 @@ export const createSocket = (socketAddress: string) => {
     isConnected: () => sio.connected,
     connect: () =>
       new Promise<void>((resolve, reject) => {
+        console.log("io: connect attempt");
+
         sio.on("connect_error", (err) => {
-          console.log(`io: connect_error`, err);
+          getErrorLogger("connect_error")(err);
           reject(err);
         });
 
