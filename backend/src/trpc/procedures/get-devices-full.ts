@@ -81,14 +81,6 @@ export const getDevicesFull = publicProcedure.query(
       getDevicesFullData(),
     ]);
 
-    uptimeRoutine.updateDeviceFull(devicesFull).catch((err) => {
-      console.error(
-        "getDevicesFull: uptimeRoutine update device-full error",
-        err
-      );
-      uptimeRoutine.stop();
-    });
-
     return {
       agentMetadataList,
       ...devicesFull,

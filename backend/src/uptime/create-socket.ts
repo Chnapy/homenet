@@ -18,7 +18,7 @@ export const createSocket = (socketAddress: string) => {
   console.log("io: socket created with address", socketAddress);
   const sio = io(socketAddress, {
     autoConnect: false,
-    retries: 3,
+    retries: 0,
     reconnectionAttempts: 3,
   });
 
@@ -142,6 +142,9 @@ export const createSocket = (socketAddress: string) => {
 
   const getTags = () => emitFn<GetTags>("getTags");
 
+  /**
+   * Can be quite slow if there is lot of monitors
+   */
   const getMonitorList = () =>
     new Promise<Record<string, Monitor>>(async (resolve, reject) => {
       const listener = on.monitorList((data) => {

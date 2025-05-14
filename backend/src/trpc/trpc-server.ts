@@ -15,7 +15,7 @@ const createContext = ({ req, res }: CreateFastifyContextOptions) => ({
   res,
 });
 
-export const setupTRPCServer = () => {
+export const setupTRPCServer = async () => {
   const tRPCServer = fastify();
 
   tRPCServer.register(cors).register(fastifyTRPCPlugin, {
@@ -32,20 +32,21 @@ export const setupTRPCServer = () => {
 
   tRPCServer.get("/api/agent/:os", getAgentByOSRoute);
 
-  tRPCServer.listen(
-    {
-      host: "0.0.0.0",
-      port: 8081,
-    },
-    (err, address) => {
-      if (err) {
-        tRPCServer.log.error(err);
-        process.exit(1);
+  return new Promise<void>((resolve, reject) => {
+    tRPCServer.listen(
+      {
+        host: "0.0.0.0",
+        port: 8081,
+      },
+      (err, address) => {
+        if (err) {
+          tRPCServer.log.error(err);
+          return reject(err);
+        }
+
+        console.log(`trpc: server listening at ${address}`);
+        resolve();
       }
-
-      console.log(`trpc: server listening at ${address}`);
-    }
-  );
-
-  return tRPCServer;
+    );
+  });
 };

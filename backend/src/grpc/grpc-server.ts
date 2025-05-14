@@ -7,7 +7,7 @@ import { AgentService } from "./generated/agent";
 import { setupGrpcHealthcheck } from "./grpc-healthcheck";
 import { gRPCRouter } from "./grpc-router";
 
-export const setupGRPCServer = () => {
+export const setupGRPCServer = async () => {
   const port = process.env.HOMENET_GRPC_PORT;
   if (!port) {
     throw new Error("required env HOMENET_GRPC_PORT not defined");
@@ -26,17 +26,21 @@ export const setupGRPCServer = () => {
 
   gRPCServer.addService(AgentService, gRPCRouter);
 
-  gRPCServer.bindAsync(
-    `0.0.0.0:${port}`,
-    grpc.ServerCredentials.createInsecure(),
-    (error, port) => {
-      if (error) {
-        console.error("grpc: server error", error);
-      } else {
+  return new Promise<void>((resolve, reject) => {
+    gRPCServer.bindAsync(
+      `0.0.0.0:${port}`,
+      grpc.ServerCredentials.createInsecure(),
+      (error, port) => {
+        if (error) {
+          console.error("grpc: server error", error);
+          return reject(error);
+        }
+
         healthcheck.enableServing();
 
         console.log("grpc: server listening on port", port);
+        resolve();
       }
-    }
-  );
+    );
+  });
 };

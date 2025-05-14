@@ -2,11 +2,12 @@ import { handleUnaryCall } from "@grpc/grpc-js";
 import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { getDeviceWithId, openDeviceDB } from "../../db/device";
-import { AgentUpdateRequest, AgentUpdateResponse } from "../generated/agent";
 import {
   DeviceUserMetadata,
   openDeviceUserMetadataDB,
 } from "../../db/device-user-metadata";
+import { uptimeRoutine } from "../../uptime/uptime";
+import { AgentUpdateRequest, AgentUpdateResponse } from "../generated/agent";
 
 export const updateService: handleUnaryCall<
   AgentUpdateRequest,
@@ -68,6 +69,10 @@ export const updateService: handleUnaryCall<
 
     callback(null, {
       message: "OK - everything's fine",
+    });
+
+    await uptimeRoutine.setup().catch((err) => {
+      console.error("grpc: update-service - uptimeRoutine setup error", err);
     });
   } catch (err) {
     console.error("grpc: AgentUpdateRequest error", err);
