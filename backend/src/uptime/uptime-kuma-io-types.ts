@@ -120,6 +120,8 @@ export type Monitor = {
   includeSensitiveData?: boolean;
 };
 
+export type MonitorMap = Record<string, Monitor>;
+
 // monitor_notification
 export type MonitorNotification = {
   id: number;

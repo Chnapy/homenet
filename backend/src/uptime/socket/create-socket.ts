@@ -1,5 +1,5 @@
 import { TransportError } from "engine.io-client";
-import { io, Socket } from "socket.io-client";
+import { io, Socket as IOSocket } from "socket.io-client";
 import {
   AddMonitor,
   AddMonitorTag,
@@ -10,9 +10,12 @@ import {
   Login,
   LoginByToken,
   Monitor,
+  MonitorMap,
   Notification,
   Tag,
-} from "./uptime-kuma-io-types";
+} from "../uptime-kuma-io-types";
+
+export type Socket = ReturnType<typeof createSocket>;
 
 export const createSocket = (socketAddress: string) => {
   console.log("io: socket created with address", socketAddress);
@@ -50,7 +53,6 @@ export const createSocket = (socketAddress: string) => {
         `io [${sio.id}]: ${eventName}`,
         error.name,
         error.message,
-        error.cause,
         error.stack
       );
     }
@@ -76,10 +78,9 @@ export const createSocket = (socketAddress: string) => {
 
   const on = {
     disconnect:
-      createOn<(reason: Socket.DisconnectReason) => void>("disconnect"),
+      createOn<(reason: IOSocket.DisconnectReason) => void>("disconnect"),
 
-    monitorList:
-      createOn<(data: Record<string, Monitor>) => void>("monitorList"),
+    monitorList: createOn<(data: MonitorMap) => void>("monitorList"),
     notificationList:
       createOn<(data: Notification[]) => void>("notificationList"),
     heartbeatList:
@@ -146,7 +147,7 @@ export const createSocket = (socketAddress: string) => {
    * Can be quite slow if there is lot of monitors
    */
   const getMonitorList = () =>
-    new Promise<Record<string, Monitor>>(async (resolve, reject) => {
+    new Promise<MonitorMap>(async (resolve, reject) => {
       const listener = on.monitorList((data) => {
         listener.turnOff();
         resolve(data);

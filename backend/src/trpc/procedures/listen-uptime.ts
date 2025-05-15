@@ -1,10 +1,8 @@
-import { EventEmitter, on } from "events";
-import { uptimeRoutine, UptimeMap } from "../../uptime/uptime";
+import { on } from "events";
+import { UptimeMap } from "../../uptime/setup/utils/create-uptime-map-getter";
+import { uptimeRoutine } from "../../uptime/uptime";
+import { uptimeEventEmitter } from "../../uptime/uptime-event-emitter";
 import { publicProcedure } from "../trpc";
-
-export const uptimeEventEmitter = new EventEmitter<{
-  add: [uptimeMap: UptimeMap];
-}>();
 
 export const listenUptime = publicProcedure.subscription(async function* (
   opts
@@ -22,7 +20,6 @@ export const listenUptime = publicProcedure.subscription(async function* (
     }
   } catch (err) {
     console.error("listenUptime: uptimeRoutine start error", err);
-    // uptimeRoutine.stop();
     return;
   }
 
@@ -35,6 +32,6 @@ export const listenUptime = publicProcedure.subscription(async function* (
       yield uptimeMap;
     }
   } finally {
-    // uptimeRoutine.stop();
+    uptimeRoutine.stop();
   }
 });
