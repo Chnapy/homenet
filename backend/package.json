@@ -2,6 +2,7 @@
   "name": "backend",
   "scripts": {
     "dev": "HOMENET_GRPC_PORT=50051 tsx --watch ./src/index.ts",
+    "dev:public": "PUBLIC_SAFE_MODE=1 HOMENET_GRPC_PORT=50051 tsx --watch ./src/index.ts",
     "check": "tsc -p tsconfig.json",
     "build": "npx esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node22 --packages=external --minify",
     "start": "node ./dist/index.js",

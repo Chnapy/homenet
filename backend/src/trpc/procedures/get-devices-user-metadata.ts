@@ -3,6 +3,7 @@ import {
   DeviceUserMetadata,
   openDeviceUserMetadataDB,
 } from "../../db/device-user-metadata";
+import { anonymizeIfNeeded } from '../public-safe-mode';
 import { publicProcedure } from "../trpc";
 
 export const getDevicesUserMetadata = publicProcedure.query(
@@ -19,6 +20,6 @@ export const getDevicesUserMetadata = publicProcedure.query(
       deviceUserMetadataList.map((data) => [data!.deviceId, data!])
     );
 
-    return deviceUserMetaMap;
+    return anonymizeIfNeeded(deviceUserMetaMap);
   }
 );

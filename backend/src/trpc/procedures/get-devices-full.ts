@@ -1,13 +1,13 @@
 import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { openDeviceDB } from "../../db/device";
-import { uptimeRoutine } from "../../uptime/uptime";
 import {
   AgentMetadataFull,
   getAgentMetadataFullFromAgentMetadata,
 } from "../entities/agent-metadata";
 import { App, getAppFromAgentApp } from "../entities/app";
 import { getInstanceFromAgentInstance, Instance } from "../entities/instance";
+import { anonymizeIfNeeded, isPublicSafeMode } from '../public-safe-mode';
 import { publicProcedure } from "../trpc";
 import { getNetEntityMap, NetEntityMap } from "../utils/get-net-entity-map";
 
@@ -17,6 +17,7 @@ export type GetDeviceFull = {
   appList: App[];
   agentMetadataList: AgentMetadataFull[];
   netEntityMap: NetEntityMap;
+  publicSafeMode: boolean;
 };
 
 export const getDevicesFullData = async (): Promise<
@@ -63,6 +64,7 @@ export const getDevicesFullData = async (): Promise<
     instanceList,
     appList,
     netEntityMap,
+    publicSafeMode: isPublicSafeMode(),
   };
 };
 
@@ -81,10 +83,10 @@ export const getDevicesFull = publicProcedure.query(
       getDevicesFullData(),
     ]);
 
-    return {
+    return anonymizeIfNeeded({
       agentMetadataList,
       ...devicesFull,
-    };
+    });
   }
 );
 
