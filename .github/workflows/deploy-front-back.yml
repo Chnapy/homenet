@@ -1,17 +1,18 @@
 name: Deploy Frontend & Backend
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "**"
-      - "!.github/workflows/deploy-agent.yml"
-      - "!agent/**"
-      - "!.vscode/**"
-      - "!**/*.md"
-      - "!**/.gitignore"
-  pull_request:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "**"
+  #     - "!.github/workflows/deploy-agent.yml"
+  #     - "!agent/**"
+  #     - "!.vscode/**"
+  #     - "!**/*.md"
+  #     - "!**/.gitignore"
+  # pull_request:
 
 jobs:
   deploy-front-back:

@@ -1,13 +1,14 @@
 name: Deploy Agent
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/deploy-agent.yml
-      - agent/**
-  pull_request:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - .github/workflows/deploy-agent.yml
+  #     - agent/**
+  # pull_request:
 
 jobs:
   create-release:

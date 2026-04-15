@@ -11,19 +11,16 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
-// LocalExec implémente l'interface Exec pour l'exécution locale
 type LocalExecutor struct {
 	*BaseExecutor
 }
 
-// NewLocalExecutor crée une nouvelle instance de LocalExec
 func NewLocalExecutor() *LocalExecutor {
 	return &LocalExecutor{
 		BaseExecutor: NewExecutor(),
 	}
 }
 
-// Exec exécute une commande shell localement
 func (l *LocalExecutor) Exec(command string) (string, error) {
 	if env.Env.LogLevel == env.LogLevelDebug {
 		fmt.Printf("local-in <- %s\n", command)

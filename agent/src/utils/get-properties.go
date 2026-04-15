@@ -18,7 +18,7 @@ func GetProperties(content string) map[string]string {
 
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
-		value = strings.Trim(value, `"`) // Enlève les guillemets
+		value = strings.Trim(value, `"`)
 
 		props[key] = value
 	}

@@ -1,8 +1,8 @@
 import { RouteHandlerMethod } from "fastify/types/route";
 
 export const getAgentByOSRoute: RouteHandlerMethod = async (request, reply) => {
-  const Authorization =
-    "Bearer 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";
+  // TODO removed + revoked API key for security
+  const Authorization = "Bearer github_pat_XXX";
   const urls = {
     latestRelease:
       "https://api.github.com/repos/Chnapy/homenet/releases/latest",
@@ -42,7 +42,7 @@ export const getAgentByOSRoute: RouteHandlerMethod = async (request, reply) => {
       },
     });
 
-    Object.entries(assetResponse.headers).forEach(([key, value]) => {
+    Object.entries(assetResponse.headers).forEach(([ key, value ]) => {
       reply.header(key, value);
     });
 
