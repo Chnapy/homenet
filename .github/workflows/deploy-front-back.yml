@@ -31,7 +31,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y resolvconf wireguard
 
       - name: Docker build
-        run: docker build . -t registry.richardhaddad.fr/homenet
+        run: docker build . --target monolith -t registry.richardhaddad.fr/homenet
 
       - name: Open WireGuard tunnel
         run: |

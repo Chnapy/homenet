@@ -7,7 +7,7 @@ import {
   TRPCClientError,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { type AppRouter, type AppRouterOutputs } from "../../../backend/src/trpc/router";
+import type { AppRouter, AppRouterOutputs } from "../../../backend/src/trpc/router";
 import { env } from '../env';
 
 export const generateTrpc = (queryClient: QueryClient) => {
