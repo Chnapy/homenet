@@ -1,7 +1,6 @@
 import { openAgentMetadataDB } from "../../db/agent-metadata";
 import { openRootDB } from "../../db/db";
 import { openDeviceDB } from "../../db/device";
-import { uptimeRoutine } from "../../uptime/uptime";
 import {
   AgentMetadataFull,
   getAgentMetadataFullFromAgentMetadata,
@@ -37,7 +36,7 @@ export const getDevicesFullData = async (): Promise<
     .map(getInstanceFromAgentInstance);
 
   const appList = agentDeviceList
-    .flatMap((agentDevice) => [agentDevice, ...agentDevice.instances])
+    .flatMap((agentDevice) => [ agentDevice, ...agentDevice.instances ])
     .flatMap((agentInstance) => agentInstance.apps)
     .map(getAppFromAgentApp);
 
@@ -48,7 +47,7 @@ export const getDevicesFullData = async (): Promise<
     ...instanceList,
     ...appList,
   ]);
-  const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
+  const duplicatedLans = checkLanDuplicates([ ...deviceList, ...instanceList ]);
 
   if (duplicatedIds.length > 0) {
     console.error("trpc: getDevicesFull - duplicated IDs", duplicatedIds);
@@ -72,7 +71,7 @@ export const getDevicesFull = publicProcedure.query(
 
     const agentMetadataDB = openAgentMetadataDB(db);
 
-    const [agentMetadataList, devicesFull] = await Promise.all([
+    const [ agentMetadataList, devicesFull ] = await Promise.all([
       agentMetadataDB
         .getRange({ reverse: true })
         .asArray.map(({ key, value }) =>
@@ -101,7 +100,7 @@ const checkIDDuplicates = (list: { id: string }[]) => {
     })
     .map((item) => item.id);
 
-  return [...new Set(duplicatedItems)];
+  return [ ...new Set(duplicatedItems) ];
 };
 
 const checkLanDuplicates = (list: { lan: string }[]) => {
@@ -117,5 +116,5 @@ const checkLanDuplicates = (list: { lan: string }[]) => {
     })
     .map((item) => item.lan);
 
-  return [...new Set(duplicatedItems)];
+  return [ ...new Set(duplicatedItems) ];
 };

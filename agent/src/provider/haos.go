@@ -53,7 +53,6 @@ func (e *HAOSProvider) GetDHCP() []*gen.AgentInstance_AgentDHCPItem {
 func (a *HAOSProvider) GetWeb() []*gen.AgentWebItem {
 	var webList []*gen.AgentWebItem
 
-	// Partie Home Assistant Core
 	haInfo, err := a.executor.Exec("ha core info")
 	if err != nil {
 		fmt.Print("HAOS: GetWeb error -", err)
@@ -73,7 +72,6 @@ func (a *HAOSProvider) GetWeb() []*gen.AgentWebItem {
 		webList = append(webList, &gen.AgentWebItem{Port: &port32, Ssl: ssl})
 	}
 
-	// Partie Docker Observer
 	haObserver, err := a.executor.Exec("docker inspect hassio_observer")
 	if err != nil {
 		fmt.Print("HAOS: GetWeb error -", err)

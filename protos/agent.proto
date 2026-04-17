@@ -2,9 +2,7 @@ syntax = "proto3";
 
 option go_package = "github.com/chnapy/homenet/agent/src/grpc/generated";
 
-// The greeting service definition.
 service Agent {
-  // Sends a greeting
   rpc update (AgentUpdateRequest) returns (AgentUpdateResponse) {}
 }
 

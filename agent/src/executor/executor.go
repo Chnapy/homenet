@@ -5,7 +5,6 @@ import (
 	"unicode/utf8"
 )
 
-// Interface représentant le contrat Executor
 type Executor interface {
 	Exec(command string) (string, error)
 	IsDir(path string) bool
@@ -15,12 +14,9 @@ type Executor interface {
 	FormatOutputForLog(output string) string
 }
 
-// Implémentation de base avec les méthodes par défaut
 type BaseExecutor struct {
-	// parentExecutor *Executor
 }
 
-// Constructeur
 func NewExecutor() *BaseExecutor {
 	return &BaseExecutor{}
 }
@@ -56,7 +52,6 @@ func (b *BaseExecutor) FormatOutputForLog(e Executor, output string) string {
 	}
 	truncated := strings.Join(lines, "\n")
 
-	// Limite à 400 caractères
 	if utf8.RuneCountInString(truncated) > nbrCharacters {
 		runes := []rune(truncated)
 		truncated = string(runes[:nbrCharacters])

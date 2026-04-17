@@ -62,19 +62,19 @@ export const createSocket = (socketAddress: string) => {
 
   const createOn =
     <C extends (...data: any[]) => void>(name: string) =>
-    (callback: C, startOn: boolean = true) => {
-      //   callback = () => console.log("io:", name);
-      const turnOn = () => sio.on(name, callback);
+      (callback: C, startOn: boolean = true) => {
+        //   callback = () => console.log("io:", name);
+        const turnOn = () => sio.on(name, callback);
 
-      if (startOn) {
-        turnOn();
-      }
+        if (startOn) {
+          turnOn();
+        }
 
-      return {
-        turnOn,
-        turnOff: () => sio.off(name, callback),
+        return {
+          turnOn,
+          turnOff: () => sio.off(name, callback),
+        };
       };
-    };
 
   const on = {
     disconnect:
@@ -126,7 +126,7 @@ export const createSocket = (socketAddress: string) => {
   const loginBasic = () =>
     emitFn<Login>("login", {
       username: "chnapy",
-      password: "Xlp9d4Wmdda5cA",
+      password: "xxx",
       token: "",
     }).then((data) => {
       currentToken = data.token;
@@ -170,7 +170,7 @@ export const createSocket = (socketAddress: string) => {
       upsideDown: false,
       packetSize: 56,
       maxredirects: 10,
-      accepted_statuscodes: ["200-299"],
+      accepted_statuscodes: [ "200-299" ],
       dns_resolve_type: "A",
       dns_resolve_server: "1.1.1.1",
       oauth_auth_method: "client_secret_basic",

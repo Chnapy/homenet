@@ -26,9 +26,43 @@ COPY frontend/ .
 
 ENV VITE_BACKEND_API=/api
 
+ENV VITE_STATIC_DEVICES_PATH=PLACEHOLDER_VITE_STATIC_DEVICES_PATH
+ENV VITE_STATIC_METADATA_PATH=PLACEHOLDER_VITE_STATIC_METADATA_PATH
+ENV VITE_SAFE_MODE=PLACEHOLDER_VITE_SAFE_MODE
+
 RUN npm run build
 
-FROM node:22-alpine
+FROM alpine:latest AS frontend-only
+
+LABEL org.opencontainers.image.title="Homenet frontend" \
+    org.opencontainers.image.url="https://github.com/Chnapy/homenet" \
+    org.opencontainers.image.source="https://github.com/Chnapy/homenet" \
+    org.opencontainers.image.authors="Richard Haddad" \
+    org.opencontainers.image.base.name="alpine:latest"
+
+RUN apk add --no-cache \
+    nginx \
+    curl \
+    && rm -rf /var/cache/apk/*
+WORKDIR /app
+
+# setup logs folders
+RUN mkdir -p /var/log/nginx /var/run/nginx \
+    && chown -R 755 /var/log/nginx /var/run/nginx
+
+COPY --from=frontend-builder /app/dist /app/frontend
+
+COPY frontend/nginx.conf /etc/nginx/nginx.conf
+COPY frontend/entrypoint.sh /app/entrypoint.sh
+
+VOLUME [ "/app" ]
+
+EXPOSE 3000
+
+# CMD ["nginx", "-g", "daemon off;"]
+CMD ["/bin/sh", "/app/entrypoint.sh"]
+
+FROM node:22-alpine AS monolith
 
 WORKDIR /app
 

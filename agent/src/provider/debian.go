@@ -28,7 +28,6 @@ func NewDebianProvider(executor ex.Executor) *DebianProvider {
 	}
 }
 
-// Méthode abstraite (panique si non implémentée)
 func (e *DebianProvider) Check() bool {
 
 	uname, _ := e.executor.Exec("uname -a")
@@ -39,24 +38,19 @@ func (e *DebianProvider) Check() bool {
 
 	osReleasePath := "/etc/os-release"
 
-	// Vérification de l'existence du fichier
 	if !e.executor.IsFile(osReleasePath) {
 		return false
 	}
 
-	// Lecture du contenu du fichier
 	configFile := e.executor.Open(osReleasePath)
 
-	// Parsing des propriétés
 	configs := utils.GetProperties(configFile)
 
-	// Extraction du nom de l'OS
 	osName, exists := configs["NAME"]
 	if !exists {
 		return false
 	}
 
-	// Vérification de la présence de "debian"
 	return strings.Contains(strings.ToLower(osName), "debian")
 }
 
@@ -69,7 +63,6 @@ func (e *DebianProvider) GetOS() gen.AgentOS {
 }
 
 func (e *DebianProvider) GetLan() string {
-	// Exécution de la commande "ip addr"
 	result, err := e.executor.Exec("ip addr")
 
 	if err != nil {
@@ -77,14 +70,11 @@ func (e *DebianProvider) GetLan() string {
 		return ""
 	}
 
-	// Découpage du résultat en lignes
 	scanner := bufio.NewScanner(strings.NewReader(result))
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Vérification des motifs dans la ligne
 		if strings.Contains(line, "inet ") && strings.Contains(line, "scope global") {
-			// Extraction de l'adresse IP
 			parts := strings.Fields(line)
 			if len(parts) < 2 {
 				continue
@@ -96,7 +86,6 @@ func (e *DebianProvider) GetLan() string {
 			}
 			ip := ipWithMask[0]
 
-			// Vérification si IP locale
 			if utils.IsIPLAN(ip) {
 				return ip
 			}
@@ -107,17 +96,13 @@ func (e *DebianProvider) GetLan() string {
 }
 
 func (e *DebianProvider) GetWan() *string {
-	// Exécution de la commande "ip addr"
 	result, _ := e.executor.Exec("ip addr")
 
-	// Découpage du résultat en lignes
 	scanner := bufio.NewScanner(strings.NewReader(result))
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Vérification des motifs dans la ligne
 		if strings.Contains(line, "inet ") && strings.Contains(line, "scope global") {
-			// Extraction de l'adresse IP
 			parts := strings.Fields(line)
 			if len(parts) < 2 {
 				continue
@@ -129,7 +114,6 @@ func (e *DebianProvider) GetWan() *string {
 			}
 			ip := ipWithMask[0]
 
-			// Vérification si IP locale
 			if !utils.IsIPLAN(ip) {
 				return &ip
 			}
@@ -215,13 +199,11 @@ func (e *DebianProvider) GetSSH() *gen.AgentSSH {
 	dropbearFilePath := "/etc/config/dropbear"
 	var ports []int32
 
-	// Lecture de sshd_config
 	if e.executor.IsFile(sshdFilePath) {
 		content := e.executor.Open(sshdFilePath)
 		scanner := bufio.NewScanner(strings.NewReader(content))
 		for scanner.Scan() {
 			line := scanner.Text()
-			// Ignore les commentaires et espaces
 			configPart := strings.TrimSpace(strings.SplitN(line, "#", 2)[0])
 			if strings.HasPrefix(configPart, "Port ") {
 				parts := strings.Fields(configPart)
@@ -237,7 +219,6 @@ func (e *DebianProvider) GetSSH() *gen.AgentSSH {
 		}
 	}
 
-	// Lecture de dropbear
 	if e.executor.IsFile(dropbearFilePath) {
 		content := e.executor.Open(dropbearFilePath)
 		scanner := bufio.NewScanner(strings.NewReader(content))
@@ -600,13 +581,11 @@ func (e *DebianProvider) GetCodeServer() *gen.AgentApp {
 		Web:  []*gen.AgentWebItem{},
 	}
 
-	// Récupérer le home directory de l'utilisateur courant
 	usr, err := user.Current()
 	homeDir := ""
 	if err == nil {
 		homeDir = usr.HomeDir
 	} else {
-		// Fallback sur $HOME si user.Current() échoue (ex: cross-compilation)
 		homeDir = os.Getenv("HOME")
 	}
 
@@ -622,7 +601,6 @@ func (e *DebianProvider) GetCodeServer() *gen.AgentApp {
 		return app
 	}
 
-	// Extraction du port depuis "bind-addr"
 	if bindAddr, ok := config["bind-addr"].(string); ok {
 		parts := strings.Split(bindAddr, ":")
 		if len(parts) == 2 {

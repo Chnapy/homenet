@@ -8,10 +8,6 @@ func IsIPLAN(ipStr string) bool {
 		return false
 	}
 
-	// Plages IP privées :
-	// - 10.0.0.0/8
-	// - 172.16.0.0/12
-	// - 192.168.0.0/16
 	for _, cidr := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"} {
 		_, network, _ := net.ParseCIDR(cidr)
 		if network.Contains(ip) {

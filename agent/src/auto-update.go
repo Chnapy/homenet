@@ -25,7 +25,8 @@ func AutoUpdate(releaseTag string) (bool, error) {
 	}
 	args := os.Args
 
-	token := "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"
+	// TODO removed + revoked API key for security
+	token := "github_pat_XXX"
 
 	selfupdate.EnableLog()
 

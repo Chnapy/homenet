@@ -1,17 +1,18 @@
 name: Deploy Frontend & Backend
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "**"
-      - "!.github/workflows/deploy-agent.yml"
-      - "!agent/**"
-      - "!.vscode/**"
-      - "!**/*.md"
-      - "!**/.gitignore"
-  pull_request:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "**"
+  #     - "!.github/workflows/deploy-agent.yml"
+  #     - "!agent/**"
+  #     - "!.vscode/**"
+  #     - "!**/*.md"
+  #     - "!**/.gitignore"
+  # pull_request:
 
 jobs:
   deploy-front-back:
@@ -30,7 +31,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y resolvconf wireguard
 
       - name: Docker build
-        run: docker build . -t registry.richardhaddad.fr/homenet
+        run: docker build . --target monolith -t registry.richardhaddad.fr/homenet
 
       - name: Open WireGuard tunnel
         run: |

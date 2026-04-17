@@ -15,10 +15,8 @@ export const getDevicesUserMetadata = publicProcedure.query(
       .getMany(deviceUserMetadataDB.getKeys().asArray)
       .then((metadata) => metadata.filter((value) => value !== undefined));
 
-    const deviceUserMetaMap = Object.fromEntries(
-      deviceUserMetadataList.map((data) => [data!.deviceId, data!])
+    return Object.fromEntries(
+      deviceUserMetadataList.map((data) => [ data!.deviceId, data! ])
     );
-
-    return deviceUserMetaMap;
   }
 );

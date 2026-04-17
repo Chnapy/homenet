@@ -1,0 +1,1715 @@
+{
+  "openapi": "3.1.1",
+  "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+  "info": {
+    "title": "tRPC API",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/updateDeviceUserMetadata": {
+      "post": {
+        "operationId": "updateDeviceUserMetadata",
+        "tags": [
+          "updateDeviceUserMetadata"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceId": {
+                    "type": "string"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "mauve",
+                      "blue",
+                      "green",
+                      "yellow"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "server",
+                      "router",
+                      "mediacenter",
+                      "desktop",
+                      "cloud"
+                    ]
+                  }
+                },
+                "required": [
+                  "deviceId",
+                  "theme"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/removeDevice": {
+      "post": {
+        "operationId": "removeDevice",
+        "tags": [
+          "removeDevice"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "deviceId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getDevicesFull": {
+      "get": {
+        "operationId": "getDevicesFull",
+        "tags": [
+          "getDevicesFull"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/GetDeviceFull"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/getDevicesUserMetadata": {
+      "get": {
+        "operationId": "getDevicesUserMetadata",
+        "tags": [
+          "getDevicesUserMetadata"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "deviceId": {
+                                "type": "string"
+                              },
+                              "theme": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "mauve",
+                                  "blue",
+                                  "green",
+                                  "yellow"
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "server",
+                                  "router",
+                                  "mediacenter",
+                                  "desktop",
+                                  "cloud"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "deviceId",
+                              "theme"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetDeviceFull": {
+        "type": "object",
+        "properties": {
+          "deviceList": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Omit"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "os": {
+                      "type": "string",
+                      "enum": [
+                        "UNKNOWN_OS",
+                        "OPENWRT_GLINET",
+                        "HAOS",
+                        "PROXMOX",
+                        "ANDROID_TV",
+                        "WINDOWS",
+                        "DEBIAN",
+                        "UNRECOGNIZED"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "PROXMOX",
+                        "UNRECOGNIZED",
+                        "UNKNOWN_TYPE",
+                        "DEVICE",
+                        "DOCKER"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  },
+                  "required": [
+                    "os",
+                    "type",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "instanceList": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Omit"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "os": {
+                      "type": "string",
+                      "enum": [
+                        "UNKNOWN_OS",
+                        "OPENWRT_GLINET",
+                        "HAOS",
+                        "PROXMOX",
+                        "ANDROID_TV",
+                        "WINDOWS",
+                        "DEBIAN",
+                        "UNRECOGNIZED"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "PROXMOX",
+                        "UNRECOGNIZED",
+                        "UNKNOWN_TYPE",
+                        "DEVICE",
+                        "DOCKER"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  },
+                  "required": [
+                    "os",
+                    "type",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "appList": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Omit2"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    },
+                    "vpnMode": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "UNKNOWN_VPN",
+                        "CLIENT",
+                        "SERVER"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Meta"
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "vpnMode",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "agentMetadataList": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AgentMetadata"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "deviceId": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deviceId",
+                    "time"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "netEntityMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NetEntity"
+            }
+          }
+        },
+        "required": [
+          "deviceList",
+          "instanceList",
+          "appList",
+          "agentMetadataList",
+          "netEntityMap"
+        ],
+        "additionalProperties": false
+      },
+      "Omit": {
+        "type": "object",
+        "properties": {
+          "unknownOS": {
+            "type": "string"
+          },
+          "lan": {
+            "type": "string"
+          },
+          "wan": {
+            "type": "string"
+          },
+          "ddns": {
+            "type": "string"
+          },
+          "dhcp": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentInstance_AgentDHCPItem"
+            }
+          },
+          "web": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentWebItem"
+            }
+          },
+          "ssh": {
+            "$ref": "#/components/schemas/AgentSSH"
+          },
+          "id": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lan",
+          "dhcp",
+          "web",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "AgentInstance_AgentDHCPItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "alias": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "alias"
+        ],
+        "additionalProperties": false
+      },
+      "AgentWebItem": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "number"
+          },
+          "ssl": {
+            "type": "boolean"
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ssl",
+          "paths"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSSH": {
+        "type": "object",
+        "properties": {
+          "ports": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ports"
+        ],
+        "additionalProperties": false
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "Omit2": {
+        "type": "object",
+        "properties": {
+          "web": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentWebItem"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "vpnAddress": {
+            "type": "string",
+            "description": "docker exec wireguard wg show"
+          },
+          "vpnClients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "/etc/config/wireguard_server\ndocker exec wireguard wg show"
+          },
+          "reverseProxy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentApp_AgentReverseProxy"
+            },
+            "description": "/etc/nginx\n/etc/caddy/Caddyfile"
+          },
+          "gRPC": {
+            "$ref": "#/components/schemas/AgentGRPC"
+          }
+        },
+        "required": [
+          "web",
+          "id",
+          "parentId",
+          "vpnClients",
+          "reverseProxy"
+        ],
+        "additionalProperties": false
+      },
+      "AgentApp_AgentReverseProxy": {
+        "type": "object",
+        "properties": {
+          "fromDomain": {
+            "$ref": "#/components/schemas/AgentApp_AgentReverseProxy_From"
+          },
+          "toAddress": {
+            "$ref": "#/components/schemas/AgentApp_AgentReverseProxy_To"
+          }
+        },
+        "required": [
+          "fromDomain",
+          "toAddress"
+        ],
+        "additionalProperties": false
+      },
+      "AgentApp_AgentReverseProxy_From": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "domain",
+          "ssl"
+        ],
+        "additionalProperties": false
+      },
+      "AgentApp_AgentReverseProxy_To": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "boolean"
+          },
+          "port": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "ssl"
+        ],
+        "additionalProperties": false
+      },
+      "AgentGRPC": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "port"
+        ],
+        "additionalProperties": false
+      },
+      "AgentMetadata": {
+        "type": "object",
+        "properties": {
+          "releaseTag": {
+            "type": "string"
+          },
+          "computeStartTime": {
+            "type": "number"
+          },
+          "computeDuration": {
+            "type": "number"
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "releaseTag",
+          "computeStartTime",
+          "computeDuration",
+          "env"
+        ],
+        "additionalProperties": false
+      },
+      "NetEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lan": {
+            "type": "string"
+          },
+          "lanAliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "wan": {
+            "type": "string"
+          },
+          "ddns": {
+            "type": "string"
+          },
+          "vpn": {
+            "type": "string"
+          },
+          "innerDomains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "addressList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NetAccessAddressOnly"
+            }
+          },
+          "os": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NetAccess"
+            }
+          },
+          "apps": {
+            "$ref": "#/components/schemas/Record"
+          }
+        },
+        "required": [
+          "id",
+          "lan",
+          "addressList",
+          "os",
+          "apps"
+        ],
+        "additionalProperties": false
+      },
+      "NetAccessAddressOnly": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "address-only"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "lan",
+              "wan",
+              "dns-domain",
+              "vpn"
+            ]
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "scope",
+          "address"
+        ],
+        "additionalProperties": false
+      },
+      "NetAccess": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "web",
+              "ssh",
+              "grpc"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "lan",
+              "wan",
+              "dns-domain",
+              "vpn"
+            ]
+          },
+          "address": {
+            "type": "string"
+          },
+          "port": {
+            "type": "number"
+          },
+          "ssl": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "scope",
+          "address",
+          "href"
+        ],
+        "additionalProperties": false
+      },
+      "Record": {
+        "type": "object",
+        "properties": {
+          "UNRECOGNIZED": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "DOCKER": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "UNKNOWN_APP": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "HOMENET": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "WIREGUARD": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "NGINX": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "CADDY": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "ADGUARD_HOME": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "NODE_RED": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "ZIGBEE2MQTT": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "PLEX": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "SUNSHINE": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "UPTIME_KUMA": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "NTFY": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "MOONLIGHT": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "CODE_SERVER": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "DOCKER_REGISTRY": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "DOCKER_REGISTRY_UI": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/NetAccess"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "appSlug": {
+                      "type": "string",
+                      "enum": [
+                        "UNRECOGNIZED",
+                        "DOCKER",
+                        "UNKNOWN_APP",
+                        "HOMENET",
+                        "WIREGUARD",
+                        "NGINX",
+                        "CADDY",
+                        "ADGUARD_HOME",
+                        "NODE_RED",
+                        "ZIGBEE2MQTT",
+                        "PLEX",
+                        "SUNSHINE",
+                        "UPTIME_KUMA",
+                        "NTFY",
+                        "MOONLIGHT",
+                        "CODE_SERVER",
+                        "DOCKER_REGISTRY",
+                        "DOCKER_REGISTRY_UI"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appSlug"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "UNRECOGNIZED",
+          "DOCKER",
+          "UNKNOWN_APP",
+          "HOMENET",
+          "WIREGUARD",
+          "NGINX",
+          "CADDY",
+          "ADGUARD_HOME",
+          "NODE_RED",
+          "ZIGBEE2MQTT",
+          "PLEX",
+          "SUNSHINE",
+          "UPTIME_KUMA",
+          "NTFY",
+          "MOONLIGHT",
+          "CODE_SERVER",
+          "DOCKER_REGISTRY",
+          "DOCKER_REGISTRY_UI"
+        ],
+        "additionalProperties": false
+      },
+      "DefaultErrorShape": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "number",
+            "enum": [
+              -32700,
+              -32600,
+              -32603,
+              -32001,
+              -32002,
+              -32003,
+              -32004,
+              -32005,
+              -32008,
+              -32009,
+              -32012,
+              -32013,
+              -32015,
+              -32022,
+              -32028,
+              -32029,
+              -32099
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/DefaultErrorData"
+          }
+        },
+        "required": [
+          "message",
+          "code",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "DefaultErrorData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "PARSE_ERROR",
+              "BAD_REQUEST",
+              "INTERNAL_SERVER_ERROR",
+              "NOT_IMPLEMENTED",
+              "BAD_GATEWAY",
+              "SERVICE_UNAVAILABLE",
+              "GATEWAY_TIMEOUT",
+              "UNAUTHORIZED",
+              "PAYMENT_REQUIRED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "METHOD_NOT_SUPPORTED",
+              "TIMEOUT",
+              "CONFLICT",
+              "PRECONDITION_FAILED",
+              "PAYLOAD_TOO_LARGE",
+              "UNSUPPORTED_MEDIA_TYPE",
+              "UNPROCESSABLE_CONTENT",
+              "PRECONDITION_REQUIRED",
+              "TOO_MANY_REQUESTS",
+              "CLIENT_CLOSED_REQUEST"
+            ]
+          },
+          "httpStatus": {
+            "type": "number"
+          },
+          "path": {
+            "type": "string"
+          },
+          "stack": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "httpStatus"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "$ref": "#/components/schemas/DefaultErrorShape"
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

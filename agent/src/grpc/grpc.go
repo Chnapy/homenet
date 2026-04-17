@@ -15,7 +15,6 @@ import (
 func Grpc(data *gen.AgentUpdateRequest) {
 	addr := env.Env.BackendRoute
 
-	// Set up a connection to the server.
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Grpc: did not connect - %v", err)
@@ -23,7 +22,6 @@ func Grpc(data *gen.AgentUpdateRequest) {
 	defer conn.Close()
 	c := gen.NewAgentClient(conn)
 
-	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
