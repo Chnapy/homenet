@@ -3,8 +3,8 @@ import React from "react";
 import { DynamicLayoutFlow } from "./components/dynamic-layout/dynamic-layout-flow";
 import { useCurrentPage } from "./components/navigation/hooks/use-current-page";
 import { Sidebar } from "./components/navigation/sidebar";
-import { useDevicesFullQuery } from './data/query/use-devices-full-query';
 import { useListenUptimeSubscribe } from "./data/query/use-listen-uptime";
+import { env } from './env';
 
 export const App: React.FC = () => {
   const currentPage = useCurrentPage((page) => addCurrentPage(page));
@@ -17,8 +17,6 @@ export const App: React.FC = () => {
   }, [ currentPage ].filter(Boolean));
 
   useListenUptimeSubscribe();
-
-  const devicesFullQuery = useDevicesFullQuery();
 
   return (
     <Box display="flex" height="100%">
@@ -35,14 +33,14 @@ export const App: React.FC = () => {
         >
           <DynamicLayoutFlow />
 
-          {devicesFullQuery.data?.publicSafeMode && <Card sx={{
+          {env.VITE_SAFE_MODE && <Card sx={{
             position: 'absolute',
             top: 0,
             right: 0,
             // transform: 'translateX(-50%)',
             fontSize: '90%',
           }}>
-            Public safe mode enabled.
+            Safe mode enabled.
             <br />Accessible urls are faked.
             <br />Edits are denied too.
           </Card>}

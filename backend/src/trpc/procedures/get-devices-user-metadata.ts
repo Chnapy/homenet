@@ -3,7 +3,6 @@ import {
   DeviceUserMetadata,
   openDeviceUserMetadataDB,
 } from "../../db/device-user-metadata";
-import { anonymizeIfNeeded } from '../public-safe-mode';
 import { publicProcedure } from "../trpc";
 
 export const getDevicesUserMetadata = publicProcedure.query(
@@ -16,10 +15,8 @@ export const getDevicesUserMetadata = publicProcedure.query(
       .getMany(deviceUserMetadataDB.getKeys().asArray)
       .then((metadata) => metadata.filter((value) => value !== undefined));
 
-    const deviceUserMetaMap = Object.fromEntries(
-      deviceUserMetadataList.map((data) => [data!.deviceId, data!])
+    return Object.fromEntries(
+      deviceUserMetadataList.map((data) => [ data!.deviceId, data! ])
     );
-
-    return anonymizeIfNeeded(deviceUserMetaMap);
   }
 );

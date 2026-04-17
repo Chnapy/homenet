@@ -1,0 +1,8 @@
+{
+    "tmp": {
+        "deviceId": "tmp",
+        "theme": "mauve",
+        "name": "Foobar",
+        "type": "router"
+    }
+}

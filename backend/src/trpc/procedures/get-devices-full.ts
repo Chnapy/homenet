@@ -7,7 +7,6 @@ import {
 } from "../entities/agent-metadata";
 import { App, getAppFromAgentApp } from "../entities/app";
 import { getInstanceFromAgentInstance, Instance } from "../entities/instance";
-import { anonymizeIfNeeded, isPublicSafeMode } from '../public-safe-mode';
 import { publicProcedure } from "../trpc";
 import { getNetEntityMap, NetEntityMap } from "../utils/get-net-entity-map";
 
@@ -17,7 +16,6 @@ export type GetDeviceFull = {
   appList: App[];
   agentMetadataList: AgentMetadataFull[];
   netEntityMap: NetEntityMap;
-  publicSafeMode: boolean;
 };
 
 export const getDevicesFullData = async (): Promise<
@@ -38,7 +36,7 @@ export const getDevicesFullData = async (): Promise<
     .map(getInstanceFromAgentInstance);
 
   const appList = agentDeviceList
-    .flatMap((agentDevice) => [agentDevice, ...agentDevice.instances])
+    .flatMap((agentDevice) => [ agentDevice, ...agentDevice.instances ])
     .flatMap((agentInstance) => agentInstance.apps)
     .map(getAppFromAgentApp);
 
@@ -49,7 +47,7 @@ export const getDevicesFullData = async (): Promise<
     ...instanceList,
     ...appList,
   ]);
-  const duplicatedLans = checkLanDuplicates([...deviceList, ...instanceList]);
+  const duplicatedLans = checkLanDuplicates([ ...deviceList, ...instanceList ]);
 
   if (duplicatedIds.length > 0) {
     console.error("trpc: getDevicesFull - duplicated IDs", duplicatedIds);
@@ -64,7 +62,6 @@ export const getDevicesFullData = async (): Promise<
     instanceList,
     appList,
     netEntityMap,
-    publicSafeMode: isPublicSafeMode(),
   };
 };
 
@@ -74,7 +71,7 @@ export const getDevicesFull = publicProcedure.query(
 
     const agentMetadataDB = openAgentMetadataDB(db);
 
-    const [agentMetadataList, devicesFull] = await Promise.all([
+    const [ agentMetadataList, devicesFull ] = await Promise.all([
       agentMetadataDB
         .getRange({ reverse: true })
         .asArray.map(({ key, value }) =>
@@ -83,10 +80,10 @@ export const getDevicesFull = publicProcedure.query(
       getDevicesFullData(),
     ]);
 
-    return anonymizeIfNeeded({
+    return {
       agentMetadataList,
       ...devicesFull,
-    });
+    };
   }
 );
 
@@ -103,7 +100,7 @@ const checkIDDuplicates = (list: { id: string }[]) => {
     })
     .map((item) => item.id);
 
-  return [...new Set(duplicatedItems)];
+  return [ ...new Set(duplicatedItems) ];
 };
 
 const checkLanDuplicates = (list: { lan: string }[]) => {
@@ -119,5 +116,5 @@ const checkLanDuplicates = (list: { lan: string }[]) => {
     })
     .map((item) => item.lan);
 
-  return [...new Set(duplicatedItems)];
+  return [ ...new Set(duplicatedItems) ];
 };

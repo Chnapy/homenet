@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "VITE_BACKEND_API=http://localhost:8081/api vite",
+    "dev:static": "VITE_STATIC_DEVICES_PATH=static/devices.json VITE_STATIC_METADATA_PATH=static/metadata.json VITE_SAFE_MODE=true vite",
     "type": "tsc -b",
     "lint": "eslint .",
     "check": "npm run type && npm run lint",
@@ -18,9 +19,9 @@
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
     "@tanstack/react-query": "^5.69.0",
-    "@trpc/client": "^11.0.0",
-    "@trpc/server": "^11.0.0",
-    "@trpc/tanstack-react-query": "^11.0.0",
+    "@trpc/client": "11.16.0",
+    "@trpc/server": "11.16.0",
+    "@trpc/tanstack-react-query": "11.16.0",
     "@xyflow/react": "^12.5.1",
     "clsx": "^2.1.1",
     "cron-parser": "^5.1.1",
@@ -29,7 +30,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
-    "zod": "^3.24.2"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

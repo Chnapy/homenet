@@ -1,7 +1,9 @@
-import { DevicesUserMetadata } from "../query/use-devices-user-metadata";
+import type { AppRouterOutputs } from '../trpc';
 
-export type DeviceUserMeta = DevicesUserMetadata[string];
+export type DevicesUserMetadata = AppRouterOutputs[ 'getDevicesUserMetadata' ];
 
-export type DeviceUserMetaType = DeviceUserMeta["type"];
+export type DeviceUserMeta = DevicesUserMetadata[ string ];
 
-export type DeviceUserMetaTheme = DeviceUserMeta["theme"];
+export type DeviceUserMetaType = DeviceUserMeta[ "type" ];
+
+export type DeviceUserMetaTheme = DeviceUserMeta[ "theme" ];

@@ -7,10 +7,11 @@ import {
   TRPCClientError,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { type AppRouter } from "../../../backend/src/trpc/router";
+import { type AppRouter, type AppRouterOutputs } from "../../../backend/src/trpc/router";
+import { env } from '../env';
 
 export const generateTrpc = (queryClient: QueryClient) => {
-  if (!import.meta.env.VITE_BACKEND_API) {
+  if (!env.VITE_BACKEND_API) {
     throw new Error("Env VITE_BACKEND_API missing");
   }
 
@@ -20,10 +21,10 @@ export const generateTrpc = (queryClient: QueryClient) => {
         // uses the httpSubscriptionLink for subscriptions
         condition: (op) => op.type === "subscription",
         true: httpSubscriptionLink({
-          url: import.meta.env.VITE_BACKEND_API,
+          url: env.VITE_BACKEND_API,
         }),
         false: httpBatchLink({
-          url: import.meta.env.VITE_BACKEND_API,
+          url: env.VITE_BACKEND_API,
           fetch: async (input, init) => {
             const response = await fetch(input, init);
 
@@ -43,7 +44,7 @@ export const generateTrpc = (queryClient: QueryClient) => {
                 await Promise.all(
                   invalidateQueriesKeys.map((queryKey) =>
                     queryClient.invalidateQueries({
-                      queryKey: [queryKey],
+                      queryKey: [ queryKey ],
                     })
                   )
                 );
@@ -51,18 +52,19 @@ export const generateTrpc = (queryClient: QueryClient) => {
             }
 
             return {
+              ok: response.ok,
               body: response.body,
               json:
                 response.ok &&
-                response.headers.get("content-type")?.includes("json")
+                  response.headers.get("content-type")?.includes("json")
                   ? () => response.json()
                   : () => {
-                      throw new TRPCClientError(response.statusText, {
-                        meta: {
-                          code: response.status,
-                        },
-                      });
-                    },
+                    throw new TRPCClientError(response.statusText, {
+                      meta: {
+                        code: response.status,
+                      },
+                    });
+                  },
             };
           },
         }),
@@ -74,4 +76,4 @@ export const generateTrpc = (queryClient: QueryClient) => {
 export const { TRPCProvider, useTRPC, useTRPCClient } =
   createTRPCContext<AppRouter>();
 
-export type { AppRouter };
+export type { AppRouter, AppRouterOutputs };

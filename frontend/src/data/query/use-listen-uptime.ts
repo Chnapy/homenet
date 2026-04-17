@@ -2,14 +2,15 @@
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { useTRPC, AppRouter } from "../trpc";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getStaticDevicesPath } from './use-devices-full-query';
 
-type OutputRaw = AppRouter["listenUptime"]["_def"]["$types"]["output"];
+type OutputRaw = AppRouter[ "listenUptime" ][ "_def" ][ "$types" ][ "output" ];
 
 export type UptimeMap = OutputRaw extends AsyncIterable<infer O, any, any>
   ? O
   : OutputRaw;
 
-const queryKey = ["listen-uptime"];
+const queryKey = [ "listen-uptime" ];
 
 export const useListenUptime = () => {
   return useQuery<UptimeMap>({
@@ -20,7 +21,7 @@ export const useListenUptime = () => {
   });
 };
 
-export const useListenUptimeSubscribe = () => {
+const useTRPCListenUptimeSubscribe = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -32,3 +33,10 @@ export const useListenUptimeSubscribe = () => {
     })
   );
 };
+
+const useStaticListenUptimeSubscribe = () => {
+};
+
+export const useListenUptimeSubscribe = getStaticDevicesPath()
+  ? useStaticListenUptimeSubscribe
+  : useTRPCListenUptimeSubscribe;

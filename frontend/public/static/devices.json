@@ -1,0 +1,41 @@
+{
+    "deviceList": [
+        {
+            "id": "tmp",
+            "lan": "192.168.8.1",
+            "dhcp": [],
+            "meta": {
+                "name": "Foobar",
+                "description": "Foobar description"
+            },
+            "os": "DEBIAN",
+            "type": "DEVICE",
+            "web": []
+        }
+    ],
+    "instanceList": [],
+    "appList": [],
+    "agentMetadataList": [],
+    "netEntityMap": {
+        "tmp": {
+            "id": "tmp",
+            "addressList": [
+                {
+                    "type": "address-only",
+                    "scope": "lan",
+                    "address": "192.168.8.1"
+                }
+            ],
+            "lan": "192.168.8.1",
+            "os": [
+                {
+                    "type": "web",
+                    "scope": "lan",
+                    "address": "192.168.8.1",
+                    "href": "http://192.168.8.1"
+                }
+            ],
+            "apps": {}
+        }
+    }
+}

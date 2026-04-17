@@ -17,5 +17,6 @@
     "node_modules/aws-sdk",
     "node_modules/framer-motion",
     "node_modules/typescript"
-  ]
+  ],
+  "js/ts.tsdk.path": "frontend/node_modules/typescript/lib"
 }
