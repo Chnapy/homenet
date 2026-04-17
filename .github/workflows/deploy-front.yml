@@ -12,7 +12,7 @@ on:
   #     - "!.vscode/**"
   #     - "!**/*.md"
   #     - "!**/.gitignore"
-  pull_request:
+  # pull_request:
 
 jobs:
   deploy-front-only:
