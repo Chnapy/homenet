@@ -12,7 +12,7 @@ export type Instance = Omit<
   AgentInstanceWithId,
   "os" | "type" | "apps" | "instances"
 > & {
-  os: keyof typeof AgentOS;
+  os: keyof typeof AgentOS | string;
   type: keyof typeof AgentInstance_AgentInstanceType;
   meta: Meta;
 };

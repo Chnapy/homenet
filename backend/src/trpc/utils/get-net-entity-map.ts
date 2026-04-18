@@ -133,7 +133,7 @@ export const getNetEntityMap = (
       )
       .map((proxy) => proxy.fromDomain!.domain);
 
-    const vpn = entityApps?.find((app) => app.slug === "WIREGUARD")?.vpnAddress;
+    const vpn = entityApps?.find((app) => app.vpnMode === "SERVER")?.vpnAddress;
 
     const addressList: NetAccessAddressOnly[] = [
       {

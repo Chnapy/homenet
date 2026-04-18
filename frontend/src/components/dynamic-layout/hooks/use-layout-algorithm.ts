@@ -10,7 +10,7 @@ import {
   getIPMask,
   useNetEntityLinks,
 } from "../../network/hooks/use-net-entity-links";
-import { iconMap } from "../../ui/app-os-icon/app-icon";
+import { getDashboardIconAny } from '../../ui/app-os-icon/utils/get-dashboard-icon';
 
 export type ElkDeviceNode = ElkNode & {
   type?: "device" | "group";
@@ -70,7 +70,7 @@ export const useLayoutAlgorithm = () => {
 
           const lanMasq = getIPMask(device.lan);
 
-          const groupNode: ElkDeviceNode = acc[lanMasq] ?? {
+          const groupNode: ElkDeviceNode = acc[ lanMasq ] ?? {
             id: lanMasq,
             type: "group",
             children: [],
@@ -100,14 +100,14 @@ export const useLayoutAlgorithm = () => {
 
           return {
             ...acc,
-            [lanMasq]: groupNode,
+            [ lanMasq ]: groupNode,
           };
         }, {} as Record<string, ElkDeviceNode>)
 
         // remove groups with only 1 child
       ).map((node) => {
         if (node.children?.length === 1) {
-          const child = node.children[0];
+          const child = node.children[ 0 ];
           delete child.parent;
           return child;
         }
@@ -144,20 +144,20 @@ export const useLayoutAlgorithm = () => {
 
           return {
             id: link.id,
-            sources: [fromId],
-            targets: [toId],
+            sources: [ fromId ],
+            targets: [ toId ],
             labels: [
               link.from.relatedApp && {
                 id: link.id + "-label-tail",
                 text: link.from.relatedApp,
-                icon: iconMap[link.from.relatedApp],
+                icon: getDashboardIconAny(link.from.relatedApp)[ 0 ],
                 width: 18,
                 height: 18,
                 layoutOptions: {
                   "elk.edgeLabels.placement": "TAIL",
                 },
               },
-              ...[...new Set(link.label)].map((label, i) => ({
+              ...[ ...new Set(link.label) ].map((label, i) => ({
                 id: link.id + "-label-center-" + i,
                 text: label,
                 width: label.length * 5,
@@ -175,7 +175,7 @@ export const useLayoutAlgorithm = () => {
               link.to.relatedApp && {
                 id: link.id + "-label-head",
                 text: link.to.relatedApp,
-                icon: iconMap[link.to.relatedApp],
+                icon: getDashboardIconAny(link.to.relatedApp)[ 0 ],
                 width: 18,
                 height: 18,
                 layoutOptions: {
@@ -199,5 +199,5 @@ export const useLayoutAlgorithm = () => {
 
       return data;
     };
-  }, [areNodesInitialized, devicesFullQuery.data, netEntityLinks.data]);
+  }, [ areNodesInitialized, devicesFullQuery.data, netEntityLinks.data ]);
 };

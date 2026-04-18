@@ -22,6 +22,7 @@ import { getPageOrigin } from "../navigation/utils/get-page-origin";
 
 type AppOSLineProps = {
   slug: DeviceAppSlug | DeviceOSSlug;
+  metaIcon?: string;
   name: string;
   description: string;
   mainAccess?: NetAccess;
@@ -30,6 +31,7 @@ type AppOSLineProps = {
 
 export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
   slug,
+  metaIcon,
   name,
   description,
   mainAccess,
@@ -67,6 +69,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
       >
         <AppOSIcon
           slug={slug}
+          metaIcon={metaIcon}
           sx={{
             width: 32,
             height: "fit-content",

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "VITE_BACKEND_API=http://localhost:8081/api vite",
-    "dev:static": "VITE_STATIC_DEVICES_PATH=static/devices.json VITE_STATIC_METADATA_PATH=static/metadata.json VITE_SAFE_MODE=true vite",
+    "dev:static": "VITE_STATIC_DEVICES_PATH=static/devices.json VITE_STATIC_METADATA_PATH=static/metadata.json vite",
     "type": "tsc -b",
     "lint": "eslint .",
     "check": "npm run type && npm run lint",

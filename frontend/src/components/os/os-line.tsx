@@ -26,12 +26,13 @@ export const OSLine: React.FC = () => {
 
   const osMainAccess = netEntityAccess[0];
   const osOthersAccessList = netEntityAccess.filter(
-    (access) => access !== osMainAccess
+    (access) => access !== osMainAccess,
   );
 
   return (
     <AppOSLine
       slug={entity.os}
+      metaIcon={entity.meta.icon}
       name={name}
       description={description}
       mainAccess={osMainAccess}

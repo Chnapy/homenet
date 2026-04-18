@@ -25,17 +25,17 @@ export const AppLine: React.FC = () => {
 
   const { name, description } = app.meta;
 
-  const netEntityAccess = data[entity.id].apps[app.slug];
+  const netEntityAccess = data[entity.id].apps[app.slug] ?? [];
 
   const appMainAccess = netEntityAccess[0];
   const appOthersAccessList = netEntityAccess.filter(
-    (access) => access !== appMainAccess
+    (access) => access !== appMainAccess,
   );
 
   return (
     <AppOSLine
-      key={app.slug}
       slug={app.slug}
+      metaIcon={app.meta.icon}
       name={name}
       description={description}
       mainAccess={appMainAccess}

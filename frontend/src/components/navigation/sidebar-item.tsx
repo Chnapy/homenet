@@ -5,18 +5,17 @@ import { AppOSIcon, AppOSIconProps } from "../ui/app-os-icon/app-icon";
 import { BadgeUptime } from "../ui/badge-uptime";
 import { useCurrentPage } from "./hooks/use-current-page";
 
-type SidebarItemProps = {
-  slug: AppOSIconProps["slug"];
+type SidebarItemProps = Pick<AppOSIconProps, "slug" | "metaIcon"> & {
   name: string;
   href: string;
   loaded: boolean;
 };
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
-  slug,
   name,
   href,
   loaded,
+  ...iconProps
 }) => {
   const currentPage = useCurrentPage();
   const isHttp = href.startsWith("http://");
@@ -59,7 +58,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       >
         <BadgeUptime uptime={uptime}>
           <ListItemIcon sx={{ minWidth: 24, maxWidth: 24 }}>
-            <AppOSIcon slug={slug} sx={{ maxWidth: "100%" }} />
+            <AppOSIcon {...iconProps} sx={{ maxWidth: "100%" }} />
           </ListItemIcon>
         </BadgeUptime>
       </ListItemButton>

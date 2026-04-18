@@ -9,7 +9,7 @@ import { getAppMeta } from "./utils/get-app-meta";
 import { Meta } from "./utils/meta";
 
 export type App = Omit<AgentAppWithId, "slug" | "vpnMode"> & {
-  slug: keyof typeof AgentApp_AgentAppSlug;
+  slug: keyof typeof AgentApp_AgentAppSlug | string;
   vpnMode: keyof typeof AgentApp_AgentVpnMode;
   meta: Meta;
 };

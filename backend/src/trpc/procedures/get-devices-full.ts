@@ -11,6 +11,7 @@ import { publicProcedure } from "../trpc";
 import { getNetEntityMap, NetEntityMap } from "../utils/get-net-entity-map";
 
 export type GetDeviceFull = {
+  safeMode?: boolean;
   deviceList: Instance[];
   instanceList: Instance[];
   appList: App[];

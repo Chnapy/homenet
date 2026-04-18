@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
               const osWeb = netEntity.os.filter((web) => web.type === "web");
 
               const instance = allInstances.find(
-                (instance) => instance.id === instanceId
+                (instance) => instance.id === instanceId,
               );
 
               if (osWeb.length === 0 || !instance) {
@@ -50,6 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
               return (
                 <SidebarItem
                   slug={instance.os}
+                  metaIcon={instance.meta.icon}
                   name={instance.meta.name}
                   href={osHref}
                   loaded={pageList.includes(osHref)}
@@ -71,8 +72,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                   return null;
                 }
 
-                const name = appList?.find((app) => app.slug === slug)?.meta
-                  .name;
+                const app = appList?.find((app) => app.slug === slug);
+                if (!app) {
+                  return null;
+                }
+
+                const name = app.meta.name;
                 if (!name) {
                   return null;
                 }
@@ -81,12 +86,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ pageList }) => {
                   <SidebarItem
                     key={slug}
                     slug={slug as DeviceAppSlug}
+                    metaIcon={app.meta.icon}
                     name={name}
                     href={appHref}
                     loaded={pageList.includes(appHref)}
                   />
                 );
-              }
+              },
             );
 
             return (

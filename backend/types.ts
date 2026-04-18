@@ -73,23 +73,21 @@ export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
         GetDeviceFull: {
+            safeMode?: boolean;
             deviceList: (components["schemas"]["Omit"] & {
-                /** @enum {string} */
-                os: "UNKNOWN_OS" | "OPENWRT_GLINET" | "HAOS" | "PROXMOX" | "ANDROID_TV" | "WINDOWS" | "DEBIAN" | "UNRECOGNIZED";
+                os: string;
                 /** @enum {string} */
                 type: "PROXMOX" | "UNRECOGNIZED" | "UNKNOWN_TYPE" | "DEVICE" | "DOCKER";
                 meta: components["schemas"]["Meta"];
             })[];
             instanceList: (components["schemas"]["Omit"] & {
-                /** @enum {string} */
-                os: "UNKNOWN_OS" | "OPENWRT_GLINET" | "HAOS" | "PROXMOX" | "ANDROID_TV" | "WINDOWS" | "DEBIAN" | "UNRECOGNIZED";
+                os: string;
                 /** @enum {string} */
                 type: "PROXMOX" | "UNRECOGNIZED" | "UNKNOWN_TYPE" | "DEVICE" | "DOCKER";
                 meta: components["schemas"]["Meta"];
             })[];
             appList: (components["schemas"]["Omit2"] & {
-                /** @enum {string} */
-                slug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
+                slug: string;
                 /** @enum {string} */
                 vpnMode: "UNRECOGNIZED" | "UNKNOWN_VPN" | "CLIENT" | "SERVER";
                 meta: components["schemas"]["Meta"];
@@ -129,6 +127,7 @@ export type components = {
         Meta: {
             name: string;
             description: string;
+            icon?: string;
         };
         Omit2: {
             web: components["schemas"]["AgentWebItem"][];
@@ -182,7 +181,11 @@ export type components = {
             innerDomains?: string[];
             addressList: components["schemas"]["NetAccessAddressOnly"][];
             os: components["schemas"]["NetAccess"][];
-            apps: components["schemas"]["Record"];
+            apps: {
+                [key: string]: (components["schemas"]["NetAccess"] & {
+                    appSlug: string;
+                })[];
+            };
         };
         NetAccessAddressOnly: {
             /** @constant */
@@ -201,80 +204,6 @@ export type components = {
             ssl?: boolean;
             path?: string;
             href: string;
-        };
-        Record: {
-            UNRECOGNIZED: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            DOCKER: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            UNKNOWN_APP: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            HOMENET: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            WIREGUARD: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            NGINX: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            CADDY: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            ADGUARD_HOME: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            NODE_RED: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            ZIGBEE2MQTT: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            PLEX: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            SUNSHINE: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            UPTIME_KUMA: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            NTFY: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            MOONLIGHT: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            CODE_SERVER: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            DOCKER_REGISTRY: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
-            DOCKER_REGISTRY_UI: (components["schemas"]["NetAccess"] & {
-                /** @enum {string} */
-                appSlug: "UNRECOGNIZED" | "DOCKER" | "UNKNOWN_APP" | "HOMENET" | "WIREGUARD" | "NGINX" | "CADDY" | "ADGUARD_HOME" | "NODE_RED" | "ZIGBEE2MQTT" | "PLEX" | "SUNSHINE" | "UPTIME_KUMA" | "NTFY" | "MOONLIGHT" | "CODE_SERVER" | "DOCKER_REGISTRY" | "DOCKER_REGISTRY_UI";
-            })[];
         };
         DefaultErrorShape: {
             message: string;
@@ -323,7 +252,6 @@ export type AgentMetadata = components['schemas']['AgentMetadata'];
 export type NetEntity = components['schemas']['NetEntity'];
 export type NetAccessAddressOnly = components['schemas']['NetAccessAddressOnly'];
 export type NetAccess = components['schemas']['NetAccess'];
-export type Record = components['schemas']['Record'];
 export type DefaultErrorShape = components['schemas']['DefaultErrorShape'];
 export type DefaultErrorData = components['schemas']['DefaultErrorData'];
 export type ResponseError = components['responses']['Error'];

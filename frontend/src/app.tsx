@@ -3,8 +3,8 @@ import React from "react";
 import { DynamicLayoutFlow } from "./components/dynamic-layout/dynamic-layout-flow";
 import { useCurrentPage } from "./components/navigation/hooks/use-current-page";
 import { Sidebar } from "./components/navigation/sidebar";
+import { useDevicesFullQuery } from './data/query/use-devices-full-query';
 import { useListenUptimeSubscribe } from "./data/query/use-listen-uptime";
-import { env } from './env';
 
 export const App: React.FC = () => {
   const currentPage = useCurrentPage((page) => addCurrentPage(page));
@@ -17,6 +17,8 @@ export const App: React.FC = () => {
   }, [ currentPage ].filter(Boolean));
 
   useListenUptimeSubscribe();
+
+  const { data } = useDevicesFullQuery();
 
   return (
     <Box display="flex" height="100%">
@@ -33,7 +35,7 @@ export const App: React.FC = () => {
         >
           <DynamicLayoutFlow />
 
-          {env.VITE_SAFE_MODE && <Card sx={{
+          {data?.safeMode && <Card sx={{
             position: 'absolute',
             top: 0,
             right: 0,
