@@ -41,9 +41,10 @@ export const App: React.FC = () => {
             right: 0,
             // transform: 'translateX(-50%)',
             fontSize: '90%',
+            p: 1,
           }}>
             Safe mode enabled.
-            <br />Accessible urls are faked.
+            <br />Private links are disabled.
             <br />Edits are denied too.
           </Card>}
         </Box>

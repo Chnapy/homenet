@@ -47,12 +47,11 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
         id,
         data: {},
         position: { x: 0, y: 0 },
-      })
+      }),
     );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<AnyNode>(
-    getNodesState()
-  );
+  const [nodes, setNodes, onNodesChange] =
+    useNodesState<AnyNode>(getNodesState());
   const [edges, setEdges, onEdgesChange] = useEdgesState<PolylineEdgeType>([]);
   // const { fitView } = useReactFlow();
 
@@ -77,10 +76,10 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
     processingRef.current = true;
 
     const getNodesFromLayout = (
-      layout: Awaited<ReturnType<typeof getLayoutAlgorithm>>
+      layout: Awaited<ReturnType<typeof getLayoutAlgorithm>>,
     ) => {
       const edgesSections = (layout.edges ?? []).flatMap(
-        (edge) => edge.sections ?? []
+        (edge) => edge.sections ?? [],
       );
 
       const everyChildren = (layout.children ?? []).flatMap((child) => [
@@ -131,10 +130,10 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
             ...partialNode,
             data: {
               sources: edgesSections.filter(
-                (section) => section.incomingShape === id
+                (section) => section.incomingShape === id,
               ),
               targets: edgesSections.filter(
-                (section) => section.outgoingShape === id
+                (section) => section.outgoingShape === id,
               ),
               offset: {
                 x: parent?.x ?? 0,
@@ -142,7 +141,7 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
               },
             },
           };
-        }
+        },
       );
 
       return {
@@ -175,10 +174,10 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
             // get source/target offset handling group/no-group cases
             const getOffset = (): ElkPoint | undefined => {
               const sourceNode = everyChildren.find(
-                (child) => child.id === source
+                (child) => child.id === source,
               );
               const targetNode = everyChildren.find(
-                (child) => child.id === target
+                (child) => child.id === target,
               );
 
               if (
@@ -211,9 +210,9 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
               targetHandle: id,
               selectable: false,
               // animated: true,
-              data: {
+              data: sections && {
                 offset: getOffset(),
-                section: sections![0],
+                section: sections[0],
                 labels,
               },
               markerEnd: {
@@ -223,7 +222,7 @@ export const DynamicLayoutFlow: React.FC = React.memo(() => {
                 width: 8,
               },
             };
-          }
+          },
         );
 
         setNodes(newNodes);
