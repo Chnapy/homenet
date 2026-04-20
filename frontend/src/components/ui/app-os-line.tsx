@@ -19,6 +19,7 @@ import {
 import { AccessLine } from "./access-line";
 import { AppOSIcon } from "./app-os-icon/app-icon";
 import { getPageOrigin } from "../navigation/utils/get-page-origin";
+import { SizingContext } from "../sizing/provider/sizing-provider";
 
 type AppOSLineProps = {
   slug: DeviceAppSlug | DeviceOSSlug;
@@ -27,6 +28,7 @@ type AppOSLineProps = {
   description: string;
   mainAccess?: NetAccess;
   accessList?: NetAccess[];
+  fullSize: boolean;
 };
 
 export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
@@ -36,8 +38,10 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
   description,
   mainAccess,
   accessList = [],
+  fullSize,
   children,
 }) => {
+  const fullSizing = SizingContext.useValue() === "full";
   const uptimeMap = useListenUptime().data ?? {};
 
   const [expanded, setExpanded] = React.useState(false);
@@ -76,15 +80,17 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
           }}
         />
 
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="body1" fontWeight={500}>
-            {name}
-          </Typography>
-          <Typography variant="body2">{description}</Typography>
-        </Box>
+        {fullSize && (
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="body1" fontWeight={500}>
+              {name}
+            </Typography>
+            <Typography variant="body2">{description}</Typography>
+          </Box>
+        )}
       </Box>
 
-      {mainAccess && (
+      {fullSizing && mainAccess && (
         <>
           <Divider variant="fullWidth" />
 
@@ -104,6 +110,11 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
       elevation={mainAccess && !sameOrigin ? 2 : 1}
       sx={{
         position: "relative",
+        minWidth: 64,
+        minHeight: 64,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
         ...(mainAccess && !sameOrigin
           ? {}
           : {
@@ -115,9 +126,13 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
         <Box
           sx={{
             display: "flex",
+            height: "100%",
           }}
         >
           <CardActionArea
+            sx={{
+              height: "100%",
+            }}
             onClick={() => {
               if (mainAccess.type === "web") {
                 window.open(mainAccess.href, "_blank");
@@ -128,7 +143,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
             {content}
           </CardActionArea>
 
-          {accessList.length > 0 && (
+          {fullSizing && accessList.length > 0 && (
             <>
               <Divider orientation="vertical" flexItem />
 
@@ -152,7 +167,7 @@ export const AppOSLine: React.FC<React.PropsWithChildren<AppOSLineProps>> = ({
         content
       )}
 
-      {accessList.length > 0 && (
+      {fullSizing && accessList.length > 0 && (
         <Collapse in={expanded} timeout="auto">
           <List disablePadding>
             {accessList.map((access, i) => (

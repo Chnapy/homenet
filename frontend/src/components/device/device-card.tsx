@@ -6,6 +6,7 @@ import { AppContext } from "../app/provider/app-provider";
 import { InstanceCard } from "../instance/instance-card";
 import { InstanceContext } from "../instance/provider/instance-provider";
 import { OSLine } from "../os/os-line";
+import { SizingContext } from "../sizing/provider/sizing-provider";
 import { DeviceAccessLineList } from "./device-access-line-list";
 import { DeviceIcon } from "./device-icon";
 import { DeviceDialogBtn } from "./dialog/device-dialog-btn";
@@ -13,6 +14,8 @@ import { DeviceContext } from "./provider/device-provider";
 
 export const DeviceCard: React.FC = () => {
   const { device, deviceUserMeta } = DeviceContext.useValue();
+  const fullSizing = SizingContext.useValue() === "full";
+
   const devicesFullQuery = useDevicesFullQuery();
 
   if (!devicesFullQuery.data) {
@@ -23,11 +26,15 @@ export const DeviceCard: React.FC = () => {
 
   const apps = appList.filter((app) => app.parentId === device.id);
   const instances = instanceList.filter(
-    (instance) => instance.parentId === device.id
+    (instance) => instance.parentId === device.id,
   );
 
   return (
-    <Box>
+    <Box
+      sx={{
+        maxWidth: fullSizing ? undefined : 350,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -70,13 +77,24 @@ export const DeviceCard: React.FC = () => {
             pb: "16px !important",
           }}
         >
-          {apps.map((app) => {
-            return (
-              <AppContext.Provider key={app.slug} value={app}>
-                <AppLine />
-              </AppContext.Provider>
-            );
-          })}
+          {apps.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: fullSizing ? "column" : undefined,
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              {apps.map((app) => {
+                return (
+                  <AppContext.Provider key={app.slug} value={app}>
+                    <AppLine />
+                  </AppContext.Provider>
+                );
+              })}
+            </Box>
+          )}
 
           {instances.map((instance) => {
             return (

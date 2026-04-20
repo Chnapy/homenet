@@ -37,6 +37,7 @@ export const OSLine: React.FC = () => {
       description={description}
       mainAccess={osMainAccess}
       accessList={osOthersAccessList}
+      fullSize
     />
   );
 };

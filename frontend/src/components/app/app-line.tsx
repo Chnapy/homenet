@@ -2,10 +2,13 @@ import React from "react";
 import { DeviceContext } from "../device/provider/device-provider";
 import { InstanceContext } from "../instance/provider/instance-provider";
 import { useNetEntityMap } from "../network/hooks/use-net-entity-map";
+import { SizingContext } from "../sizing/provider/sizing-provider";
 import { AppOSLine } from "../ui/app-os-line";
 import { AppContext } from "./provider/app-provider";
 
 export const AppLine: React.FC = () => {
+  const fullSizing = SizingContext.useValue() === "full";
+
   const { device } = DeviceContext.useValue();
   const instance = InstanceContext.useValueNullable();
 
@@ -40,6 +43,7 @@ export const AppLine: React.FC = () => {
       description={description}
       mainAccess={appMainAccess}
       accessList={appOthersAccessList}
+      fullSize={fullSizing}
     />
   );
 };

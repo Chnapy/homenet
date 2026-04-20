@@ -1,15 +1,18 @@
 import { Box, Card, CardContent } from "@mui/material";
 import React from "react";
+import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 import { AppLine } from "../app/app-line";
 import { AppContext } from "../app/provider/app-provider";
 import { DeviceAccessLineList } from "../device/device-access-line-list";
 import { OSLine } from "../os/os-line";
+import { SizingContext } from "../sizing/provider/sizing-provider";
 import { InstanceIcon } from "./instance-icon";
 import { InstanceContext } from "./provider/instance-provider";
-import { useDevicesFullQuery } from "../../data/query/use-devices-full-query";
 
 export const InstanceCard: React.FC = () => {
   const instance = InstanceContext.useValue();
+  const fullSizing = SizingContext.useValue() === "full";
+
   const devicesFullQuery = useDevicesFullQuery();
 
   if (!devicesFullQuery.data) {
@@ -50,7 +53,8 @@ export const InstanceCard: React.FC = () => {
         <CardContent
           sx={{
             display: "flex",
-            flexDirection: "column",
+            flexDirection: fullSizing ? "column" : undefined,
+            flexWrap: "wrap",
             gap: 1,
             pb: "16px !important",
           }}
