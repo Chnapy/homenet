@@ -1,0 +1,24 @@
+{
+  "name": "homenet-types",
+  "version": "0.0.1",
+  "description": "Type definitions for Homenet static data",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chnapy/homenet.git"
+  },
+  "author": "Richard Haddad <https://github.com/Chnapy>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Chnapy/homenet/issues"
+  },
+  "homepage": "https://github.com/Chnapy/homenet#readme",
+  "main": "index.d.ts",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts",
+    "backend/types.ts"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
