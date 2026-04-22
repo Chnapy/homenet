@@ -135,6 +135,7 @@ export const useNetEntityLinks = () => {
                 [
                   entity.lan,
                   ...(entity.lanAliases ?? []),
+                  entity.vpn,
                   entity.wan,
                   entity.ddns,
                 ].includes(proxy.toAddress!.address)
@@ -164,10 +165,10 @@ export const useNetEntityLinks = () => {
       }
 
       // moonlight -> sunshine
-      if (deviceApps?.some((app) => app.slug === "MOONLIGHT")) {
+      if (deviceApps?.some((app) => app.slug.toUpperCase().includes("MOONLIGHT"))) {
         links.push(
           ...appList
-            .filter((app) => app.slug === "SUNSHINE")
+            .filter((app) => app.slug.toUpperCase().includes("SUNSHINE"))
             .map(
               (sunshineApp): NetDeviceLink =>
                 injectLinkId({
